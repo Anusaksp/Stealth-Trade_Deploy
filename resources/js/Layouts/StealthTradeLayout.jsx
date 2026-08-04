@@ -107,7 +107,7 @@ export default function StealthTradeLayout({ children }) {
                                 <h4 className="stealth-footer__title">แพลตฟอร์ม</h4>
                                 <ul className="stealth-footer__list">
                                     <li><Link href="#">กระดานเทรด</Link></li>
-                                    <li><Link href="#">ZKP Lab</Link></li>
+                                    <li><Link href="stealth-dashboard">ZKP Lab</Link></li>
                                     <li><Link href="#">คลังความรู้</Link></li>
                                     <li><Link href="#">เชื่อมต่อกระเป๋าเงิน</Link></li>
                                 </ul>
@@ -129,7 +129,7 @@ export default function StealthTradeLayout({ children }) {
                                 <h4 className="stealth-footer__title">บริษัท</h4>
                                 <ul className="stealth-footer__list">
                                     <li><Link href="#">เกี่ยวกับเรา</Link></li>
-                                    <li><Link href="#">ติดต่อ</Link></li>
+                                    <li><Link href="{route('contract')}">ติดต่อ</Link></li>
                                     <li><Link href="#">นโยบายความเป็นส่วนตัว</Link></li>
                                     <li><Link href="#">ข้อกำหนดการใช้งาน</Link></li>
                                 </ul>

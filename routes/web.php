@@ -71,3 +71,12 @@ Route::post('/lab1/submit', [\App\Http\Controllers\Lab1Controller::class, 'submi
 Route::get('/lab1/result', function () {
     return Inertia::render('Lab1Result');
 })->middleware(['auth'])->name('lab1.result');
+
+Route::get('/about/contract', function () {
+    return Inertia::render('About/contract');
+})->name('contract');
+
+Route::get('/upload-drive', function () {
+    // คำว่า 'pg' ต้องตรงกับชื่อไฟล์ pg.jsx ในโฟลเดอร์ resources/js/Pages
+    return Inertia::render('pg'); 
+});
