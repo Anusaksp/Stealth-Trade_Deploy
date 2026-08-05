@@ -89,20 +89,20 @@ function DashboardContent() {
 
     const products = [
         {
-            title: lang === 'TH' ? 'แบบทดสอบที่ 1' : 'LAB 1',
+            title: lang === 'TH' ? 'ลูกบอล Alibaba' : 'LAB 1',
             description: lang === 'TH'
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
-            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book1.png)', maskImage: 'url(/images/book1.png)' }}></div>,
-            href: '/lab1',
+            icon: <img src="/images/Ball.png" className="stealth-icon-img-tinted" alt="Ball" />,
+            href: '/minigameball',
         },
         {
-            title: lang === 'TH' ? 'แบบทดสอบที่ 2' : 'LAB 2',
+            title: lang === 'TH' ? 'ถ้ำ Alibaba' : 'LAB 2',
             description: lang === 'TH'
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
-            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book2.png)', maskImage: 'url(/images/book2.png)' }}></div>,
-            href: '/lab2_minigames',
+            icon: <img src="/images/cave.png" className="stealth-icon-img-tinted" alt="Cave" />,
+            href: '/minigamecave',
         },
         {
             title: lang === 'TH' ? 'แบบทดสอบที่ 3' : 'LAB 3',
@@ -110,6 +110,47 @@ function DashboardContent() {
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
             icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book3.png)', maskImage: 'url(/images/book3.png)' }}></div>,
+            href: '/lab3',
+        },
+        {
+            title: lang === 'TH' ? 'แบบทดสอบที่ 4' : 'LAB 4',
+            description: lang === 'TH'
+                ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
+                : 'Test to make you understand more about ZKP.',
+            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book1.png)', maskImage: 'url(/images/book1.png)' }}></div>,
+            href: '/lab4',
+        },
+        {
+            title: lang === 'TH' ? 'แบบทดสอบที่ 5' : 'LAB 5',
+            description: lang === 'TH'
+                ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
+                : 'Test to make you understand more about ZKP.',
+            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book2.png)', maskImage: 'url(/images/book2.png)' }}></div>,
+            href: '/lab5',
+        },
+        {
+            title: lang === 'TH' ? 'แบบทดสอบที่ 6' : 'LAB 6',
+            description: lang === 'TH'
+                ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
+                : 'Test to make you understand more about ZKP.',
+            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book3.png)', maskImage: 'url(/images/book3.png)' }}></div>,
+            href: '/lab6',
+        },
+        {
+            title: lang === 'TH' ? 'แบบทดสอบที่ 7' : 'LAB 7',
+            description: lang === 'TH'
+                ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
+                : 'Test to make you understand more about ZKP.',
+            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book1.png)', maskImage: 'url(/images/book1.png)' }}></div>,
+            href: '/lab7',
+        },
+        {
+            title: lang === 'TH' ? 'แบบทดสอบที่ 8' : 'LAB 8',
+            description: lang === 'TH'
+                ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
+                : 'Test to make you understand more about ZKP.',
+            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book2.png)', maskImage: 'url(/images/book2.png)' }}></div>,
+            href: '/lab8',
         },
     ];
 
