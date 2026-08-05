@@ -80,3 +80,12 @@ Route::get('/upload-drive', function () {
     // คำว่า 'pg' ต้องตรงกับชื่อไฟล์ pg.jsx ในโฟลเดอร์ resources/js/Pages
     return Inertia::render('pg'); 
 });
+
+Route::get('/minigameball', function () {
+    return Inertia::render('minigame_ball');
+})->name('minigameball');
+
+Route::get('/minigamecave', function () {
+    return Inertia::render('minigame_cave');
+})->name('minigamecave');
+
