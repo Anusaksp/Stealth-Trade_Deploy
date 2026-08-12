@@ -4,17 +4,10 @@ export default function Pg() {
   const [folderTree, setFolderTree] = useState([]);
   const [selectedPath, setSelectedPath] = useState([]);
   const [file, setFile] = useState(null);
-<<<<<<< HEAD
 
   // 🔴 1. เพิ่ม State สำหรับเก็บชื่อ/รหัสคนส่ง
   const [uploaderName, setUploaderName] = useState('');
 
-=======
-  
-  // 🔴 1. เพิ่ม State สำหรับเก็บชื่อ/รหัสคนส่ง
-  const [uploaderName, setUploaderName] = useState(''); 
-  
->>>>>>> 62de94d43b95572dab38d89952dc96ed01fd4d1b
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingFolders, setIsFetchingFolders] = useState(true);
@@ -76,22 +69,13 @@ export default function Pg() {
     const reader = new FileReader();
     reader.onload = async function (event) {
       const base64Data = event.target.result.split(',')[1];
-<<<<<<< HEAD
-
-=======
-      
->>>>>>> 62de94d43b95572dab38d89952dc96ed01fd4d1b
       // 🔴 3. แนบชื่อผู้ส่งไปกับก้อนข้อมูล (payload)
       const payload = {
         folderId: targetFolder.id,
         fileName: file.name,
         mimeType: file.type,
         base64: base64Data,
-<<<<<<< HEAD
         uploaderName: uploaderName
-=======
-        uploaderName: uploaderName 
->>>>>>> 62de94d43b95572dab38d89952dc96ed01fd4d1b
       };
 
       try {
@@ -169,7 +153,7 @@ export default function Pg() {
         </h2>
 
         <form onSubmit={handleUpload} className="space-y-5">
-          
+
           {/* 🔴 4. เพิ่มช่องกรอก รหัส/ชื่อ ผู้ส่ง */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
