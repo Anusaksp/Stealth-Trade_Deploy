@@ -7,7 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\GoogleLoginController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Homepage', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -78,7 +78,7 @@ Route::get('/about/contract', function () {
 
 Route::get('/upload-drive', function () {
     // คำว่า 'pg' ต้องตรงกับชื่อไฟล์ pg.jsx ในโฟลเดอร์ resources/js/Pages
-    return Inertia::render('pg'); 
+    return Inertia::render('pg');
 });
 
 Route::get('/minigameball', function () {
@@ -88,4 +88,3 @@ Route::get('/minigameball', function () {
 Route::get('/minigamecave', function () {
     return Inertia::render('minigame_cave');
 })->name('minigamecave');
-
