@@ -20,6 +20,7 @@ const TOTAL_ROUNDS = 5; // จำนวนรอบทั้งหมดที�
 // === ข้อมูลสีของลูกบอล ===
 const BALL_COLORS = {
     blue: { hex: '#3b82f6', name: 'น้ำเงิน' },  // ลูกบอลสีน้ำเงิน
+    red: { hex: '#ef4444', name: 'แดง' },
 };
 
 
