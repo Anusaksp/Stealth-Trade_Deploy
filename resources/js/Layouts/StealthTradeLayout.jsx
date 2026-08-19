@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState, createContext, useContext } from 'react';
+import PageBackground from '@/Components/PageBackground';
 
 export const LangContext = createContext();
 
@@ -12,7 +13,7 @@ export default function StealthTradeLayout({ children }) {
 
     return (
         <LangContext.Provider value={{ lang, setLang }}>
-            <div className="stealth-layout">
+            <PageBackground className="stealth-layout">
                 {/* ── Navbar ── */}
                 <nav className="stealth-nav">
                     <div className="stealth-nav__inner">
@@ -20,7 +21,7 @@ export default function StealthTradeLayout({ children }) {
                         <div className="stealth-nav__left">
                             <Link href="/" className="stealth-nav__logo">
                                 <img
-                                    src="/images/logo_green.png"
+                                    src="/images/logo.blackgreen.png"
                                     alt="Stealth Trade"
                                     className="stealth-nav__logo-img"
                                 />
@@ -83,7 +84,7 @@ export default function StealthTradeLayout({ children }) {
                             {/* Column 1: Brand */}
                             <div className="stealth-footer__brand">
                                 <Link href="/" className="stealth-footer__logo">
-                                    <img src="/images/logo_green.png" alt="Stealth Trade Logo" />
+                                    <img src="/images/logo.blackgreen.png" alt="Stealth Trade Logo" />
                                     <span>Stealth Trade</span>
                                 </Link>
                                 <p className="stealth-footer__desc">
@@ -132,7 +133,7 @@ export default function StealthTradeLayout({ children }) {
                         </div>
                     </div>
                 </footer>
-            </div>
+            </PageBackground>
         </LangContext.Provider>
     );
 }

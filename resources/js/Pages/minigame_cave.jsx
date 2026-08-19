@@ -13,6 +13,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import '../../css/cave.css';
+import PageBackground from '@/Components/PageBackground';
 
 // ===== ค่าคงที่ของเกม =====
 const STEPS = {
@@ -367,22 +368,22 @@ export default function Cave() {
             if (knowsSecret) {
                 success = true;
                 setStatusMsg(`Peggy รู้คำวิเศษ! เปิดประตูลับและออกทาง ${requestedPath} ✨`);
-
+                
                 await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 1.0, 700);
-
+                
                 setHighlightPath(requestedPath);
                 setDoorOpen(true);
-
+                
                 await movePeggy(DOOR_CENTER_POS, 250);
                 setDoorOpen(false);
                 await moveAlongPath(exitPathRef, 1.0, 0, 1100);
             } else {
                 success = false;
                 setStatusMsg(`Peggy ไม่รู้คำวิเศษ! เปิดประตูไม่ได้ ❌`);
-
+                
                 // เดินไปถึงประตูแล้วติด
                 await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 1.0, 700);
-
+                
                 const curPos = peggyPosRef.current;
                 for (let i = 0; i < 2; i++) {
                     await movePeggy({ x: curPos.x - 4, y: curPos.y }, 60);
@@ -532,15 +533,8 @@ export default function Cave() {
     // UI — ใช้ Layout เดียวกับ minigame_ball
     // ====================================================
     return (
-        <>
+        <PageBackground className="cave-page">
             <Head title="มินิเกมถ้ำ ZKP" />
-
-            {/* พื้นหลัง blob */}
-            <div id="mg-bg">
-                <div className="mgblob-1" />
-                <div className="mgblob-2" />
-                <div className="mgblob-3" />
-            </div>
 
             {/* เลย์เอาต์หลัก */}
             <main id="mg-main">
@@ -769,8 +763,6 @@ export default function Cave() {
                     </aside>
                 </div>
             </main>
-
-
-        </>
+        </PageBackground>
     );
 }

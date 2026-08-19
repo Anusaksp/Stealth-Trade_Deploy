@@ -88,3 +88,7 @@ Route::get('/minigameball', function () {
 Route::get('/minigamecave', function () {
     return Inertia::render('minigame_cave');
 })->name('minigamecave');
+
+Route::get('/lab0', function () {
+    return Inertia::render('Lab0');
+})->name('lab0');
