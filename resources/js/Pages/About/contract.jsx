@@ -167,7 +167,7 @@ export default function Contract() {
                 /* 2. ชื่อเล่น แปะติดขอบซ้ายแบบธงชาติ */
                 .modal-nickname-flag {
                     position: absolute;
-                    top: 55%; /* ให้อยู่ประมาณช่วงกลางถึงล่างนิดๆ */
+                    top: 30%; /* ให้อยู่ประมาณช่วงกลางถึงล่างนิดๆ */
                     left: 0;
                     background: #e94560; /* สีแดงเด่นๆ ตามธีม */
                     color: white;
