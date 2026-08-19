@@ -13,11 +13,12 @@ function ZkpContent() {
         howItWorksDesc: lang === 'TH'
             ? 'ลองจินตนาการว่าคุณมีรหัสผ่านเข้าห้องนิรภัย คุณต้องการพิสูจน์ให้เพื่อนเห็นว่าคุณรู้รหัสผ่าน โดยที่คุณไม่ยอมบอกรหัสผ่านนั้นกับเพื่อน ZKP คือกระบวนการที่คุณเข้าไปในห้องนิรภัยและหยิบของชิ้นหนึ่งออกมาให้เพื่อนดู เพื่อยืนยันว่าคุณเข้าไปได้จริง โดยที่รหัสผ่านยังคงเป็นความลับ'
             : 'Imagine you have the password to a vault. You want to prove to a friend that you know the password without telling them what it is. ZKP is the process where you go into the vault and bring an item out to show your friend, proving you have access while keeping the password a secret.',
-        benefitsTitle: lang === 'TH' ? 'ข้อดีของ ZKP ใน Stealth Trade' : 'Benefits of ZKP in Stealth Trade',
+        benefitsTitle: lang === 'TH' ? 'ข้อดีของ ZKP' : 'Benefits of ZKP in Stealth Trade',
         benefits: lang === 'TH' ? [
             'ความเป็นส่วนตัวขั้นสุด: ไม่ต้องเปิดเผยข้อมูลส่วนตัวในการทำธุรกรรม',
-            'ความปลอดภัยสูง: ลดความเสี่ยงจากการถูกแฮ็กข้อมูลเพราะไม่มีข้อมูลดิบถูกส่งออกไป',
-            'ความน่าเชื่อถือ: ระบบสามารถตรวจสอบความถูกต้องได้ 100% โดยอาศัยหลักการทางคณิตศาสตร์'
+            'ความปลอดภัยสูง: ลดความเสี่ยงจากการถูกขโมยข้อมูล เพราะไม่มีการส่งข้อมูลจริงผ่านระบบเครือข่าย',
+            'ความน่าเชื่อถือ: ระบบสามารถตรวจสอบความถูกต้องได้ 100% โดยอาศัยหลักการทางคณิตศาสตร์',
+            'ลดขนาดข้อมูลและการประมวลผล: ช่วยย่อข้อมูลธุรกรรมจำนวนมากบนบล็อกเชนให้เหลือชุดข้อมูลสั้นๆ ที่ตรวจสอบได้ง่าย ทำให้ระบบทำงานเร็วขึ้น'
         ] : [
             'Ultimate Privacy: No need to reveal personal data during transactions.',
             'High Security: Reduces the risk of data breaches since raw data is never exposed.',
