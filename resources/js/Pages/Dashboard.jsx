@@ -118,7 +118,7 @@ function DashboardContent() {
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
             icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book3.png)', maskImage: 'url(/images/book3.png)' }}></div>,
-            href: '/lab3',
+            href: '/minigame_cipher',
         },
         {
             title: lang === 'TH' ? 'แบบทดสอบที่ 4' : 'LAB 4',

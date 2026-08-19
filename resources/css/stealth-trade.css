@@ -470,7 +470,7 @@ body {
 
 @media (min-width: 768px) {
     .stealth-products__grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -489,6 +489,9 @@ body {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .stealth-card::before {

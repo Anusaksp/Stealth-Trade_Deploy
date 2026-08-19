@@ -92,3 +92,7 @@ Route::get('/minigamecave', function () {
 Route::get('/lab0', function () {
     return Inertia::render('Lab0');
 })->name('lab0');
+
+Route::get('/minigame_cipher', function () {
+    return Inertia::render('minigame_cipher');
+})->name('minigame_cipher');

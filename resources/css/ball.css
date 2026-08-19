@@ -500,3 +500,55 @@
                 .mg-flow-title { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
                 /* คำอธิบายขั้นตอน */
                 .mg-flow-desc { font-size: 11px; color: #64748b; line-height: 1.55; }
+
+                /* ═══════════════════════════════════════
+                   3D Ball Styles (Extracted from JSX)
+                   ═══════════════════════════════════════ */
+                .mg-ball-container {
+                    position: relative;
+                    width: 96px;
+                    height: 96px;
+                }
+
+                .mg-ball-glow {
+                    position: absolute;
+                    inset: -12px;
+                    border-radius: 50%;
+                    background: var(--ball-color);
+                    filter: blur(24px);
+                    opacity: 0.2;
+                }
+
+                .mg-ball-3d {
+                    width: 96px;
+                    height: 96px;
+                    border-radius: 50%;
+                    position: relative;
+                    transition: all 0.5s;
+                    background: radial-gradient(circle at 34% 26%,
+                        #ffffff 0%,
+                        color-mix(in srgb, var(--ball-color) 45%, #ffffff) 16%,
+                        var(--ball-color) 58%,
+                        color-mix(in srgb, var(--ball-color) 62%, #000000) 100%);
+                    box-shadow: inset -6px -8px 14px color-mix(in srgb, var(--ball-color) 55%, #000000),
+                                inset 5px 6px 12px rgb(255 255 255 / 0.45),
+                                0 10px 20px -8px color-mix(in srgb, var(--ball-color) 60%, transparent);
+                }
+
+                .mg-ball-highlight {
+                    position: absolute;
+                    left: 22%;
+                    top: 14%;
+                    width: 30%;
+                    height: 22%;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.65);
+                    filter: blur(3px);
+                    pointer-events: none;
+                }
+
+                /* Highlighted Text style */
+                .mg-highlight-text {
+                    color: #ef4444;
+                    font-weight: 900;
+                }
