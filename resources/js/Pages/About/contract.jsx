@@ -169,7 +169,7 @@ export default function Contract() {
                     position: absolute;
                     top: 30%; /* ให้อยู่ประมาณช่วงกลางถึงล่างนิดๆ */
                     left: 0;
-                    background: #e94560; /* สีแดงเด่นๆ ตามธีม */
+                    background: #002077e5; /* สีแดงเด่นๆ ตามธีม */
                     color: white;
                     padding: 0.5rem 1.25rem 0.5rem 0.75rem;
                     font-size: 1.8rem;
@@ -177,7 +177,7 @@ export default function Contract() {
                     text-transform: uppercase;
                     border-radius: 0 8px 8px 0; /* มุมมนเฉพาะด้านขวา */
                     box-shadow: 2px 4px 15px rgba(0,0,0,0.4);
-                    border-left: 6px solid #1a1a2e; /* เพิ่มขอบสีเข้มด้านซ้ายให้ดูมีมิติ */
+                    border-left: 6px solid #2e2a1a; /* เพิ่มขอบสีเข้มด้านซ้ายให้ดูมีมิติ */
                     z-index: 10;
                     letter-spacing: 1px;
                 }
