@@ -96,3 +96,7 @@ Route::get('/lab0', function () {
 Route::get('/minigame_cipher', function () {
     return Inertia::render('minigame_cipher');
 })->name('minigame_cipher');
+
+Route::get('/about/zkp', function () {
+    return Inertia::render('About/Zkp'); // ชี้ไปที่ไฟล์ Zkp.jsx
+})->name('about.zkp');
