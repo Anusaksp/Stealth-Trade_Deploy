@@ -199,7 +199,7 @@ function useTypewriter(text, speed = 22) {
 // ──────────────────────────────────────────────────────
 const MSG = {
     // ข้อความเลือกบทบาทตอนเริ่มเกม (ใช้ร่วมกัน)
-    roleSelect: 'ยินดีต้อนรับสู่ห้องปฏิบัติการที่สำคัญที่สุด\nที่คุณจะได้ทดลองปัญหาคลาสสิกของวงการ Cryptography : จะพิสูจน์ได้ไหมว่าเรารู้ความจริง โดยไม่เคยบอกว่าความจริงคืออะไรและไม่เปิดเผยความลับไม่แม้แต่บิตเดียว \n\nลองนึกภาพนักเทรดที่ต้องพิสูจน์ว่าเงินทุนเพียงพอสำหรับออร์เดอร์ โดยไม่ต้องเปิดเผยยอดเงิน\nเราจะมาเรียนรู้หลักการข้างต้นผ่านแบบทดสอบนี้กัน แบบทดสอบนี้จะมีทั้งหมด 2 บทบาท คือ\n1.ผู้พิสูจน์(Prover) คือผู้ที่จะมองเห็นสีของลูกบอลทั้ง 2 ลูก และจะคอยบอกผู้ตรวจสอบ(Verifier) ว่าลูกบอลสีแดงนั้นอยู่ฝั่งซ้ายหรือขวา\n2.ผู้ตรวจสอบ(Verifier) คือผู้ที่จะไม่เห็นสีของลูกบอลทั้ง 2 ลูก และจะคอยสลับฝั่งลูกบอลหรือไม่ก็ได้เพื่อพิสูจน์ว่า(Prover) มองเห็นสีจริงหรือไม่',
+    roleSelect: 'ยินดีต้อนรับสู่ห้องปฏิบัติการที่สำคัญที่สุด\nที่คุณจะได้ทดลองปัญหาคลาสสิกของวงการ Cryptography : จะพิสูจน์ได้ไหมว่าเรารู้ความจริง โดยไม่เคยบอกว่าความจริงคืออะไรและไม่เปิดเผยความลับไม่แม้แต่บิตเดียว \n\nลองนึกภาพว่าคุณกำลังจะทำแบบทดสอบหนึ่งเป็นมินิเกมลูกบอลโดยมีลูกบอลอยู่ 2 ลูก โดย prover บอกว่าลูกบอลทั้ง 2 ลูกเป็นคนละสีกัน โดยเราจะเป็นผู้ตรวจสอบหรือ Verifier ที่จะมาพิสูจน์ว่าลูกบอลทั้ง 2 ลูกเป็นคนละสีกันจริงมั้ย โดยที่ไม่ต้องให้ Prover บอกว่าลูกไหนคือสีไหน และเราก็ตาบอดสีด้วย',
 
     // ─── ข้อความแนะนำตอนเริ่มเกม ───
     introProver: 'ตอนนี้คุณคือผู้พิสูจน์ (Prover) : คุณจะต้องพิสูจน์ต่อผม(Verifier) ว่าคุณมองเห็นสีลูกบอลจริงๆ\nบอกผมมาหน่อยครับว่าลูกบอลสีแดงอยู่ฝั่งไหน?',
@@ -232,12 +232,44 @@ const MSG = {
 // ══════════════════════════════════════════════════════
 export default function MiniGame() {
 
+    // === ข้อความสนทนาเริ่มต้น ===
+    const INITIAL_CHAT = [
+        {
+            id: 1,
+            sender: 'prover',
+            name: '(PROVER)',
+            avatar: '/images/Prover.png',
+            text: 'คุณเชื่อไหมว่าลูกบอลจะมีทั้งหมด 2 ลูก โดยลูกบอลทั้ง 2 ลูกนี้เป็นคนละสีกัน โดยลูกหนึ่งเป็นสีแดง ลูกหนึ่งเป็นสีฟ้า'
+        },
+        {
+            id: 2,
+            sender: 'verifier',
+            name: '(VERIFIER)',
+            avatar: '/images/VERIFIER.png',
+            text: 'ผมไม่รู้หรอกครับเพราะผมตาบอดสี แล้วผมเชื่อคุณได้อย่างไรครับ คุณลองพิสูจน์ให้ผมดูหน่อยได้มั้ย'
+        },
+        {
+            id: 3,
+            sender: 'prover',
+            name: '(PROVER)',
+            avatar: '/images/Prover.png',
+            text: 'ได้งั้นผมจะลองพิสูจน์ให้ดู งั้นคุณลองเอาลูกบอลไปถือไว้สิ แล้วเอาใส่ในกล่องนี้ซึ่งผมจะมองไม่เห็นอย่างแน่นอนเนื่องจากเป็นกล่องทึบที่ปิดไว้ โดยคุณสามารถเลือกได้เลยว่าจะ "สลับ" หรือ "ไม่สลับ" ตำแหน่งของลูกบอลได้ แล้วผมก็จะบอกว่าคุณสลับหรือไม่สลับ'
+        },
+        {
+            id: 4,
+            sender: 'prover',
+            name: '(PROVER)',
+            avatar: '/images/Prover.png',
+            text: 'โดยตอนนี้ผมจะบอกให้ว่าลูกบอลแต่ละสีอยู่ฝั่งไหน "ลูกบอลสีแดงอยู่ฝั่งซ้าย และลูกบอลสีฟ้าอยู่ฝั่งขวา"'
+        }
+    ];
+
     // === State ของเกม ===
     const [positions, setPositions] = useState({ A: 'red', B: 'blue' }); // ตำแหน่งลูกบอล A, B
     const [round, setRound] = useState(0);                                // รอบปัจจุบัน
     const [log, setLog] = useState([]);                                   // บันทึกผลทุกรอบ
-    const [phase, setPhase] = useState('roleSelect');                     // สถานะเกม: roleSelect|intro|waiting|reveal|done
-    const [selectedRole, setSelectedRole] = useState(null);               // บทบาทที่เลือก: 'prover' | 'verifier'
+    const [phase, setPhase] = useState('waiting');                        // สถานะเกม: waiting|reveal|done
+    const [selectedRole, setSelectedRole] = useState('verifier');         // บทบาทเริ่มต้นเป็น Verifier
     const [proverView, setProverView] = useState(false);                  // สลับมุมมอง: ผู้ตรวจสอบ/ผู้พิสูจน์
     const [swapOffset, setSwapOffset] = useState(0);                      // ค่า offset สำหรับ animation สลับ (0=ปกติ, 1=กำลังสลับ)
     const [isAnimating, setIsAnimating] = useState(false);                // ป้องกันกดซ้ำระหว่าง animation
@@ -246,6 +278,15 @@ export default function MiniGame() {
     const [confidence, setConfidence] = useState(0);                      // ระดับความเชื่อมั่น (เริ่มที่ 0%)
     const [correctStreak, setCorrectStreak] = useState(0);                // จำนวนรอบที่ตอบถูกต่อเนื่อง (n ใน ZKP formula)
     const typed = useTypewriter(narratorText);                            // ข้อความที่กำลังพิมพ์ดีด
+
+    // === State สำหรับระบบสนทนาแบบแชท ===
+    const [chatMessages, setChatMessages] = useState(INITIAL_CHAT);
+    const chatEndRef = useRef(null);
+
+    // Auto scroll แชทเมื่อมีข้อความใหม่
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [chatMessages]);
 
     // === ฟังก์ชันสำหรับแปลงข้อความที่พิมพ์ดีดให้เน้นคำว่า ซ้าย / ขวา เป็นตัวหนาสีแดง ===
     const renderTypedText = (text) => {
@@ -257,6 +298,42 @@ export default function MiniGame() {
             }
             return part;
         });
+    };
+
+    // === ฟังก์ชัน parse markdown อย่างง่าย: **bold** และ *italic* ===
+    const renderMarkdown = (text) => {
+        if (!text) return null;
+        const segments = [];
+        let remaining = String(text);
+        let keyIdx = 0;
+        while (remaining.length > 0) {
+            const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+            const italicMatch = remaining.match(/\*([^*]+?)\*/);
+            let first = null;
+            if (boldMatch && italicMatch) {
+                first = boldMatch.index <= italicMatch.index
+                    ? { type: 'bold', match: boldMatch }
+                    : { type: 'italic', match: italicMatch };
+            } else if (boldMatch) {
+                first = { type: 'bold', match: boldMatch };
+            } else if (italicMatch) {
+                first = { type: 'italic', match: italicMatch };
+            }
+            if (!first) {
+                segments.push(remaining);
+                break;
+            }
+            if (first.match.index > 0) {
+                segments.push(remaining.slice(0, first.match.index));
+            }
+            if (first.type === 'bold') {
+                segments.push(<strong key={keyIdx++} style={{ fontWeight: '700' }}>{first.match[1]}</strong>);
+            } else {
+                segments.push(<em key={keyIdx++}>{first.match[1]}</em>);
+            }
+            remaining = remaining.slice(first.match.index + first.match[0].length);
+        }
+        return segments;
     };
 
     // === ฟังก์ชันสุ่มตำแหน่งลูกบอล ===
@@ -272,30 +349,45 @@ export default function MiniGame() {
         const isProver = role === 'prover';
         setProverView(isProver);
         const nextPos = randomizePositions();
-        const redSide = nextPos.A === 'red' ? 'ซ้าย' : 'ขวา';
-        setNarratorText(isProver ? MSG.introProver : MSG.introVerifier(redSide));
-        setPhase('intro');
-    }, [randomizePositions]);
 
-    // === เมื่อเข้าสู่ phase 'intro' ให้รอ 3 วินาที แล้วเปลี่ยนเป็น 'waiting' ===
-    useEffect(() => {
-        if (phase !== 'intro') return;
-        const t = setTimeout(() => {
-            setPhase('waiting');
-            const isProver = selectedRole === 'prover';
-            const redSide = positions.A === 'red' ? 'ซ้าย' : 'ขวา';
-            setNarratorText(isProver ? MSG.waitingProver : MSG.waitingVerifier(redSide));
-        }, 3000);
-        return () => clearTimeout(t);
-    }, [phase, selectedRole, positions]);
+        // กำหนดบทสนทนาเริ่มต้นตามบทบาท
+        if (isProver) {
+            setChatMessages([
+                {
+                    id: 1,
+                    sender: 'verifier',
+                    name: 'จ่อย 2 (VERIFIER)',
+                    avatar: '/images/joi_avatar_alt.png',
+                    text: 'เฮ้ย จ่อย 1! ลูกบอลสองลูกนี้มันคนละสีกันจริงเหรอ? ฉันมองยังไงก็เหมือนกันเป๊ะ นายมั่วรึเปล่า หลอกฉันแน่ๆ'
+                },
+                {
+                    id: 2,
+                    sender: 'prover',
+                    name: 'จ่อย 1 (PROVER)',
+                    avatar: '/images/joi_avatar.png',
+                    text: 'ไม่เชื่อใช่ป่ะ? งั้นเอามันสุ่มใส่ไว้ใน "กล่องทึบ" แล้วนายแอบสลับตำแหน่งหรือคงเดิมได้เลย จากนั้นฉันจะบอกเองว่านายสลับตำแหน่งหรือไม่!'
+                },
+                {
+                    id: 3,
+                    sender: 'verifier',
+                    name: 'จ่อย 2 (VERIFIER)',
+                    avatar: '/images/joi_avatar_alt.png',
+                    text: 'โอเค! งั้นฉันแอบสุ่มตำแหน่งในกล่องรอบที่ 1 เรียบร้อยแล้ว... ไหนบอกซิ รอบนี้ลูกสีแดงอยู่ทางซ้าย (A) หรือ ขวา (B)?'
+                }
+            ]);
+        } else {
+            setChatMessages(INITIAL_CHAT);
+        }
+        setPhase('waiting');
+    }, [randomizePositions]);
 
     // === ฟังก์ชันรีเซ็ตเกมใหม่ ===
     const reset = useCallback(() => {
         setPositions({ A: 'red', B: 'blue' });
         setRound(0);
         setLog([]);
-        setPhase('roleSelect');
-        setSelectedRole(null);
+        setPhase('waiting');
+        setSelectedRole('verifier');
         setProverView(false);
         setSwapOffset(0);
         setIsAnimating(false);
@@ -303,101 +395,292 @@ export default function MiniGame() {
         setGameWon(false);
         setConfidence(0);
         setCorrectStreak(0);
+        setChatMessages(INITIAL_CHAT);
     }, []);
 
-    // === ฟังก์ชันจัดการเมื่อผู้เล่นกดเลือก (ซ้าย / ขวา) ===
+    // === ฟังก์ชันจัดการเริ่มรอบถัดไป ===
+    const handleNextRound = useCallback(() => {
+        const nextRoundNum = round + 1;
+        if (nextRoundNum > TOTAL_ROUNDS) {
+            // จบการทดลองทั้งหมด
+            setPhase('done');
+
+            const isProver = selectedRole === 'prover';
+            const totalCorrectSoFar = log.filter(e => e.correct).length;
+            const won = isProver ? (totalCorrectSoFar >= Math.ceil(TOTAL_ROUNDS / 2)) : true;
+
+            if (isProver) {
+                if (won) {
+                    setChatMessages(prev => [
+                        ...prev,
+                        {
+                            id: Date.now(),
+                            sender: 'verifier',
+                            name: '(VERIFIER)',
+                            avatar: '/images/VERIFIER.png',
+                            text: `สุดยอด! คุณตอบถูกครบ 5 รอบเต็ม (ระดับความเชื่อมั่น 100%) ฉันเชื่อแล้วว่าคุณมองเห็นสีจริง โดยที่ฉันไม่เคยเห็นสีลูกบอลเลย!`
+                        },
+                        {
+                            id: Date.now() + 1,
+                            sender: 'prover',
+                            name: '(PROVER)',
+                            avatar: '/images/Prover.png',
+                            text: `เห็นไหมล่ะ! นี่คือหัวใจของ Zero-Knowledge Proof ที่ Stealth Trade ใช้ปกป้องข้อมูลการเทรดของคุณไง!`
+                        }
+                    ]);
+                    setNarratorText(MSG.winProver(confidence));
+                } else {
+                    setChatMessages(prev => [
+                        ...prev,
+                        {
+                            id: Date.now(),
+                            sender: 'verifier',
+                            name: '(VERIFIER)',
+                            avatar: '/images/VERIFIER.png',
+                            text: `ฮั่นแน่! ตอบผิดบ่อยขนาดนี้ แสดงว่าคุณเดาสุ่มแน่ๆ ฉันยังไม่เชื่อหรอกนะว่าเห็นจริง!`
+                        },
+                        {
+                            id: Date.now() + 1,
+                            sender: 'prover',
+                            name: '(PROVER)',
+                            avatar: '/images/Prover.png',
+                            text: `แหะๆ... รอบนี้พลาดไปหน่อย ขอแก้ตัวใหม่อีกรอบนะ!`
+                        }
+                    ]);
+                    setNarratorText(MSG.loseProver(confidence));
+                }
+            } else {
+                // Verifier Role - AI Prover wins
+                setChatMessages(prev => [
+                    ...prev,
+                    {
+                        id: Date.now(),
+                        sender: 'verifier',
+                        name: '(VERIFIER)',
+                        avatar: '/images/VERIFIER.png',
+                        text: `เออ ยอมแพ้แล้ว! คุณทายถูกติดต่อกัน 5 รอบแบบนี้ (โอกาสเดาสุ่มถูกแค่ 3.12%) คุณมองเห็นสีจริง ๆ นั่นแหละ!`
+                    },
+                    {
+                        id: Date.now() + 1,
+                        sender: 'prover',
+                        name: '(PROVER)',
+                        avatar: '/images/Prover.png',
+                        text: `เห็นไหมล่ะ! นี่คือความมหัศจรรย์ของ ZKP พิสูจน์ความจริงได้โดยไม่ต้องเปิดเผยสีหรือข้อมูลใด ๆ เลย!`
+                    }
+                ]);
+                setNarratorText(MSG.winVerifier(confidence));
+            }
+            setGameWon(won);
+            return;
+        }
+
+        setPhase('waiting');
+
+        if (selectedRole === 'prover') {
+            setChatMessages(prev => [
+                ...prev,
+                {
+                    id: Date.now(),
+                    sender: 'verifier',
+                    name: '(VERIFIER)',
+                    avatar: '/images/VERIFIER.png',
+                    text: `รอบที่ ${nextRoundNum}: ฉันเอาลูกบอลใส่กล่องแล้วแอบสุ่มตำแหน่งเรียบร้อยแล้ว... ไหนบอกซิ รอบนี้ลูกสีแดงอยู่ทางซ้าย (A) หรือ ขวา (B)?`
+                }
+            ]);
+        }
+    }, [round, selectedRole, log, confidence, randomizePositions]);
+
     const handleChoice = useCallback((chooseSide) => {
         if (phase !== 'waiting' || isAnimating) return;
+        
+        const isProverRole = selectedRole === 'prover';
+        const redIsLeft = positions.A === 'red';
+        
+        // บันทึกผลรอบนี้
+        const newRound = round + 1;
+
+        // 1. Determine if the Prover answers correctly
+        let proverIsCorrect = false;
+        if (isProverRole) {
+            // ผู้เล่นเป็น Prover: ตรวจว่าเลือกถูกฝั่งหรือไม่
+            proverIsCorrect = (chooseSide === 'left' && redIsLeft) || (chooseSide === 'right' && !redIsLeft);
+        } else {
+            // ผู้เล่นเป็น Verifier: AI Prover สุ่มตอบ 50/50
+            proverIsCorrect = Math.random() < 0.5;
+        }
+
         setPhase('reveal');
 
-        // ตรวจสอบว่าตอบถูกไหม:
-        // ทั้ง Prover และ Verifier ต้องทายว่าลูกแดงอยู่ซ้ายหรือขวา
-        // ถูก = เลือกตรงกับตำแหน่งจริง, ผิด = เลือกไม่ตรง
-        const redIsLeft = positions.A === 'red';
-        const isCorrect = (chooseSide === 'left' && redIsLeft) || (chooseSide === 'right' && !redIsLeft);
-
-        // อัปเดต correctStreak และ confidence ตามสูตร ZKP: 1 − (0.5)^n
-        // ถ้าตอบถูก: n++ → confidence เพิ่มขึ้น
-        // ถ้าตอบผิด: n รีเซ็ตเป็น 0 → confidence กลับไป 50% (เหมือนเดาสุ่ม) สำหรับ Prover
-        // สำหรับ Verifier จะเพิ่ม confidence เสมอแม้ตอบผิด (ตาม request)
-        let newStreak;
-        if (isCorrect || selectedRole !== 'prover') {
+        // คำนวณ confidence
+        let newStreak = correctStreak;
+        let newConf = confidence;
+        if (proverIsCorrect) {
             newStreak = correctStreak + 1;
+            newConf = Math.round((1 - Math.pow(0.5, newStreak)) * 100);
         } else {
-            newStreak = 0; // ตอบผิด → รีเซ็ต streak (เฉพาะ Prover)
+            // ตอบผิด: คง confidence ไว้เท่าเดิม ไม่ลดลง
+            // newStreak and newConf keep their current values
         }
+        
         setCorrectStreak(newStreak);
-        const newConf = Math.round((1 - Math.pow(0.5, newStreak)) * 100);
         setConfidence(newConf);
 
-        // animation สลับตำแหน่ง (แสดงให้เห็นว่ามีการสลับสำหรับ visual)
-        const doSwap = selectedRole !== 'prover' && chooseSide === 'left';
+        // อัพเดท narrator text
+        if (proverIsCorrect) {
+            setNarratorText(selectedRole === 'prover' 
+                ? MSG.correctProver(newRound, newConf) 
+                : MSG.correctVerifier(newRound, newConf, chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'));
+        } else {
+            setNarratorText(selectedRole === 'prover' 
+                ? MSG.wrongProver(newRound, newConf) 
+                : MSG.wrongVerifier(newRound, newConf, chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'));
+        }
+
+        // แอนิเมชันสลับตำแหน่ง
+        setIsAnimating(true);
+        const doSwap = !isProverRole && chooseSide === 'left';
         if (doSwap) {
-            setIsAnimating(true);
             setSwapOffset(1);
             setTimeout(() => {
                 setSwapOffset(0);
                 setPositions(p => ({ A: p.B, B: p.A }));
-                setIsAnimating(false);
             }, 700);
         }
 
-        // บันทึกผลรอบนี้
-        const newRound = round + 1;
-        const isProverRole = selectedRole === 'prover';
+        // บันทึก log
         const entry = {
             round: newRound,
             action: isProverRole
-                ? (chooseSide === 'left' ? 'เลือกซ้าย' : 'เลือกขวา')  // Prover: ระบุตำแหน่งลูกแดง
-                : (chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'),   // Verifier: สลับหรือไม่สลับ
-            correct: isCorrect,
+                ? (chooseSide === 'left' ? 'เลือกซ้าย' : 'เลือกขวา')
+                : (chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'),
+            correct: proverIsCorrect,
         };
-        // คำนวณ totalCorrect ผ่าน functional update เพื่อหลีกเลี่ยง stale closure
-        setLog(prev => {
-            const newLog = [...prev, entry];
-            return newLog;
-        });
+        setLog(prev => [...prev, entry]);
         setRound(newRound);
 
-        // คำนวณ totalCorrect จาก log ปัจจุบัน + ผลรอบนี้
-        const totalCorrectSoFar = log.filter(e => e.correct).length + (isCorrect ? 1 : 0);
+        // --- เพิ่มคำพูดในกล่องสนทนาแชท ---
+        if (!isProverRole) {
+            // ══════ VERIFIER ROLE (ผู้เล่นเป็น Verifier) ══════
 
-        const delay = doSwap ? 750 : 100;
-        const isProver = isProverRole;
+            // 1. Verifier (ผู้เล่น) แสดงการกระทำ
+            const actionText = chooseSide === 'left' 
+                ? 'แอบสลับตำแหน่งลูกบอลในกล่องทึบ' 
+                : 'ไม่ได้สลับตำแหน่งลูกบอล';
+            const userMsg = {
+                id: Date.now(),
+                sender: 'verifier',
+                name: '(VERIFIER)',
+                avatar: '/images/VERIFIER.png',
+                text: `*${actionText}*`
+            };
+            setChatMessages(prev => [...prev, userMsg]);
 
-        // ตรวจสอบว่าครบ 5 รอบหรือยัง
-        if (newRound >= TOTAL_ROUNDS) {
+            // 2. Prover (AI) สุ่มตอบหลังจาก animation
             setTimeout(() => {
-                const finalConf = newConf;
-                const won = isProver ? (totalCorrectSoFar >= Math.ceil(TOTAL_ROUNDS / 2)) : true;
-                if (isProver) {
-                    setNarratorText(won ? MSG.winProver(finalConf) : MSG.loseProver(finalConf));
-                } else {
-                    setNarratorText(MSG.winVerifier(finalConf));
+                // AI Prover สุ่มตอบว่าสลับหรือไม่สลับ
+                const aiGuess = proverIsCorrect 
+                    ? (chooseSide === 'left' ? 'สลับตำแหน่ง' : 'ไม่ได้สลับตำแหน่ง')
+                    : (chooseSide === 'left' ? 'ไม่ได้สลับตำแหน่ง' : 'สลับตำแหน่ง');
+
+                const proverMsg = {
+                    id: Date.now() + 1,
+                    sender: 'prover',
+                    name: '(PROVER)',
+                    avatar: '/images/Prover.png',
+                    text: `รอบที่ ${newRound} — ผมคิดว่าคุณ **${aiGuess}** แน่นอน!`
+                };
+
+                setChatMessages(prev => {
+                    const nextMsgs = [...prev, proverMsg];
+                    
+                    if (proverIsCorrect) {
+                        // ตอบถูก: Verifier ยืนยันว่าถูกต้อง
+                        nextMsgs.push({
+                            id: Date.now() + 2,
+                            sender: 'verifier',
+                            name: '(VERIFIER)',
+                            avatar: '/images/VERIFIER.png',
+                            text: `ถูกต้อง! ผม${chooseSide === 'left' ? 'สลับตำแหน่ง' : 'ไม่ได้สลับตำแหน่ง'}จริงๆ ด้วย! ระดับความเชื่อมั่นเพิ่มเป็น ${newConf}%`
+                        });
+                    } else {
+                        // ตอบผิด: Verifier บอกว่าผิด + จบเกมทันที
+                        nextMsgs.push({
+                            id: Date.now() + 2,
+                            sender: 'verifier',
+                            name: '(VERIFIER)',
+                            avatar: '/images/VERIFIER.png',
+                            text: `ผิดเต็มๆ! ความจริงผม${chooseSide === 'left' ? 'สลับตำแหน่ง' : 'ไม่ได้สลับตำแหน่ง'}ต่างหาก! ระดับความเชื่อมั่นคงอยู่ที่ ${newConf}% — คุณล้มเหลวในการพิสูจน์ (เดาสุ่ม 50/50)`
+                        });
+                    }
+                    return nextMsgs;
+                });
+
+                if (!proverIsCorrect) {
+                    setPhase('done');
+                    setGameWon(false);
+                    setNarratorText(MSG.loseVerifier(newConf));
                 }
-                setGameWon(won);
-                setPhase('done');
-            }, delay);
+                setIsAnimating(false);
+            }, 750);
         } else {
-            setTimeout(() => {
-                if (isProver) {
-                    setNarratorText(isCorrect ? MSG.correctProver(newRound, newConf) : MSG.wrongProver(newRound, newConf));
-                } else {
-                    const actionLabel = chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ';
-                    setNarratorText(isCorrect ? MSG.correctVerifier(newRound, newConf, actionLabel) : MSG.wrongVerifier(newRound, newConf, actionLabel));
-                }
-            }, delay);
-            setTimeout(() => {
-                // สุ่มตำแหน่งลูกบอลใหม่ก่อนเริ่มรอบถัดไป
-                const nextPos = randomizePositions();
-                setPhase('waiting');
-                const redSide = nextPos.A === 'red' ? 'ซ้าย' : 'ขวา';
-                setNarratorText(isProver ? MSG.waitingProver : MSG.waitingVerifier(redSide));
-            }, delay + 5000);
-        }
-    }, [phase, round, log, isAnimating, selectedRole, positions, correctStreak, randomizePositions]);
+            // ══════ PROVER ROLE (ผู้เล่นเป็น Prover) ══════
 
-    // === แสดงสีลูกบอลเมื่อเลือกบทบาทผู้พิสูจน์ หรือเกมจบ ===
+            // 1. Prover (ผู้เล่น) ตอบ
+            const userMsg = {
+                id: Date.now(),
+                sender: 'prover',
+                name: '(PROVER)',
+                avatar: '/images/Prover.png',
+                text: `ลูกบอลสีแดงอยู่ทาง **${chooseSide === 'left' ? 'ซ้าย (ตำแหน่ง A)' : 'ขวา (ตำแหน่ง B)'}**!`
+            };
+            setChatMessages(prev => [...prev, userMsg]);
+
+            // 2. Verifier (AI) ตรวจคำตอบ
+            setTimeout(() => {
+                let replyText = '';
+                if (proverIsCorrect) {
+                    replyText = chooseSide === 'left'
+                        ? `ถูกต้องจริงด้วย! ฉันสุ่มให้สีแดงอยู่ฝั่งซ้ายพอดี (ระดับความน่าจะเป็นเดาสุ่มสำเร็จลดลงแล้ว)`
+                        : `ถูกต้องจริงด้วย! ฉันสุ่มให้สีแดงอยู่ฝั่งขวาพอดี (ระดับความน่าจะเป็นเดาสุ่มสำเร็จลดลงแล้ว)`;
+                } else {
+                    replyText = chooseSide === 'left'
+                        ? `ผิดแล้ว! รอบที่ ${newRound} สีแดงอยู่ฝั่งขวาต่างหาก! นายเดาสุ่มแน่ๆ ระดับความเชื่อมั่นคงอยู่ที่ ${newConf}%!`
+                        : `ผิดแล้ว! รอบที่ ${newRound} สีแดงอยู่ฝั่งซ้ายต่างหาก! นายเดาสุ่มแน่ๆ ระดับความเชื่อมั่นคงอยู่ที่ ${newConf}%!`;
+                }
+
+                const verifierMsg = {
+                    id: Date.now() + 1,
+                    sender: 'verifier',
+                    name: '(VERIFIER)',
+                    avatar: '/images/VERIFIER.png',
+                    text: replyText
+                };
+                
+                setChatMessages(prev => {
+                    const nextMsgs = [...prev, verifierMsg];
+                    if (!proverIsCorrect) {
+                        nextMsgs.push({
+                            id: Date.now() + 2,
+                            sender: 'verifier',
+                            name: '(VERIFIER)',
+                            avatar: '/images/VERIFIER.png',
+                            text: `สรุปผลการทดลอง: Prover ตอบผิดในรอบที่ ${newRound}! ระดับความเชื่อมั่นคงอยู่ที่ ${newConf}% ระบบยกเลิกการพิสูจน์ทันที`
+                        });
+                    }
+                    return nextMsgs;
+                });
+
+                if (!proverIsCorrect) {
+                    setPhase('done');
+                    setGameWon(false);
+                    setNarratorText(MSG.loseProver(newConf));
+                }
+                setIsAnimating(false);
+            }, 750);
+        }
+
+    }, [phase, round, log, isAnimating, selectedRole, positions, correctStreak, confidence, randomizePositions]);
+
     const showColors = selectedRole === 'prover' || phase === 'done';
 
     // === ระยะห่างระหว่างลูกบอล สำหรับ animation สลับตำแหน่ง (พิกเซล) ===
@@ -503,147 +786,132 @@ export default function MiniGame() {
                     {/* ══════ ฝั่งซ้าย: สนามเกม (Arena) ══════ */}
                     <section className="mg-arena mgcard">
 
-                        {/* ═══ หน้าเลือกบทบาท (แสดงเฉพาะตอน roleSelect) ═══ */}
-                        {phase === 'roleSelect' ? (
-                            <div className="mg-role-select">
-                                <h2 className="mg-role-select-title">เลือกบทบาทที่ต้องการ</h2>
-                                <div className="mg-role-select-buttons">
-                                    <button
-                                        className="mg-role-btn mg-role-btn-prover"
-                                        onClick={() => handleRoleSelect('prover')}
-                                    >
-                                        ผู้พิสูจน์ (Prover)
-                                    </button>
-                                    <button
-                                        className="mg-role-btn mg-role-btn-verifier"
-                                        onClick={() => handleRoleSelect('verifier')}
-                                    >
-                                        ผู้ตรวจสอบ (Verifier)
-                                    </button>
+                        {/* ═══ ส่วนแสดงผลสนามเกม Chat Arena ═══ */}
+                        <>
+                            {/* ส่วนหัว: แสดงบทบาทปัจจุบัน */}
+                            <div className="mg-arena-header">
+                                <span className="mg-role-badge">
+                                    บทบาท: {selectedRole === 'prover' ? 'ผู้พิสูจน์ (Prover)' : 'ผู้ตรวจสอบ (Verifier)'}
+                                </span>
+                                {/* หมายเหตุ: ผู้ตรวจสอบมองไม่เห็นสี */}
+                                {selectedRole === 'verifier' && (
+                                    <span className="mg-verifier-note">
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696" />
+                                            <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696" />
+                                            <path d="m2 2 20 20" />
+                                        </svg>
+                                        ไม่สามารถแยกสีได้
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* ═══ กล่องพื้นที่แชทการสนทนา (Chat Container) ═══ */}
+                            <div className="mg-chat-area">
+                                <div className="mg-chat-messages">
+                                    {chatMessages.map(msg => (
+                                        <div key={msg.id} className={`mg-chat-msg ${msg.sender === 'verifier' ? 'right' : 'left'}`}>
+                                            <div className="mg-chat-avatar">
+                                                <img src={msg.avatar} alt={msg.name} className="mg-chat-avatar-img" />
+                                                <span className="mg-chat-name">{msg.name}</span>
+                                            </div>
+                                            <div className="mg-chat-bubble">
+                                                {renderMarkdown(msg.text)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div ref={chatEndRef} />
                                 </div>
                             </div>
-                        ) : (
-                            <>
-                                {/* ส่วนหัว: แสดงบทบาทปัจจุบัน */}
-                                <div className="mg-arena-header">
-                                    <span className="mg-role-badge">
-                                        บทบาท: {selectedRole === 'prover' ? 'ผู้พิสูจน์ (Prover)' : 'ผู้ตรวจสอบ (Verifier)'}
-                                    </span>
-                                    {/* หมายเหตุ: ผู้ตรวจสอบมองไม่เห็นสี */}
-                                    {selectedRole === 'verifier' && (
-                                        <span className="mg-verifier-note">
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696" />
-                                                <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696" />
-                                                <path d="m2 2 20 20" />
-                                            </svg>
-                                            ไม่สามารถแยกสีได้
-                                        </span>
-                                    )}
+
+                            {/* ═══ กล่องทึบ ZKP และปุ่มกระทำ ═══ */}
+                            {phase !== 'done' && (
+                                <div className="mg-chat-box-container">
+                                    <div className="mg-chat-box-title">กล่องทึบ ZKP</div>
+                                    <div className="mg-chat-box-balls">
+                                        <div
+                                            style={{
+                                                transform: swapOffset 
+                                                    ? 'translateX(60px) scale(0.95)' 
+                                                    : phase === 'reveal' 
+                                                    ? 'translateX(-140px) scale(1.1)' 
+                                                    : 'translateX(0) scale(1)',
+                                                transition: 'transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                            }}
+                                        >
+                                            <Ball color={positions.A} hidden={!showColors} />
+                                        </div>
+                                        <div
+                                            style={{
+                                                transform: swapOffset 
+                                                    ? 'translateX(-60px) scale(0.95)' 
+                                                    : phase === 'reveal' 
+                                                    ? 'translateX(140px) scale(1.1)' 
+                                                    : 'translateX(0) scale(1)',
+                                                transition: 'transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                            }}
+                                        >
+                                            <Ball color={positions.B} hidden={!showColors} />
+                                        </div>
+                                    </div>
                                 </div>
+                            )}
 
-                                {/* ═══ เวทีลูกบอล ═══ */}
-                                <div className="mg-stage">
-                                    <div className="mg-stage-top-glow" />  {/* แสง gradient ด้านบน */}
-                                    <div className="mg-balls-row">
-
-                                        {/* ลูกบอล A — ใช้ translateX เพื่อ animation สลับ */}
-                                        <div
-                                            className="mg-ball-slot"
-                                            style={{
-                                                transform: swapOffset ? `translateX(${SWAP_GAP}px)` : 'translateX(0)',
-                                                transition: swapOffset ? 'transform 0.65s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-                                            }}
-                                        >
-                                            <div className="mg-ball-float" style={{ animationDelay: '0s' }}>
-                                                <Ball color={positions.A} hidden={!showColors} />
-                                            </div>
-                                            <div className="mg-ball-shadow" />         {/* เงาใต้ลูกบอล */}
-                                            <span className="mg-ball-label">ตำแหน่ง A</span>
-                                        </div>
-
-                                        {/* ไอคอนลูกศรสลับตำแหน่ง (ตรงกลาง) */}
-                                        <div className="mg-balls-sep">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.35">
-                                                <path d="m16 3 4 4-4 4" /><path d="M20 7H4" />
-                                                <path d="m8 21-4-4 4-4" /><path d="M4 17h16" />
-                                            </svg>
-                                        </div>
-
-                                        {/* ลูกบอล B — ใช้ translateX ทิศตรงข้ามเพื่อสลับ */}
-                                        <div
-                                            className="mg-ball-slot"
-                                            style={{
-                                                transform: swapOffset ? `translateX(-${SWAP_GAP}px)` : 'translateX(0)',
-                                                transition: swapOffset ? 'transform 0.65s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-                                            }}
-                                        >
-                                            <div className="mg-ball-float" style={{ animationDelay: '0.7s' }}>
-                                                <Ball color={positions.B} hidden={!showColors} />
-                                            </div>
-                                            <div className="mg-ball-shadow" />
-                                            <span className="mg-ball-label">ตำแหน่ง B</span>
-                                        </div>
-                                    </div>
-
-                                    {/* เส้นคั่นตกแต่ง */}
-                                    <div className="mg-dividers">
-                                        <div className="mg-div-line" />    {/* เส้นหลัก */}
-                                        <div className="mg-div-line-sm" /> {/* เส้นรอง */}
-                                    </div>
-
-                                    {/* ป้ายสถานะ: ชนะ หรือ แสดงมุมมองปัจจุบัน */}
-                                    {gameWon ? (
-                                        <div className="mg-status-win">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-                                                <path d="m9 12 2 2 4-4" />
-                                            </svg>
-                                            ZKP พิสูจน์สำเร็จ! ความเชื่อมั่น {confidence}%
-                                        </div>
+                            {/* ═══ ปุ่มการกระทำ: เลือกการกระทำ หรือ เริ่มรอบถัดไป ═══ */}
+                            {phase === 'done' ? (
+                                <button className="mg-btn-primary" onClick={reset}>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                    </svg>
+                                    เล่นอีกครั้ง
+                                </button>
+                            ) : phase === 'reveal' ? (
+                                <button className="mg-btn-primary" onClick={handleNextRound} disabled={isAnimating}>
+                                    {round >= TOTAL_ROUNDS ? 'สรุปผลการทดลอง ZKP →' : `เริ่มรอบที่ ${round + 1} →`}
+                                </button>
+                            ) : (
+                                <div className="mg-action-row">
+                                    {selectedRole === 'verifier' ? (
+                                        <>
+                                            <button className="mg-chat-action-btn swap" onClick={() => handleChoice('left')} disabled={phase !== 'waiting' || isAnimating}>
+                                                <svg className="mg-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                                                </svg>
+                                                แอบสลับตำแหน่ง
+                                            </button>
+                                            <button className="mg-chat-action-btn keep" onClick={() => handleChoice('right')} disabled={phase !== 'waiting' || isAnimating}>
+                                                <svg className="mg-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                                                </svg>
+                                                ไม่สลับตำแหน่ง
+                                            </button>
+                                        </>
                                     ) : (
-                                        <div className="mg-status-pill">
-                                            {selectedRole === 'prover' ? '👁 มุมมองผู้พิสูจน์ — เห็นสีลูกบอล' : '🙈 มุมมองผู้ตรวจสอบ — มองไม่เห็นสี'}
-                                        </div>
+                                        <>
+                                            <button className="mg-btn-swap" onClick={() => handleChoice('left')} disabled={phase !== 'waiting' || isAnimating}>
+                                                ซ้าย (ตำแหน่ง A)
+                                            </button>
+                                            <button className="mg-btn-keep" onClick={() => handleChoice('right')} disabled={phase !== 'waiting' || isAnimating}>
+                                                ขวา (ตำแหน่ง B)
+                                            </button>
+                                        </>
                                     )}
                                 </div>
+                            )}
 
-                                {/* ═══ ปุ่มการกระทำ: ซ้าย / ขวา ═══ */}
-                                {phase === 'done' ? (
-                                    /* ปุ่มเล่นอีกครั้ง (แสดงเมื่อเกมจบ) */
-                                    <button className="mg-btn-primary" onClick={reset}>
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                            <path d="M3 3v5h5" />
-                                        </svg>
-                                        เล่นอีกครั้ง
-                                    </button>
-                                ) : (
-                                    /* ปุ่มซ้าย + ปุ่มขวา */
-                                    <div className="mg-action-row">
-                                        <button className="mg-btn-swap" onClick={() => handleChoice('left')} disabled={phase !== 'waiting'}>
-                                            {selectedRole === 'verifier' ? 'สลับฝั่ง' : 'ซ้าย'}
-                                        </button>
-                                        <button className="mg-btn-keep" onClick={() => handleChoice('right')} disabled={phase !== 'waiting'}>
-                                            {selectedRole === 'verifier' ? 'ไม่สลับ' : 'ขวา'}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {/* ═══ จุดแสดงจำนวนรอบ (5 จุด) ═══ */}
-                                <div className="mg-dots">
-                                    {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className={`mg-dot ${i < round ? 'mg-dot-done'                          /* รอบที่ผ่านแล้ว = สีม่วง */
-                                                : i === round && phase !== 'done' ? 'mg-dot-active' /* รอบปัจจุบัน = เต้น */
-                                                    : ''                                                /* รอบที่ยังไม่ถึง = สีจาง */
-                                                }`}
-                                        />
-                                    ))}
-                                </div>
-                            </>
-                        )}
+                            {/* ═══ จุดแสดงจำนวนรอบ (5 จุด) ═══ */}
+                            <div className="mg-dots">
+                                {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className={`mg-dot ${i < round ? 'mg-dot-done' : i === round && phase !== 'done' ? 'mg-dot-active' : ''}`}
+                                    />
+                                ))}
+                            </div>
+                        </>
                     </section>
 
                     {/* ══════ ฝั่งขวา: แถบด้านข้าง (Sidebar) ══════ */}
@@ -1180,6 +1448,161 @@ export default function MiniGame() {
                 .mg-flow-title { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
                 /* คำอธิบายขั้นตอน */
                 .mg-flow-desc { font-size: 11px; color: #64748b; line-height: 1.55; }
+
+                /* ── Chat UI ── */
+                .mg-chat-area {
+                    width: 100%;
+                    max-height: 380px;
+                    overflow-y: auto;
+                    padding-right: 8px;
+                    margin-bottom: 16px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .mg-chat-area::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .mg-chat-area::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .mg-chat-area::-webkit-scrollbar-thumb {
+                    background: rgba(124, 58, 237, 0.2);
+                    border-radius: 999px;
+                }
+                .mg-chat-messages {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+                .mg-chat-msg {
+                    display: flex;
+                    gap: 12px;
+                    align-items: flex-start;
+                    animation: fadeInMsg 0.25s ease-out;
+                }
+                @keyframes fadeInMsg {
+                    from { opacity: 0; transform: translateY(8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .mg-chat-msg.right {
+                    flex-direction: row-reverse;
+                }
+                .mg-chat-avatar {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 4px;
+                    flex-shrink: 0;
+                    width: 66px;
+                }
+                .mg-chat-avatar-img {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    border: 2px solid rgba(124,58,237,0.25);
+                    background: #fff;
+                    object-fit: cover;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                }
+                .mg-chat-msg.right .mg-chat-avatar-img {
+                    border-color: rgba(236, 72, 153, 0.25);
+                }
+                .mg-chat-name {
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: #64748b;
+                    text-align: center;
+                    line-height: 1.2;
+                }
+                .mg-chat-bubble {
+                    background: #ffffff;
+                    padding: 12px 16px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(0,0,0,0.06);
+                    box-shadow: 0 3px 12px rgba(0,0,0,0.03);
+                    font-size: 13.5px;
+                    line-height: 1.6;
+                    color: #334155;
+                    max-width: 72%;
+                    position: relative;
+                }
+                .mg-chat-msg.left .mg-chat-bubble {
+                    border-top-left-radius: 4px;
+                    border-left: 3px solid #3b82f6;
+                }
+                .mg-chat-msg.right .mg-chat-bubble {
+                    border-top-right-radius: 4px;
+                    background: #fdf2f8;
+                    border-right: 3px solid #ec4899;
+                }
+                .mg-chat-bubble strong {
+                    color: #7c3aed;
+                }
+                
+                /* กล่องทึบ ZKP ใน Chat */
+                .mg-chat-box-container {
+                    background: #0f172a;
+                    border-radius: 14px;
+                    padding: 16px;
+                    margin-top: 10px;
+                    margin-bottom: 14px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 10px;
+                    width: 50%;
+                    margin-left: 150px;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+                }
+                .mg-chat-box-title {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #94a3b8;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                }
+                .mg-chat-box-balls {
+                    display: flex;
+                    gap: 20px;
+                    margin: 4px 0;
+                }
+
+                .mg-chat-action-btn {
+                    flex: 1;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    border-radius: 12px;
+                    padding: 14px 20px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    background: #ffffff;
+                    color: #334155;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                }
+                .mg-chat-action-btn:hover:not(:disabled) {
+                    background: #f8fafc;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                }
+                .mg-chat-action-btn.swap {
+                    color: #ec4899;
+                    border-color: rgba(236, 72, 153, 0.2);
+                }
+                .mg-chat-action-btn.swap:hover:not(:disabled) {
+                    background: #fff5f9;
+                }
+                .mg-chat-action-btn.keep {
+                    color: #64748b;
+                }
+                .mg-action-icon {
+                    width: 16px;
+                    height: 16px;
+                }
 
             `}</style>
         </>

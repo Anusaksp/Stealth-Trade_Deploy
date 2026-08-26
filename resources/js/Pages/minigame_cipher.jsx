@@ -1,13 +1,7 @@
 /**
  * =====================================================
- * มินิเกม ZKP Sigma Protocol — The Imposter's Cipher
- * Lab 3: การกิจจับผิดสายลับ — Stealth Trade ZKP Lab
- *
- * หน้านี้เป็นเกมจำลองเชิงปฏิบัติการที่อธิบายหลักการ
- * Zero-Knowledge Proof (ZKP) ผ่าน Sigma Protocol โดย
- * ผู้เล่นรับบทเป็น "หัวหน้ารักษาความปลอดภัย (Verifier)"
- * ที่ต้องจับผิด "สายลับปลอม (Imposter)" โดยไม่ต้องให้
- * เขาพูดรหัสผ่านตรงๆ ผ่านกลไก Commit→Challenge→Response
+ * Lab 3 — ภารกิจจับผิดสายลับ (The Imposter's Cipher)
+ * ZKP Sigma Protocol Interactive Simulation
  * =====================================================
  */
 
@@ -15,44 +9,28 @@ import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import '../../css/cipher.css';
 
-// === ค่าคงที่ ===
-const TOTAL_ROUNDS = 5; // จำนวนรอบทั้งหมด
+// ─── ZKP Parameters ───
+const ZKP_P = 11;
+const ZKP_G = 2;
+const ZKP_X = 4; // real secret
 
-// ═══════════════════════════════════════════════════════
-// Sigma Protocol Parameters (สำหรับการคำนวณ ZKP Response)
-// P = prime, G = generator, x = ความลับ (ตัวเลขความลับของเรา)
-// Y = G^x mod P  (สาธารณะ public key)
-// k = nonce ชั่วคราวที่สุ่ม (tempCode)
-// T = G^k mod P  (commitment)
-// c = challenge จากหัวหน้า
-// r = k + (c*x)(response)
-// Verify: G^r mod P === (T * Y^c) mod P
-// ═══════════════════════════════════════════════════════
-const ZKP_P = 11;   // prime number
-const ZKP_G = 2;    // generator
-const ZKP_X = 4;    // ความลับที่แท้จริงของเรา (x)
-
-/** Modular exponentiation: (base^exp) mod mod */
 function modPow(base, exp, mod) {
     let result = 1n;
     let b = BigInt(base) % BigInt(mod);
     let e = BigInt(exp);
     const m = BigInt(mod);
     while (e > 0n) {
-        if (e % 2n === 1n) result = result * b % m;
+        if (e % 2n === 1n) result = (result * b) % m;
         e = e / 2n;
-        b = b * b % m;
+        b = (b * b) % m;
     }
     return Number(result);
 }
 
-// ──────────────────────────────────────────────────────
-// Custom Hook: เอฟเฟกต์พิมพ์ดีด (Typewriter)
-// ──────────────────────────────────────────────────────
+// ─── Typewriter Hook ───
 function useTypewriter(text, speed = 22) {
     const [displayed, setDisplayed] = useState('');
     const idxRef = useRef(0);
-
     useEffect(() => {
         setDisplayed('');
         idxRef.current = 0;
@@ -66,191 +44,145 @@ function useTypewriter(text, speed = 22) {
         }, speed);
         return () => clearInterval(iv);
     }, [text]);
-
     return displayed;
 }
 
-// ──────────────────────────────────────────────────────
-// คอมโพเนนต์กล่อง Lock (Commit Box Visual)
-// ──────────────────────────────────────────────────────
-function CommitBox({ committed, value }) {
+// ─── Soundness Chart SVG ───
+function SoundnessChartSVG({ rounds }) {
+    const W = 640, H = 240;
+    const padL = 52, padR = 32, padT = 28, padB = 44;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    const points = Array.from({ length: rounds }, (_, i) => {
+        const n = i + 1;
+        const y = (1 - Math.pow(0.5, n)) * 100;
+        const px = padL + (i / (rounds - 1 || 1)) * chartW;
+        const py = padT + chartH - (y / 100) * chartH;
+        return { n, y, px, py };
+    });
+
+    const polyline = points.map(p => `${p.px},${p.py}`).join(' ');
+    const areaPath = `M ${points[0].px},${padT + chartH} ` +
+        points.map(p => `L ${p.px},${p.py}`).join(' ') +
+        ` L ${points[points.length - 1].px},${padT + chartH} Z`;
+
+    const yLines = [0, 25, 50, 75, 100];
+
     return (
-        <div className="cc-commit-box">
-            {committed ? (
-                <>
-                    <div className="cc-lock-icon cc-lock-locked">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                    </div>
-                    <span className="cc-commit-label">กล่องถูกล็อคแล้ว —</span>
-                    <span className="cc-commit-value">[ {value !== null ? '****' : '????'} เข้ารหัสอยู่ ]</span>
-                </>
-            ) : (
-                <>
-                    <div className="cc-lock-icon cc-lock-open">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                            <path d="M7 11V7a5 5 0 0 1 9.9-1" />
-                        </svg>
-                    </div>
-                    <span className="cc-commit-label">รอล็อคกล่อง...</span>
-                    <span className="cc-commit-value cc-dim">[ยังไม่มีข้อมูล]</span>
-                </>
-            )}
-        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+            <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.02" />
+                </linearGradient>
+            </defs>
+            {/* Background */}
+            <rect x="0" y="0" width={W} height={H} rx="12" fill="#0f0a1e" />
+
+            {/* Grid lines */}
+            {yLines.map(pct => {
+                const cy = padT + chartH - (pct / 100) * chartH;
+                return (
+                    <g key={pct}>
+                        <line x1={padL} y1={cy} x2={W - padR} y2={cy} stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4,4" />
+                        <text x={padL - 6} y={cy + 4} textAnchor="end" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="monospace">{pct}%</text>
+                    </g>
+                );
+            })}
+
+            {/* Axes labels */}
+            <text x={padL - 36} y={padT + chartH / 2} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="monospace" textAnchor="middle"
+                transform={`rotate(-90, ${padL - 36}, ${padT + chartH / 2})`}>
+                Y: โอกาสจับได้ (%)
+            </text>
+            <text x={W - padR} y={padT + chartH + 32} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="monospace" textAnchor="end">
+                X: จำนวนรอบ (N = 1 .. {rounds})
+            </text>
+
+            {/* Area fill */}
+            <path d={areaPath} fill="url(#chartGrad)" />
+
+            {/* Line */}
+            <polyline points={polyline} fill="none" stroke="#a78bfa" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+
+            {/* X axis ticks */}
+            {points.map(p => (
+                <text key={p.n} x={p.px} y={padT + chartH + 18} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontFamily="monospace">{p.n}</text>
+            ))}
+
+            {/* Dots + last tooltip */}
+            {points.map((p, i) => (
+                <g key={i}>
+                    <circle cx={p.px} cy={p.py} r={i === points.length - 1 ? 6 : 4} fill={i === points.length - 1 ? '#a78bfa' : '#7c3aed'} stroke="#fff" strokeWidth="1.5" />
+                    {i === points.length - 1 && (
+                        <g>
+                            <rect x={p.px - 26} y={p.py - 28} width={52} height={20} rx={5} fill="#7c3aed" />
+                            <text x={p.px} y={p.py - 14} textAnchor="middle" fill="#fff" fontSize="11" fontWeight="700" fontFamily="monospace">
+                                {p.y.toFixed(1)}%
+                            </text>
+                        </g>
+                    )}
+                </g>
+            ))}
+        </svg>
     );
 }
 
-// ──────────────────────────────────────────────────────
-// คอมโพเนนต์ผลลัพธ์รอบ (Round Result)
-// ──────────────────────────────────────────────────────
-function RoundResult({ passed, boxValue, challenge }) {
+// ─── Mini soundness preview chart for Scene 1 ───
+function SoundnessPreviewChart({ rounds }) {
+    const W = 320, H = 120;
+    const padL = 36, padR = 16, padT = 14, padB = 28;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    const pts = Array.from({ length: rounds }, (_, i) => {
+        const n = i + 1;
+        const yv = (1 - Math.pow(0.5, n)) * 100;
+        const px = padL + (i / (rounds - 1 || 1)) * chartW;
+        const py = padT + chartH - (yv / 100) * chartH;
+        return { n, yv, px, py };
+    });
+
+    const poly = pts.map(p => `${p.px},${p.py}`).join(' ');
+    const area = `M ${pts[0].px},${padT + chartH} ` +
+        pts.map(p => `L ${p.px},${p.py}`).join(' ') +
+        ` L ${pts[pts.length - 1].px},${padT + chartH} Z`;
+
     return (
-        <div className={`cc-result-box ${passed ? 'cc-result-pass' : 'cc-result-fail'}`}>
-            {passed ? (
-                <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                    <span>ในกล่อง = {boxValue} · ตรงกับโจทย์! สายลับตัวจริงผ่าน</span>
-                </>
-            ) : (
-                <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
-                    <span>ในกล่อง = {boxValue} · ไม่ตรงกับโจทย์! สายลับปลอมโดนจับ</span>
-                </>
-            )}
-        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+            <defs>
+                <linearGradient id="prevGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.02" />
+                </linearGradient>
+            </defs>
+            <rect x="0" y="0" width={W} height={H} rx="8" fill="#0f0a1e" />
+            {[0, 50, 100].map(pct => {
+                const cy = padT + chartH - (pct / 100) * chartH;
+                return (
+                    <g key={pct}>
+                        <line x1={padL} y1={cy} x2={W - padR} y2={cy} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                        <text x={padL - 4} y={cy + 3} textAnchor="end" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">{pct}%</text>
+                    </g>
+                );
+            })}
+            <path d={area} fill="url(#prevGrad)" />
+            <polyline points={poly} fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+            {pts.map((p, i) => (
+                <circle key={i} cx={p.px} cy={p.py} r={i === pts.length - 1 ? 5 : 3}
+                    fill={i === pts.length - 1 ? '#a78bfa' : '#7c3aed'} stroke="#fff" strokeWidth="1.2" />
+            ))}
+            {pts.map(p => (
+                <text key={p.n} x={p.px} y={padT + chartH + 16} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="monospace">{p.n}</text>
+            ))}
+        </svg>
     );
 }
 
-// ──────────────────────────────────────────────────────
-// คอมโพเนนต์บันทึกผล (Round Log)
-// ──────────────────────────────────────────────────────
-function RoundLog({ log }) {
-    return (
-        <div className="cc-log">
-            <div className="cc-log-title">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                </svg>
-                บันทึกการกิจ
-            </div>
-            {log.length === 0 ? (
-                <p className="cc-log-empty">ยังไม่มีรอบที่บันทึก…</p>
-            ) : (
-                <ul className="cc-log-list">
-                    {log.map((e, i) => (
-                        <li key={i} className={`cc-log-entry ${e.passed ? 'cc-log-ok' : 'cc-log-fail'}`}>
-                            <span className="cc-log-round">รอบ {e.round}</span>
-                            <span className="cc-log-detail">โจทย์={e.challenge} / กล่อง={e.boxValue}</span>
-                            <span className="cc-log-result">{e.passed ? '✓ รอด' : '✗ โดนจับ'}</span>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
-}
-
-// ──────────────────────────────────────────────────────
-// คอมโพเนนต์แถบความน่าจะเป็น
-// ──────────────────────────────────────────────────────
-function ProbBar({ roundsPassed }) {
-    const prob = Math.pow(0.5, roundsPassed) * 100;
-    const caught = 100 - prob;
-
-    return (
-        <div className="cc-prob">
-            <div className="cc-prob-header">
-                <span className="cc-prob-title">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" />
-                    </svg>
-                    ระดับความน่าเชื่อถือ
-                </span>
-                <span className="cc-prob-formula">1 − (0.5)<sup>n</sup> · n={roundsPassed}</span>
-            </div>
-            <div className="cc-prob-pct">{caught.toFixed(0)}%</div>
-            <div className="cc-prob-track">
-                <div className="cc-prob-fill" style={{ width: `${caught}%` }} />
-            </div>
-            <div className="cc-prob-stats">
-                <div className="cc-pstat">
-                    <dt className="cc-pstat-label">รอบที่ผ่านแล้ว</dt>
-                    <dd className="cc-pstat-val">{roundsPassed}/{TOTAL_ROUNDS}</dd>
-                </div>
-                <div className="cc-pstat">
-                    <dt className="cc-pstat-label">โอกาสรอดของ Imposter</dt>
-                    <dd className="cc-pstat-val">{prob.toFixed(1)}%</dd>
-                </div>
-            </div>
-            <div className="cc-prob-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-                    <path d="m9 12 2 2 4-4" />
-                </svg>
-                <span>SIGMA PROTOCOL · {roundsPassed === 0 ? 'STANDBY' : roundsPassed >= TOTAL_ROUNDS ? 'COMPLETE ✓' : 'ACTIVE'}</span>
-            </div>
-            <p className="cc-prob-desc">
-                แต่ละรอบที่ผ่านลดโอกาสรอดของ Imposter ลงครึ่งหนึ่ง เมื่อครบ {TOTAL_ROUNDS} รอบ
-                โอกาสจับได้สูงถึง {(1 - Math.pow(0.5, TOTAL_ROUNDS)) * 100}%
-            </p>
-        </div>
-    );
-}
-
-// ══════════════════════════════════════════════════════
-// คอมโพเนนต์หลัก: Lab 3 — The Imposter's Cipher
-// ══════════════════════════════════════════════════════
+// ─── Main Component ───
 export default function MiniGameCipher() {
-
-    // === State เกม ===
-    const [scene, setScene] = useState('intro');       // 'intro' | 'game' | 'summary'
-    const [step, setStep] = useState('commit');        // 'commit' | 'challenge' | 'response'
-    const [round, setRound] = useState(1);             // รอบปัจจุบัน 1-5
-    const [log, setLog] = useState([]);                // บันทึกผลทุกรอบ
-
-    // State ภายในแต่ละรอบ
-    const [secretValue, setSecretValue] = useState(null);    // ค่าลับของ Imposter (0 หรือ 1)
-    const [trueSecret, setTrueSecret] = useState(ZKP_X);     // ความลับที่แท้จริง (สุ่มถ้าเป็น Imposter)
-    const [committed, setCommitted] = useState(false);       // ล็อคกล่องแล้วหรือยัง
-    const [challenge, setChallenge] = useState(null);        // โจทย์ที่ส่งไป (0 หรือ 1)
-    const [revealed, setRevealed] = useState(false);         // เปิดกล่องแล้วหรือยัง
-    const [roundPassed, setRoundPassed] = useState(null);    // ผลรอบนี้ (true/false/null)
-    const [roundsPassed, setRoundsPassed] = useState(0);     // จำนวนรอบที่ Imposter รอด
-    const [summaryWon, setSummaryWon] = useState(false);     // Imposter รอดทั้งหมดหรือไม่
-    const [selectedRole, setSelectedRole] = useState(null);  // 'อิมพอสเตอร์' | 'คนใน'
-    const [tempCode, setTempCode] = useState(null);           // k: nonce ชั่วคราวที่สุ่มได้
-    const [challengeLoading, setChallengeLoading] = useState(false);
-    const [challengeReady, setChallengeReady] = useState(false);
-    const [responseLoading, setResponseLoading] = useState(false);
-    const [responseReady, setResponseReady] = useState(false);
-
-    // === Sigma Protocol ZKP Variables ===
-    // x = secretValue (ZKP_X = 4)
-    // Y = G^x mod P  (public key)
-    // T = G^k mod P  (commitment, k คือตัวแรกที่สุ่มจากขั้นตอนที่ 1 commit)
-    // c = ตัวเลขที่สุ่มได้จากขั้นตอนที่ 2 challenge
-    // r = k + (c*x)  (response)
-    // Verify: G^r mod P === (T * Y^c) mod P
-    const [zkpY, setZkpY] = useState(null);   // Y = G^x mod P
-    const [zkpT, setZkpT] = useState(null);   // T = G^k mod P
-    const [zkpR, setZkpR] = useState(null);   // r = k + (c*x)
-    const [zkpVerify, setZkpVerify] = useState(null); // ผล verify G^r === T*Y^c
-
-    // Narrator message
-    const [narratorText, setNarratorText] = useState(
-        'สวัสดีครับ พบคือ ดร.ชีโร่ จะคอยช่วยคุณตลอดการกิจนี้ — ตอนนี้อ่านบรีฟก่อน แล้วกด "เริ่มทำการกิจ" ได้เลย'
-    );
-    const typed = useTypewriter(narratorText);
-
-    // === นาฬิกา ===
+    // ── Clock ──
     const [clockStr, setClockStr] = useState('');
     useEffect(() => {
         const update = () => {
@@ -264,740 +196,1170 @@ export default function MiniGameCipher() {
         return () => clearInterval(t);
     }, []);
 
-    // === รีเซ็ตสถานะภายในรอบ ===
-    const resetRound = useCallback(() => {
-        let ts;
-        let currentGuess;
+    // ── Advisory team tabs ──
+    const [activeAdvisor, setActiveAdvisor] = useState(0);
+    const advisors = [
+        {
+            id: 'chiro',
+            initials: 'ชี',
+            color: '#7c3aed',
+            name: 'ดร.ชีโร่ วรรณรัตน์',
+            role: 'Head of Cryptography Research',
+            specialty: 'Research & Applied Math',
+            badge: 'Cryptography',
+            badgeColor: '#7c3aed',
+            quote: 'สวัสดีครับ ผม ดร.ชีโร่ — สาระสำคัญของแล็บนี้คือการเรียนรู้ขั้นตอนที่เรียกว่า Commit-Challenge-Response ครับ',
+        },
+    ];
 
-        if (selectedRole === 'imposter') {
-            // โจร: ความลับจริงสุ่ม 1-5, ค่า x ที่เดาสุ่ม 1-10
-            ts = Math.floor(Math.random() * 5) + 1;
-            currentGuess = Math.floor(Math.random() * 10) + 1;
-        } else {
-            // พันธมิตร: ใช้ค่า 4 ที่ฟิกซ์ไว้เสมอ ห้ามสุ่ม
-            ts = ZKP_X;
-            currentGuess = ZKP_X;
-        }
+    // ── Sigma Protocol accordion ──
+    const [openAccordion, setOpenAccordion] = useState(0);
+    const [showSeqDiagram, setShowSeqDiagram] = useState(false);
+    const accordionItems = [
+        {
+            icon: '✉️',
+            iconBg: '#ede9fe',
+            title: '1. Commit — ผูกมัดคำตอบ',
+            badge: 'Binding & Hiding',
+            badgeColor: '#7c3aed',
+            content: (
+                <div>
+                    <p style={{ fontSize: 13, color: '#334155', marginBottom: 12 }}>
+                        <strong>ระบบสร้างรหัสผ่านชั่วคราวจากรหัสผ่านจริงของ Prover เก็บไว้เป็นคำตอบ</strong>
+                    </p>
+                    <p style={{ fontSize: 13, color: '#334155', marginBottom: 12 }}>
+                        <strong>Prover:</strong> ล็อคคำตอบไว้ในกล่องปิดผนึกก่อนล่วงหน้า โดยยังไม่เปิดเผยคำตอบจริงออกมา
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#5b21b6' }}>
+                            🔒 <strong>Binding:</strong> ล็อคแล้วเปลี่ยนใจสลับคำตอบทายหลังไม่ได้
+                        </div>
+                        <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#991b1b' }}>
+                            🙈 <strong>Hiding:</strong> ฝั่ง Verifier มองไม่เห็นข้อมูลข้างในกล่อง
+                        </div>
+                    </div>
+                </div>
+            ),
+        },
+        {
+            icon: '🔑',
+            iconBg: '#fef3c7',
+            title: '2. Challenge — ส่งโจทย์ท้าทาย',
+            badge: 'Unpredictable Randomness',
+            badgeColor: '#d97706',
+            content: (
+                <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
+                    <strong>Verifier:</strong> สุ่มส่งโจทย์ท้าทายกลับมาให้ Prover — เพราะสุ่มจริง จึงไม่มีทางที่ Prover เดาล่วงหน้าและเตรียมคำตอบโกงได้
+                </div>
+            ),
+        },
+        {
+            icon: '🔓',
+            iconBg: '#d1fae5',
+            title: '3. Response — เปิดกล่องเฉลย',
+            badge: 'Verification',
+            badgeColor: '#059669',
+            content: (
+                <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
+                    <p style={{ marginBottom: 8 }}><strong>Prover & Verifier:</strong> Verifier เปิดกล่องคำตอบที่ Commit ไว้ และเช็คว่าคำตอบตรงกับโจทย์ที่ท้าทายไปหรือไม่</p>
+                    <p>ถ้ารู้หัสจริงจะตอบถูกได้ 100% เสมอ (Completeness) แต่ถ้าเป็นคนโกง ตอบผิดแค่ครั้งเดียวจะถูกจับได้ทันที (Soundness)</p>
+                </div>
+            ),
+        },
+    ];
 
-        setTrueSecret(ts);
-        setSecretValue(currentGuess);
-        setZkpY(modPow(ZKP_G, ts, ZKP_P));  // Y = G^x mod P (จากความลับที่ถูกต้อง)
+    // ── Scene 1: Setup ──
+    const [proverMode, setProverMode] = useState(null); // 'honest' | 'imposter'
+    const [roundCount, setRoundCount] = useState(5);
+    const roundPresets = [
+        { label: '3 รอบ (ด่วน)', sublabel: '87.5% ตรวจจับได้', value: 3 },
+        { label: '5 รอบ (แนะนำ)', sublabel: '96.9% มาตรฐานสากล', value: 5, recommended: true },
+        { label: '10 รอบ (สูงสุด)', sublabel: '99.9% ปลอดภัยขั้นสูง', value: 10 },
+    ];
 
-        setZkpT(null);
-        setZkpR(null);
-        setZkpVerify(null);
-        setTempCode(null);
-        setCommitted(false);
-        setChallenge(null);
-        setRevealed(false);
-        setRoundPassed(null);
-        setChallengeLoading(false);
-        setChallengeReady(false);
-        setResponseLoading(false);
-        setResponseReady(false);
-        setStep('commit');
-    }, [selectedRole]);
+    // ── Scene 2: Simulation ──
+    // scene2State: 'idle' | 'running' | 'done'
+    const [scene2State, setScene2State] = useState('idle');
+    const [simCurrentRound, setSimCurrentRound] = useState(0);
+    const [simPhase, setSimPhase] = useState(''); // 'commit' | 'challenge' | 'response'
+    const [simLog, setSimLog] = useState([]); // [{round, challenge, caught, south}]
+    const [simCaughtRound, setSimCaughtRound] = useState(null); // round when caught (null = survived all)
+    const [simCommitVal, setSimCommitVal] = useState(null);
+    const [simChallenge, setSimChallenge] = useState(null);
+    const [simResponse, setSimResponse] = useState(null);
+    const [simRoundResult, setSimRoundResult] = useState(null); // 'pass'|'fail'
+    const [simStatus, setSimStatus] = useState(''); // 'ผ่านแล้ว N รอบ | จับโกงได้ N รอบ'
+    const simRunning = useRef(false);
+    const simAbort = useRef(false);
 
-    // === เริ่มเกม ===
-    const handleStart = useCallback(() => {
-        setNarratorText('สเต็ปแรก Commit — กรอก "รหัสชั่วคราว" ใส่ลงไปในกล่องเพื่อให้เจ้าหน้าที่นำไปเช็คคำตอบในขั้นสุดท้าย');
-        setScene('game');
-        resetRound();
-    }, [resetRound]);
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // เมื่อเข้าสู่ฉากเกมครั้งแรก หรือ role เปลี่ยน (ซึ่งไม่น่าเปลี่ยนกลางเกม) ให้ reset
-    useEffect(() => {
-        if (scene === 'game' && round === 1 && step === 'commit' && trueSecret === ZKP_X && secretValue === null) {
-            resetRound();
-        }
-    }, [scene, round, step, trueSecret, secretValue, resetRound]);
+    const runSimulation = useCallback(async () => {
+        if (simRunning.current) return;
+        simRunning.current = true;
+        simAbort.current = false;
+        setScene2State('running');
+        setSimCurrentRound(0);
+        setSimLog([]);
+        setSimCaughtRound(null);
+        setSimRoundResult(null);
+        setSimStatus('');
 
-    // === Step 1: Commit ===
-    const handleCommit = useCallback(() => {
-        setCommitted(true);
-        setStep('challenge');
-        setChallengeLoading(true);
-        setChallengeReady(false);
-        setNarratorText('ดีมาก! — ขั้นตอนนี้ผมจะสุ่มโจทย์ให้คุณเองโดยโจทย์จะเป็นตัวเลขแบบสุ่ม100% คุณไม่สามารถเดาล่วงหน้าได้แน่นอน');
-        // สุ่ม delay 3000-5000ms
-        const delay = 3000 + Math.random() * 2000;
-        setTimeout(() => {
-            const c = Math.floor(Math.random() * 5) + 1;
-            setChallenge(c);
-            setChallengeLoading(false);
-            setChallengeReady(true);
-            setNarratorText(`หัวหน้าส่งโจทย์มาแล้ว! โจทย์คือ "${c}" — คุณไม่สามารถเดาได้ล่วงหน้าเลย! กด "ขั้นตอนถัดไป" เพื่อเปิดกล่องเฉลย`);
-        }, delay);
-    }, []);
+        let log = [];
+        let caught = false;
+        let caughtAt = null;
 
-    // === Step 2: Challenge — ผู้เล่นกด "ขั้นตอนถัดไป" เพื่อไป step 3 ===
-    const handleChallenge = useCallback(() => {
-        setStep('response');
-        setNarratorText('เหลือสเต็ปสุดท้าย! กด "เปิดกล่องเฉลย" เพื่อดูว่าคำตอบที่ล็อคไว้สามารถแก้โจทย์ที่คุณได้มาได้หรือไม่');
-    }, []);
+        for (let r = 1; r <= roundCount; r++) {
+            if (simAbort.current) break;
+            setSimCurrentRound(r);
+            setSimPhase('commit');
+            setSimCommitVal(null);
+            setSimChallenge(null);
+            setSimResponse(null);
+            setSimRoundResult(null);
 
-    // === Step 3: Response — เปิดกล่อง + ZKP Verify ===
-    const handleReveal = useCallback(() => {
-        // Phase 1: แสดง loading spinner
-        setRevealed(true);
-        setResponseLoading(true);
-        setResponseReady(false);
-        setNarratorText('หัวหน้ารักษาความปลอดภัยกำลังเปิดกล่องและตรวจสอบคำตอบของคุณ...');
+            // Phase commit
+            await sleep(1400);
+            const k = Math.floor(Math.random() * 9) + 1; // Imposter's random guess for k
+            setSimCommitVal(k);
 
-        // สุ่ม delay 3000-5000ms เหมือน Step 2
-        const delay = 3000 + Math.random() * 2000;
-        setTimeout(() => {
-            // Phase 2: คำนวณ ZKP และแสดงผล
-            setResponseLoading(false);
-            setResponseReady(true);
+            // Phase challenge
+            setSimPhase('challenge');
+            await sleep(1600);
+            const c = Math.floor(Math.random() * 2); // 0 or 1 (South)
+            setSimChallenge(c);
 
-            // คำนวณ r = k + (c*x)
-            const k = tempCode;           // k คือ nonce ที่สุ่มไว้ใน step 1 (commit)
-            const c = challenge;          // c คือตัวเลขที่สุ่มได้จากขั้นตอนที่ 2 (challenge)
-            const x_guess = Number(secretValue) || 0; // x คือความลับที่เดาพิมพ์เข้ามา
-            const r = k + (c * x_guess);
-            setZkpR(r);
+            // Phase response
+            setSimPhase('response');
+            await sleep(1600);
 
-            // Verify: G^r mod P ควร === (T * Y^c) mod P
-            const T = modPow(ZKP_G, k, ZKP_P);          // T = G^k mod P
-            setZkpT(T);
-            const Y = zkpY;                             // Y = G^x_true mod P (หัวหน้าคำนวณจากความลับจริงไว้แล้ว)
-            const lhs = modPow(ZKP_G, r, ZKP_P);        // G^r mod P
-            const rhs = (modPow(Y, c, ZKP_P) * T) % ZKP_P;  // (Y^c * T) mod P
-            const verified = lhs === rhs;
-            setZkpVerify(verified);
-
-            const passed = verified;
-            setRoundPassed(passed);
-
-            const newEntry = {
-                round,
-                challenge,
-                boxValue: tempCode,
-                passed,
-            };
-            const newLog = [...log, newEntry];
-            setLog(newLog);
-
-            if (passed) {
-                const newPassed = roundsPassed + 1;
-                setRoundsPassed(newPassed);
-                const confidencePct = ((1 - Math.pow(0.5, newPassed)) * 100).toFixed(1);
-                setNarratorText(`ตรวจสอบสำเร็จ! คำตอบตรงกัน ✓ Confidence Level เพิ่มเป็น ${confidencePct}%`);
-                if (round >= TOTAL_ROUNDS) {
-                    // Imposter รอดทั้ง 5 รอบ (โชคร้าย!)
-                    setTimeout(() => {
-                        setSummaryWon(true);
-                        setScene('summary');
-                        setNarratorText('น่าตกใจ! สายลับปลอมโชคดีเดาถูกทุกรอบ... แต่จำไว้ว่าโอกาสนี้มีแค่ 1/32 (3.125%) เท่านั้น ในชีวิตจริง ZKP รันหลายร้อยรอบ');
-                    }, 2000);
-                }
+            let passed;
+            if (proverMode === 'honest') {
+                passed = true; // always passes
             } else {
-                // จับได้แล้ว! — แสดงข้อความบรรยายทันที แล้วรอให้ typewriter พิมพ์จบก่อนค่อยเปลี่ยนหน้า
-                const failText = `จับได้แล้ว! รอบ ${round} — ความลับจริงคือ ${trueSecret} แต่คุณเดา ${tempCode} คำตอบจึงไม่ตรงกัน สายลับปลอมโดนเปิดโปง! Sigma Protocol ทำงานสมบูรณ์`;
-                setNarratorText(failText);
-                // delay = ความยาวข้อความ × 22ms (ความเร็ว typewriter) + 1500ms buffer ให้อ่าน
-                const typingDuration = failText.length * 22 + 1500;
-                setTimeout(() => {
-                    setSummaryWon(false);
-                    setScene('summary');
-                }, typingDuration);
+                // Imposter: 50% chance each round
+                passed = Math.random() < 0.5;
             }
-        }, delay);
-    }, [secretValue, challenge, round, log, roundsPassed, tempCode, zkpY, trueSecret]);
 
-    // === ไปรอบต่อไป ===
-    const handleNext = useCallback(() => {
-        const nextRound = round + 1;
-        setRound(nextRound);
-        resetRound();
-        setNarratorText(`รอบที่ ${nextRound} — เริ่มใหม่! กด "รับกล่องคำตอบ" เพื่อให้สายลับ commit ค่าใหม่`);
-    }, [round, resetRound]);
+            setSimResponse(passed ? '✓' : '✗');
+            setSimRoundResult(passed ? 'pass' : 'fail');
 
-    // === รีเซ็ตทั้งหมด ===
-    const handleReset = useCallback(() => {
-        setScene('intro');
-        setStep('commit');
-        setRound(1);
-        setLog([]);
-        setSecretValue(null);
-        setCommitted(false);
-        setChallenge(null);
-        setRevealed(false);
-        setRoundPassed(null);
-        setRoundsPassed(0);
-        setSummaryWon(false);
-        setNarratorText('สวัสดีครับ พบคือ ดร.ชีโร่ จะคอยช่วยคุณตลอดการกิจนี้ — ตอนนี้อ่านบรีฟก่อน แล้วกด "เริ่มทำการกิจ" ได้เลย');
+            const entry = { round: r, challenge: c, south: c, caught: !passed };
+            log = [...log, entry];
+            setSimLog([...log]);
+
+            if (!passed) {
+                caught = true;
+                caughtAt = r;
+                setSimCaughtRound(r);
+                await sleep(1400);
+                break;
+            }
+
+            await sleep(1200);
+        }
+
+        const passedCount = log.filter(e => !e.caught).length;
+        const caughtCount = log.filter(e => e.caught).length;
+        setSimStatus(`ผ่านแล้ว: ${passedCount} รอบ  |  จับโกงได้: ${caughtCount} รอบ`);
+        setScene2State('done');
+        simRunning.current = false;
+    }, [proverMode, roundCount]);
+
+    const handleResetSim = useCallback(() => {
+        simAbort.current = true;
+        simRunning.current = false;
+        setScene2State('idle');
+        setSimCurrentRound(0);
+        setSimLog([]);
+        setSimCaughtRound(null);
+        setSimRoundResult(null);
+        setSimStatus('');
+        setSimCommitVal(null);
+        setSimChallenge(null);
+        setSimResponse(null);
+        setSimPhase('');
     }, []);
 
-    // ── ชื่อ step ──
-    const stepLabel = { commit: 'ขั้นที่ 1', challenge: 'ขั้นที่ 2', response: 'ขั้นที่ 3' };
-    const stepDone = (s) => {
-        const order = ['commit', 'challenge', 'response'];
-        return order.indexOf(s) < order.indexOf(step) || revealed;
+    // ── Monte Carlo ──
+    const [mcState, setMcState] = useState('idle'); // 'idle' | 'done'
+    const [mcResults, setMcResults] = useState(null);
+
+    const runMonteCarlo = useCallback(() => {
+        const N = 1000;
+        const n = roundCount;
+        let caughtPerRound = Array(n).fill(0);
+        let survived = 0;
+        for (let i = 0; i < N; i++) {
+            let thisSurvived = true;
+            for (let r = 0; r < n; r++) {
+                if (Math.random() < 0.5) {
+                    // caught at round r+1
+                    caughtPerRound[r]++;
+                    thisSurvived = false;
+                    break;
+                }
+            }
+            if (thisSurvived) survived++;
+        }
+        const totalCaught = N - survived;
+        const empiricalRate = (totalCaught / N * 100).toFixed(1);
+        const theoretical = ((1 - Math.pow(0.5, n)) * 100).toFixed(1);
+        const deviation = Math.abs(parseFloat(empiricalRate) - parseFloat(theoretical)).toFixed(3);
+        setMcResults({ N, survived, totalCaught, empiricalRate, theoretical, deviation, caughtPerRound, n });
+        setMcState('done');
+    }, [roundCount]);
+
+    // ── Started ──
+    const [started, setStarted] = useState(false);
+    const canStart = proverMode !== null;
+
+    const handleStart = () => {
+        if (!canStart) return;
+        setStarted(true);
+        handleResetSim();
+        setMcState('idle');
+        setMcResults(null);
+        // auto-run simulation
+        setTimeout(() => runSimulation(), 300);
     };
-    const stepActive = (s) => s === step && !revealed;
+
+    const handleRestartLab = () => {
+        setStarted(false);
+        setProverMode(null);
+        setRoundCount(5);
+        handleResetSim();
+        setMcState('idle');
+        setMcResults(null);
+    };
+
+    // ── Roadmap modal ──
+    const [showRoadmap, setShowRoadmap] = useState(false);
+
+    const catchProb = (1 - Math.pow(0.5, roundCount)) * 100;
+    const soundnessErr = Math.pow(0.5, roundCount) * 100;
 
     return (
         <>
-            {/* SEO */}
-            <Head title="Lab 3: การกิจจับผิดสายลับ — The Imposter's Cipher" />
+            <Head title="Lab 3: ภารกิจจับผิดสายลับ — The Imposter's Cipher | Stealth Trade" />
 
-            {/* ═══ พื้นหลัง Blob ═══ */}
-            <div id="cc-bg">
-                <div className="ccblob ccblob-1" />
-                <div className="ccblob ccblob-2" />
-                <div className="ccblob ccblob-3" />
+            {/* ── Background ── */}
+            <div id="lab3-bg">
+                <div className="lab3-blob lab3-blob-1" />
+                <div className="lab3-blob lab3-blob-2" />
+                <div className="lab3-blob lab3-blob-3" />
             </div>
 
-            {/* ═══ เนื้อหาหลัก ═══ */}
-            <main id="cc-main">
+            {/* ── Roadmap Modal ── */}
+            {showRoadmap && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+                    onClick={() => setShowRoadmap(false)}>
+                    <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', maxWidth: 480, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+                        onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                            <div style={{ fontSize: 16, fontWeight: 800, color: '#1e293b' }}>🗺️ Stealth Trade Lab Roadmap</div>
+                            <button onClick={() => setShowRoadmap(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#94a3b8' }}>×</button>
+                        </div>
+                        {[
+                            { n: 1, name: 'Zero-Knowledge Basics', done: true },
+                            { n: 2, name: 'Hash & Commitment', done: true },
+                            { n: 3, name: "The Imposter's Cipher", done: false, current: true },
+                            { n: 4, name: 'Cryptographic Commitments', done: false },
+                            { n: 5, name: 'Merkle Trees', done: false },
+                            { n: 6, name: 'Schnorr Signatures', done: false },
+                            { n: 7, name: 'zk-SNARKs Introduction', done: false },
+                            { n: 8, name: 'ZKP in Trading Systems', done: false },
+                        ].map(lab => (
+                            <div key={lab.n} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                                <div style={{
+                                    width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    background: lab.done ? '#22c55e' : lab.current ? '#7c3aed' : 'rgba(0,0,0,0.06)',
+                                    color: lab.done || lab.current ? '#fff' : '#94a3b8', fontSize: 11, fontWeight: 700,
+                                }}>
+                                    {lab.done ? '✓' : lab.n}
+                                </div>
+                                <span style={{ fontSize: 13, color: lab.current ? '#7c3aed' : lab.done ? '#334155' : '#94a3b8', fontWeight: lab.current ? 700 : 400 }}>
+                                    Lab {lab.n}: {lab.name} {lab.current && '← คุณอยู่ที่นี่'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* ── Sequence Diagram Modal ── */}
+            {showSeqDiagram && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+                    onClick={() => setShowSeqDiagram(false)}>
+                    <div style={{ background: '#0f0a1e', borderRadius: 16, padding: '0', maxWidth: 680, width: '100%', overflow: 'hidden' }}
+                        onClick={e => e.stopPropagation()}>
+                        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                            <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>
+                                SEQUENCE DIAGRAM : SIGMA PROTOCOL ROUND i
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>ROUND (1 .. N)</span>
+                                <button onClick={() => setShowSeqDiagram(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer' }}>×</button>
+                            </div>
+                        </div>
+                        {/* Headers */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, padding: '12px 20px' }}>
+                            <div style={{ background: '#7c3aed', borderRadius: 8, padding: '8px 16px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>Prover (ผู้พิสูจน์)</div>
+                            <div style={{ background: '#5b21b6', borderRadius: 8, padding: '8px 16px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>Verifier (ผู้ตรวจสอบ)</div>
+                        </div>
+                        {/* Steps */}
+                        {[
+                            { left: '1. Commit', arrow: '→', arrowLabel: 'ล็อคกล่องคำตอบ [ c ]', right: 'รับกล่องปิดผนึก' },
+                            { left: 'รับโจทย์สุ่ม', arrow: '←', arrowLabel: 'สุ่มโจทย์ [ 0 หรือ 1 ]', right: '2. Challenge' },
+                            { left: '3. Response', arrow: '→', arrowLabel: 'เปิดกล่องเฉลย [ r ]', right: 'ตรวจความสอดคล้อง' },
+                        ].map((row, i) => (
+                            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0 20px 2px', gap: 8 }}>
+                                <div style={{ fontSize: 12, fontFamily: 'monospace', color: row.arrow === '→' ? '#a78bfa' : 'rgba(255,255,255,0.4)', textAlign: row.arrow === '→' ? 'left' : 'right', padding: '12px 8px' }}>{row.left}</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+                                        {row.arrow === '→' ? `—— ${row.arrowLabel} ——→` : `←—— ${row.arrowLabel} ——`}
+                                    </span>
+                                </div>
+                                <div style={{ fontSize: 12, fontFamily: 'monospace', color: row.arrow === '←' ? '#a78bfa' : 'rgba(255,255,255,0.4)', textAlign: row.arrow === '←' ? 'right' : 'left', padding: '12px 8px' }}>{row.right}</div>
+                            </div>
+                        ))}
+                        <div style={{ margin: '8px 20px 20px', background: 'rgba(255,235,59,0.08)', border: '1px solid rgba(255,235,59,0.2)', borderRadius: 8, padding: '12px 16px', fontSize: 12, color: '#fbbf24' }}>
+                            💡 <strong>คิดสำคัญ:</strong> คนโกงที่ไม่มีรหัสจริงจะเดาถูกแค่ 50% ต่อรอบ ถ้ารันติดต่อกัน N รอบ โอกาสรอดจะลดลงเหลือ <strong>(1/2)ⁿ</strong>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ═══ Main Content ═══ */}
+            <main id="lab3-main">
 
                 {/* ─── Header ─── */}
-                <header className="cc-header">
-                    <div className="cc-brand">
+                <header className="lab3-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                         <Link href="/dashboard" className="cc-back-btn" title="กลับหน้าแรก">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="m15 18-6-6 6-6" />
                             </svg>
                         </Link>
-                        <div className="cc-brand-icon">
+                        <Link href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, background: 'linear-gradient(135deg, #7c3aed, #d946ef)', borderRadius: 12, color: '#fff', textDecoration: 'none', flexShrink: 0, boxShadow: '0 4px 16px rgba(124,58,237,0.35)' }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
                                 <path d="m9 12 2 2 4-4" />
                             </svg>
-                        </div>
+                        </Link>
                         <div>
-                            <div className="cc-brand-tag">Stealth Trade · ZKP Education Lab</div>
-                            <h1 className="cc-brand-title">
-                                Lab 3: การกิจจับผิดสายลับ
-                                <span className="cc-mono"> (The Imposter's Cipher)</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.08em', textTransform: 'uppercase' }}>✦ STEALTH TRADE · LAB 03</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#dcfce7', border: '1px solid #86efac', borderRadius: 999, padding: '2px 10px', fontSize: 11, fontWeight: 600, color: '#166534' }}>
+                                    ● โหมดจำลองเชิงโต้ตอบ
+                                </span>
+                            </div>
+                            <h1 style={{ fontSize: 'clamp(15px,2.2vw,21px)', fontWeight: 800, color: '#1e293b', margin: 0, lineHeight: 1.2 }}>
+                                ภารกิจจับผิดสายลับ
+                                <span style={{ fontFamily: 'monospace', fontSize: '0.68em', color: '#64748b', marginLeft: 6, fontWeight: 400 }}>(The Imposter's Cipher)</span>
                             </h1>
                         </div>
                     </div>
-                    <div />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <button
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, color: '#475569', cursor: 'pointer' }}
+                            onClick={() => setShowRoadmap(true)}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                            3/8 labs
+                        </button>
+                    </div>
                 </header>
 
-                {/* ─── ดร.ชีโร่ Narrator ─── */}
-                <section className="cc-narrator cccard">
-                    <div className="cc-avatar-wrap">
-                        <div className="cc-avatar-ring" />
-                        <div className="cc-avatar">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
+                {/* ─── Advisory Team ─── */}
+                <section className="lab3-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>ทีมที่ปรึกษาผู้เชี่ยวชาญ (Stealth Advisory Team)</span>
                         </div>
-                        <span className="cc-online" />
+                        <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 4 }}>เลือกมุมมองที่ต้องการรับคำแนะนำ</span>
                     </div>
-                    <div className="cc-narrator-body">
-                        <div className="cc-narrator-meta">
-                            <span className="cc-narrator-name">ดร.ชีโร่ วรรณรัตน์</span>
-                            <span className="cc-narrator-role">Head of Cryptography Research · Stealth Trade</span>
-                        </div>
-                        <div className="cccard cc-bubble">
-                            <p className="cc-narrator-text">
-                                {typed}<span className="cc-caret" />
-                            </p>
-                        </div>
+
+                    {/* Tabs */}
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                        {advisors.map((adv, i) => (
+                            <button
+                                key={adv.id}
+                                onClick={() => setActiveAdvisor(i)}
+                                style={{
+                                    padding: '5px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid',
+                                    background: activeAdvisor === i ? adv.badgeColor : 'transparent',
+                                    borderColor: activeAdvisor === i ? adv.badgeColor : 'rgba(0,0,0,0.12)',
+                                    color: activeAdvisor === i ? '#fff' : '#64748b',
+                                    transition: 'all 0.2s',
+                                    display: 'flex', alignItems: 'center', gap: 5,
+                                }}
+                            >
+                                <span style={{ width: 7, height: 7, borderRadius: '50%', background: activeAdvisor === i ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.15)', display: 'inline-block' }} />
+                                {adv.name.split(' ')[0]} · {adv.badge}
+                            </button>
+                        ))}
                     </div>
+
+                    {/* Advisor card */}
+                    {(() => {
+                        const adv = advisors[activeAdvisor];
+                        return (
+                            <div style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                <div style={{ position: 'relative', flexShrink: 0 }}>
+                                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: adv.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 12, border: '2px solid rgba(255,255,255,0.6)' }}>
+                                        {adv.initials}
+                                    </div>
+                                    <span style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, background: '#22c55e', border: '2px solid #fff', borderRadius: '50%' }} />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8, justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                            <span style={{ fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{adv.name}</span>
+                                            <span style={{ background: adv.badgeColor, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 10px' }}>{adv.role}</span>
+                                            <span style={{ fontSize: 11, color: '#64748b' }}>({adv.specialty})</span>
+                                        </div>
+                                        <span style={{ fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /></svg>
+                                            Active Insight
+                                        </span>
+                                    </div>
+                                    <div style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
+                                        {adv.quote}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
                 </section>
 
-                {/* ═══════════════════════════════
-                    SCENE 1 — Intro / Mission Brief
-                    ═══════════════════════════════ */}
-                {scene === 'intro' && (
-                    <section className="cc-intro cccard">
-                        {/* หัวข้อ */}
-                        <div className="cc-intro-header">
-                            <span className="cc-scene-tag">ฉากที่ 1 · จุดเริ่มต้นการกิจ</span>
-                            <span className="cc-timestamp">เวลา {clockStr}</span>
-                        </div>
-                        <h2 className="cc-intro-title">จุดเริ่มต้นการกิจ</h2>
-                        <p className="cc-intro-sub">
-                            เวลา {clockStr} สัญญาณเตือนภัยของฐานลับดังขึ้น มีคนกำลังพยายามผ่านด่านรักษาความปลอดภัยของคุณ...
-                        </p>
+                {/* ─── Sigma Protocol Explainer ─── */}
+                <section className="lab3-card">
 
-                        {/* Alert แดง */}
-                        <div className="cc-alert cc-alert-danger">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                                <line x1="12" x2="12" y1="9" y2="13" />
-                                <line x1="12" x2="12.01" y1="17" y2="17" />
-                            </svg>
-                            <div>
-                                <div className="cc-alert-title">แจ้งเตือนระดับสูงสุด</div>
-                                <div className="cc-alert-body">
-                                    ตรวจพบผู้บุกรุกพยายามแอบเข้าฐานลับ — อ้างตัวเป็นสายลับของเรา แต่ <strong>ไม่มีรหัสผ่านจริง</strong>
+                    <h2 style={{ fontSize: 'clamp(18px,3vw,26px)', fontWeight: 800, color: '#1e293b', marginBottom: 8 }}>
+                        Commit · Challenge · Response คืออะไร?
+                    </h2>
+                    <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 16 }}>
+                        พิสูจน์ว่า <strong>"รู้ความลับจริง"</strong> ได้โดยไม่ต้องส่งความลับตัวจริงผ่านเครือข่ายเลย — ผ่านกลไก 3 ขั้นตอนด้านล่างนี้
+                    </p>
+
+                    {/* Sequence Diagram (inline toggle) */}
+                    {showSeqDiagram && (
+                        <div style={{ background: '#0f0a1e', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                                <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>SEQUENCE DIAGRAM : SIGMA PROTOCOL ROUND i</span>
+                                <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>ROUND (1 .. N)</span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                                <div style={{ background: '#7c3aed', borderRadius: 8, padding: '8px 16px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>Prover (ผู้พิสูจน์)</div>
+                                <div style={{ background: '#5b21b6', borderRadius: 8, padding: '8px 16px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>Verifier (ผู้ตรวจสอบ)</div>
+                            </div>
+                            {[
+                                { left: '1. Commit', dir: '→', label: 'ล็อคกล่องคำตอบ [ c ]', right: 'รับกล่องปิดผนึก' },
+                                { left: 'รับโจทย์สุ่ม', dir: '←', label: 'สุ่มโจทย์ [ 0 หรือ 1 ]', right: '2. Challenge' },
+                                { left: '3. Response', dir: '→', label: 'เปิดกล่องเฉลย [ r ]', right: 'ตรวจความสอดคล้อง' },
+                            ].map((row, i) => (
+                                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, padding: '10px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none', alignItems: 'center' }}>
+                                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: row.dir === '→' ? '#a78bfa' : 'rgba(255,255,255,0.35)', textAlign: row.dir === '→' ? 'left' : 'right' }}>{row.left}</div>
+                                    <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                        {row.dir === '→' ? `—— ${row.label} ——→` : `←—— ${row.label} ——`}
+                                    </div>
+                                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: row.dir === '←' ? '#a78bfa' : 'rgba(255,255,255,0.35)', textAlign: row.dir === '←' ? 'right' : 'left' }}>{row.right}</div>
                                 </div>
+                            ))}
+                            <div style={{ marginTop: 12, background: 'rgba(255,235,59,0.08)', border: '1px solid rgba(255,235,59,0.2)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#fbbf24' }}>
+                                💡 <strong>คิดสำคัญ:</strong> คนโกงที่ไม่มีรหัสจริงจะเดาถูกแค่ 50% ต่อรอบ ถ้ารันติดต่อกัน N รอบ โอกาสรอดจะลดลงเหลือ <strong>(1/2)ⁿ</strong>
                             </div>
                         </div>
+                    )}
 
-                        {/* Info ม่วง */}
-                        <div className="cc-alert cc-alert-info">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                            </svg>
-                            <div>
-                                <div className="cc-alert-sublabel">บทบาทของคุณ</div>
-                                <div className="cc-alert-title">หัวหน้ารักษาความปลอดภัย</div>
-                                <div className="cc-alert-body">
-                                    คัดกรองทุกคนที่อ้างว่าเป็นพวกเดียวกัน <strong>โดยไม่ต้องขอให้เขาพูดรหัสผ่านออกมาตรงๆ</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 2 กล่องล่าง */}
-                        <div className="cc-intro-section-label">บทบาทของคุณมี 2 ตัวเลือก</div>
-                        <div className="cc-intro-cards">
-                            <div
-                                className={`cc-intro-card cc-intro-card-threat cc-intro-card-selectable ${selectedRole === 'imposter' ? 'cc-intro-card-selected-threat' : ''}`}
-                                onClick={() => setSelectedRole('imposter')}
-                            >
-                                <div className="cc-intro-card-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="8" r="5" />
-                                        <path d="M20 21a8 8 0 1 0-16 0" />
+                    {/* Accordion */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {accordionItems.map((item, i) => (
+                            <div key={i} style={{ border: '1px solid', borderColor: openAccordion === i ? 'rgba(124,58,237,0.2)' : 'rgba(0,0,0,0.07)', borderRadius: 12, overflow: 'hidden', transition: 'all 0.2s' }}>
+                                <button
+                                    onClick={() => setOpenAccordion(openAccordion === i ? -1 : i)}
+                                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: openAccordion === i ? 'rgba(124,58,237,0.04)' : 'rgba(255,255,255,0.4)', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                                >
+                                    <div style={{ width: 32, height: 32, borderRadius: 8, background: item.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
+                                        {item.icon}
+                                    </div>
+                                    <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{item.title}</span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 10px', border: '1px solid', color: item.badgeColor, borderColor: `${item.badgeColor}40`, background: `${item.badgeColor}10` }}>
+                                        {item.badge}
+                                    </span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" style={{ flexShrink: 0, transform: openAccordion === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                                        <path d="M6 9l6 6 6-6" />
                                     </svg>
-                                </div>
-                                <div className="cc-intro-card-content">
-                                    <div className="cc-intro-card-label">ศัตรู: Imposter</div>
-                                    <div className="cc-intro-card-desc">สายลับปลอมที่พยายาม "เดา" คำตอบให้ผ่านด่าน</div>
-                                </div>
-                                <div className="cc-intro-card-radio">
-                                    <div className={`cc-radio-dot ${selectedRole === 'imposter' ? 'cc-radio-dot-active-threat' : ''}`} />
-                                </div>
-                            </div>
-                            <div
-                                className={`cc-intro-card cc-intro-card-weapon cc-intro-card-selectable ${selectedRole === 'kongnai' ? 'cc-intro-card-selected-weapon' : ''}`}
-                                onClick={() => setSelectedRole('kongnai')}
-                            >
-                                <div className="cc-intro-card-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" />
-                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                    </svg>
-                                </div>
-                                <div className="cc-intro-card-content">
-                                    <div className="cc-intro-card-label">พันธมิตร: คนในองค์กร</div>
-                                    <div className="cc-intro-card-desc">ผู้ที่รู้รหัสผ่านแต่จะไม่บอกโดยตรง</div>
-                                </div>
-                                <div className="cc-intro-card-radio">
-                                    <div className={`cc-radio-dot ${selectedRole === 'kongnai' ? 'cc-radio-dot-active-weapon' : ''}`} />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ปุ่มเริ่ม */}
-                        <button
-                            className={`cc-btn-start ${!selectedRole ? 'cc-btn-start-disabled' : ''}`}
-                            onClick={handleStart}
-                            disabled={!selectedRole}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polygon points="5 3 19 12 5 21 5 3" />
-                            </svg>
-                            เริ่มทำการกิจ
-                        </button>
-                    </section>
-                )}
-
-                {/* ═══════════════════════════════
-                    SCENE 2 — Game: Commit→Challenge→Response
-                    ═══════════════════════════════ */}
-                {scene === 'game' && (
-                    <div className="cc-game-grid">
-
-                        {/* ── ฝั่งซ้าย: Wizard ── */}
-                        <section className="cc-wizard cccard">
-
-                            {/* หัวข้อ */}
-                            <div className="cc-wizard-header">
-                                <span className="cc-scene-tag">ฉากที่ 2 · บทเรียน 3 ขั้นตอน</span>
-                                <span className="cc-round-badge">รอบ {round}/{TOTAL_ROUNDS}</span>
-                            </div>
-                            <h2 className="cc-wizard-title">Commit → Challenge → Response</h2>
-
-                            {/* ── กรอบรหัสลับ ── */}
-                            <div className="cc-secret-banner">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                </svg>
-                                {selectedRole === 'imposter' ? (
-                                    <span>รหัสลับที่แท้จริงของคุณคือ&nbsp;<strong className="cc-secret-value">***</strong> (คุณคือสายลับปลอม)</span>
-                                ) : (
-                                    <span>รหัสลับที่แท้จริงของคุณคือ&nbsp;<strong className="cc-secret-value">{trueSecret}</strong></span>
-                                )}
-                            </div>
-
-                            {/* ─── Step 1: Commit ─── */}
-                            <div className={`cc-step ${stepActive('commit') ? 'cc-step-active' : ''} ${stepDone('commit') ? 'cc-step-done' : ''}`}>
-                                <div className="cc-step-num">1</div>
-                                <div className="cc-step-body">
-                                    <div className="cc-step-label">STEP 1 · COMMIT</div>
-                                    <div className="cc-step-title">ผูกมัดคำตอบ</div>
-                                    <p className="cc-step-desc">
-                                        สายลับส่ง "รหัสผ่านชั่วคราว" ลงมาในกล่องมาให้ก่อน — ล็อคไว้ล่วงหน้า เปลี่ยนทีหลังไม่ได้แต่คุณยังเปิดดูข้างในไม่ได้
-                                    </p>
-                                    {stepActive('commit') ? (
-                                        <div className="cc-commit-action-row">
-                                            {selectedRole === 'imposter' ? (
-                                                /* ฝั่งโจร: กรอกรหัสชั่วคราวเอง */
-                                                <div className="cc-tempcode-display" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                                    <span className="cc-tempcode-label" style={{ color: '#475569', fontSize: '14px', fontWeight: '600' }}>กรอกรหัสชั่วคราว:</span>
-                                                    <input
-                                                        type="number"
-                                                        className="cc-secret-input"
-                                                        style={{ width: '80px', fontSize: '18px', padding: '6px 10px' }}
-                                                        value={tempCode === null ? '' : tempCode}
-                                                        onChange={(e) => setTempCode(e.target.value === '' ? null : Number(e.target.value))}
-                                                        placeholder="?"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                /* ฝั่งพันธมิตร: กดปุ่มสุ่มรหัสชั่วคราว */
-                                                <>
-                                                    <button
-                                                        className="cc-step-btn cc-step-btn-roll"
-                                                        onClick={() => setTempCode(Math.floor(Math.random() * 5) + 1)}
-                                                    >
-                                                        รับรหัสผ่านชั่วคราว
-                                                    </button>
-                                                    <div className="cc-tempcode-display">
-                                                        {tempCode !== null ? (
-                                                            <>
-                                                                <span className="cc-tempcode-label">รหัสชั่วคราว:</span>
-                                                                <span className="cc-tempcode-num">{tempCode}</span>
-                                                            </>
-                                                        ) : (
-                                                            <span className="cc-tempcode-placeholder">ยังไม่ได้รับรหัส</span>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            )}
-                                            {/* ปุ่มขวา: ส่งรหัส */}
-                                            <button
-                                                className="cc-step-btn cc-step-btn-send"
-                                                onClick={handleCommit}
-                                                disabled={tempCode === null}
-                                            >
-                                                ส่งรหัสผ่านชั่วคราว
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <CommitBox committed={committed} value={secretValue} />
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* ─── Step 2: Challenge ─── */}
-                            <div className={`cc-step ${stepActive('challenge') ? 'cc-step-active' : ''} ${stepDone('challenge') ? 'cc-step-done' : ''} ${step === 'commit' && !revealed ? 'cc-step-locked' : ''}`}>
-                                <div className="cc-step-num">2</div>
-                                <div className="cc-step-body">
-                                    <div className="cc-step-label">STEP 2 · CHALLENGE</div>
-                                    <div className="cc-step-title">รับโจทย์ท้าทาย</div>
-                                    <p className="cc-step-desc">
-                                        หัวหน้ารักษาความปลอดภัยกำลังเตรียมโจทย์ให้คุณอยู่ โจทย์จะเป็นตัวเลขแบบสุ่ม ที่คุณต้องนำไปรวมกับรหัสผ่านชั่วคราวของคุณ เพื่อพิสูจน์ว่าคุณรู้ความลับจริงหรือไม่
-                                    </p>
-                                    {stepActive('challenge') ? (
-                                        <div className="cc-challenge-loading-area">
-                                            {challengeLoading ? (
-                                                <div className="cc-challenge-spinner-wrap">
-                                                    <div className="cc-spinner" />
-                                                    <span className="cc-spinner-text">หัวหน้ากำลังเตรียมโจทย์ให้คุณ...</span>
-                                                </div>
-                                            ) : challengeReady ? (
-                                                <div className="cc-challenge-reveal">
-                                                    <div className="cc-challenge-reveal-label">โจทย์ของหัวหน้า</div>
-                                                    <div className="cc-challenge-reveal-number">{challenge}</div>
-                                                    <button
-                                                        className="cc-step-btn cc-step-btn-next"
-                                                        onClick={handleChallenge}
-                                                    >
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                                                        ขั้นตอนถัดไป
-                                                    </button>
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    ) : challenge !== null ? (
-                                        <div className="cc-commit-box cc-challenge-sent">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M22 2 11 13M22 2 15 22l-4-9-9-4 20-7z" />
-                                            </svg>
-                                            <span>โจทย์ของหัวหน้า: <strong>{challenge}</strong></span>
-                                        </div>
-                                    ) : (
-                                        <div className="cc-commit-box cc-dim-box">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M22 2 11 13M22 2 15 22l-4-9-9-4 20-7z" />
-                                            </svg>
-                                            <span className="cc-dim">รอโจทย์จากหัวหน้า...</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* ─── Step 3: Response ─── */}
-                            <div className={`cc-step ${stepActive('response') ? 'cc-step-active' : ''} ${stepDone('response') ? 'cc-step-done' : ''} ${['commit', 'challenge'].includes(step) && !revealed ? 'cc-step-locked' : ''}`}>
-                                <div className="cc-step-num">3</div>
-                                <div className="cc-step-body">
-                                    <div className="cc-step-label">STEP 3 · RESPONSE</div>
-                                    <div className="cc-step-title">เปิดกล่องเฉลย</div>
-                                    <p className="cc-step-desc">
-                                        หัวหน้ารักษาความปลอดภัยจะเปิดกล่องที่ล็อคไว้ เพื่อเช็คว่าคำตอบของคุณแก้โจทย์ของเขาได้หรือไม่
-                                    </p>
-                                    {stepActive('response') && !revealed ? (
-                                        <button className="cc-step-btn cc-step-btn-reveal" onClick={handleReveal}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <rect x="3" y="11" width="18" height="11" rx="2" />
-                                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                            </svg>
-                                            เปิดกล่องเฉลย
-                                        </button>
-                                    ) : revealed && responseLoading ? (
-                                        <div className="cc-challenge-loading-area">
-                                            <div className="cc-challenge-spinner-wrap">
-                                                <div className="cc-spinner" />
-                                                <span className="cc-spinner-text">หัวหน้ารักษาความปลอดภัยกำลังเช็คคำตอบ...</span>
-                                            </div>
-                                        </div>
-                                    ) : revealed && responseReady && roundPassed !== null ? (
-                                        <div className="cc-response-result-block">
-                                            <div className={`cc-response-verify ${roundPassed ? 'cc-response-verify-pass' : 'cc-response-verify-fail'}`}>
-                                                {roundPassed ? (
-                                                    <>
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                            <path d="M20 6 9 17l-5-5" />
-                                                        </svg>
-                                                        <span>ตรวจสอบสำเร็จ — คำตอบตรงกัน! โดยใช้วิธีคำนวณแบบ ONE WAY FUNCTION เพื่อให้หัวหน้ารักษาความปลอดภัยรู้ว่าเรารู้ความลับโดยที่ไม่ต้องบอกความลับจริง</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                            <path d="M18 6 6 18M6 6l12 12" />
-                                                        </svg>
-                                                        <span>ตรวจสอบไม่ผ่าน — คำตอบไม่ตรงกัน!</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="cc-commit-box cc-dim-box">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <rect x="3" y="11" width="18" height="11" rx="2" />
-                                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                            </svg>
-                                            <span className="cc-dim">รอเปิดกล่อง...</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* ─── ปุ่ม ไปต่อ (หลังเปิดกล่องแล้ว + ยังไม่จบเกม) ─── */}
-                            {revealed && roundPassed && round < TOTAL_ROUNDS && scene === 'game' && (
-                                <button className="cc-btn-next" onClick={handleNext}>
-                                    ไปรอบต่อไป →
                                 </button>
-                            )}
-                        </section>
-
-                        {/* ── ฝั่งขวา: Stats ── */}
-                        <aside className="cc-sidebar">
-                            <ProbBar roundsPassed={roundsPassed} />
-                            <RoundLog log={log} />
-                        </aside>
-                    </div>
-                )}
-
-                {/* ═══════════════════════════════
-                    SCENE 3 — Summary
-                    ═══════════════════════════════ */}
-                {scene === 'summary' && (
-                    <section className={`cc-summary cccard ${summaryWon ? 'cc-summary-won' : 'cc-summary-caught'}`}>
-                        <div className="cc-summary-icon">
-                            {summaryWon ? (
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                                    <path d="m9 12 2 2 4-4" />
-                                </svg>
-                            ) : (
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-                                    <path d="m9 12 2 2 4-4" />
-                                </svg>
-                            )}
-                        </div>
-                        <h2 className="cc-summary-title">
-                            {summaryWon ? '✅ ผ่านบทสอบ' : '⚠️ จับสายลับปลอมสำเร็จ!'}
-                        </h2>
-                        <p className="cc-summary-desc">
-                            {summaryWon
-                                ? `คุณผ่านบททดสอบทั้ง ${TOTAL_ROUNDS} รอบ — โอกาสเกิดขึ้นจริงแค่ ${(Math.pow(0.5, TOTAL_ROUNDS) * 100).toFixed(1)}% เท่านั้น ในระบบจริง ZKP ทำงานหลายร้อยรอบทำให้โอกาสนี้แทบเป็นศูนย์`
-                                : `Sigma Protocol ทำงานสมบูรณ์ Imposter ไม่สามารถ commit ค่าที่ตรงกับ challenge ได้ โดยไม่รู้ challenge ล่วงหน้า — นี่คือหัวใจของ ZKP`
-                            }
-                        </p>
-
-                        {/* สถิติ */}
-                        <div className="cc-summary-stats">
-                            <div className="cc-sstat">
-                                <dt>รอบที่ผ่านทั้งหมด</dt>
-                                <dd>{roundsPassed}/{TOTAL_ROUNDS}</dd>
-                            </div>
-                            <div className="cc-sstat">
-                                <dt>โอกาสโดนจับได้</dt>
-                                <dd>{(Math.pow(0.5, roundsPassed) * 100).toFixed(1)}%</dd>
-                            </div>
-                            <div className="cc-sstat">
-                                <dt>ระดับความน่าเชื่อถือ</dt>
-                                <dd>{((1 - Math.pow(0.5, roundsPassed)) * 100).toFixed(1)}%</dd>
-                            </div>
-                        </div>
-
-                        {/* Log */}
-                        <RoundLog log={log} />
-
-                        {/* ปุ่มทำใหม่ */}
-                        <button className="cc-btn-reset" onClick={handleReset}>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                <path d="M3 3v5h5" />
-                            </svg>
-                            ทำกิจใหม่อีกครั้ง
-                        </button>
-                    </section>
-                )}
-
-                {/* ─── Footer flow cards ─── */}
-                {scene !== 'intro' && (
-                    <div className="cc-flow-cards">
-                        {[
-                            { step: '01 · Commit', title: 'ผูกมัดคำตอบ', desc: 'Prover ส่งกล่องล็อค commit(x) ก่อน — เปลี่ยนย้อนหลังไม่ได้' },
-                            { step: '02 · Challenge', title: 'รับโจทย์ท้าทาย', desc: 'Verifier สุ่มส่ง c ∈ {1,2,3,4,5} — Prover ไม่รู้ล่วงหน้า' },
-                            { step: '03 · Response', title: 'เปิดกล่องเฉลย', desc: 'Verifier เปิดกล่อง ถ้า response ตรง challenge = พิสูจน์ได้ว่ารู้ secret' },
-                        ].map((card, i) => (
-                            <div key={i} className="cc-flow-card cccard">
-                                <div className="cc-flow-step">{card.step}</div>
-                                <div className="cc-flow-title">{card.title}</div>
-                                <p className="cc-flow-desc">{card.desc}</p>
+                                {openAccordion === i && (
+                                    <div style={{ padding: '12px 16px 16px', background: 'rgba(255,255,255,0.3)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                                        {item.content}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
-                )}
+                </section>
 
-                {/* ─── ZKP Math Breakdown ─── */}
-                {scene !== 'intro' && (
-                    <section className="cc-math-breakdown cccard">
-                        <div className="cc-math-header">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                {/* ─── Scene 1: Setup ─── */}
+                <section className="lab3-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                                <path d="m9 12 2 2 4-4" />
                             </svg>
-                            <h2>สมการคณิตศาสตร์เบื้องหลัง (ZKP Sigma Protocol)</h2>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>ฉากที่ 1 · เลือกลักษณะของสายลับ & กำหนดรอบ</span>
+                        </div>
+                        <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#64748b' }}>Stealth Gate {clockStr}</span>
+                    </div>
+
+                    <h2 style={{ fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, color: '#1e293b', marginBottom: 8 }}>เตรียมความพร้อมก่อนเข้าด่านตรวจ</h2>
+                    <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 20 }}>
+                        ทดสอบว่า <strong>โปรโตคอล Commit-Challenge-Response</strong> จะสามารถแยกแยะระหว่างสายลับตัวจริงกับผู้บุกรุกได้อย่างไร
+                    </p>
+
+                    {/* Step 1: Prover mode */}
+                    <div style={{ marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                            <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#7c3aed', color: '#fff', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>เลือกสายลับที่จะทำการทดสอบ (PROVER MODE)</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            {/* Honest Prover */}
+                            <button
+                                onClick={() => setProverMode('honest')}
+                                style={{
+                                    padding: '16px', borderRadius: 14, border: '2px solid',
+                                    borderColor: proverMode === 'honest' ? '#7c3aed' : 'rgba(0,0,0,0.08)',
+                                    background: proverMode === 'honest' ? 'rgba(124,58,237,0.07)' : 'rgba(255,255,255,0.5)',
+                                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
+                                    boxShadow: proverMode === 'honest' ? '0 0 0 3px rgba(124,58,237,0.1)' : 'none',
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                                            <path d="m9 12 2 2 4-4" />
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                                            <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>ตอบตามความจริง</span>
+                                            <span style={{ background: '#dcfce7', color: '#166534', fontSize: 10, fontWeight: 700, padding: '1px 8px', borderRadius: 999 }}>ผ่าน 100%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                                    <strong style={{ color: '#475569' }}>Honest Prover</strong> — รู้ความลับจริง จึงตอบถูกตรงกับโจทย์ทุกครั้ง อยู่เสมอ ไม่เคยผิดพลาด
+                                </div>
+                            </button>
+
+                            {/* Cheating Imposter */}
+                            <button
+                                onClick={() => setProverMode('imposter')}
+                                style={{
+                                    padding: '16px', borderRadius: 14, border: '2px solid',
+                                    borderColor: proverMode === 'imposter' ? '#f59e0b' : 'rgba(0,0,0,0.08)',
+                                    background: proverMode === 'imposter' ? 'rgba(245,158,11,0.07)' : 'rgba(255,255,255,0.5)',
+                                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
+                                    boxShadow: proverMode === 'imposter' ? '0 0 0 3px rgba(245,158,11,0.1)' : 'none',
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
+                                            <circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" />
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                                            <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>ปลอมตัวเป็น Imposter</span>
+                                            <span style={{ background: '#fef3c7', color: '#92400e', fontSize: 10, fontWeight: 700, padding: '1px 8px', borderRadius: 999 }}>ลุ้นดวง 50%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                                    <strong style={{ color: '#475569' }}>Cheating Prover</strong> — ไม่มีรหัสผ่านจริง ต้องอาศัยเดาสุ่มแต่ละรอบ มีโอกาสผ่านได้ 50% ต่อรอบ
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Step 2: Round count */}
+                    <div style={{ marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#7c3aed', color: '#fff', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</div>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>กำหนดจำนวนรอบการทำทาย (ROUND COUNT: N)</span>
+                            </div>
+                            <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: '#7c3aed', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 8, padding: '4px 12px' }}>
+                                {roundCount} รอบ
+                            </div>
                         </div>
 
-                        <div className="cc-math-grid">
-                            {/* Setup */}
-                            <div className="cc-math-col">
-                                <div className="cc-math-step-title">1. การเตรียมข้อมูลตั้งต้น (Setup)</div>
-                                <p className="cc-math-desc">ก่อนเริ่มระบบ เราต้องมี "ค่าคงที่สาธารณะ" ที่ทุกคนรู้ตรงกันก่อน สมมติให้:</p>
-                                <ul className="cc-math-list">
-                                    <li><span className="cc-math-var">P</span> (ค่า Prime Number) = <strong>11</strong></li>
-                                    <li><span className="cc-math-var">G</span> (ค่า Generator) = <strong>2</strong></li>
-                                    <li><span className="cc-math-var">x</span> (ความลับของเรา) = <strong>4</strong></li>
-                                </ul>
-                                <p className="cc-math-desc">ระบบจะสร้าง ข้อมูลตัวแทน (Public Key) ส่งให้หัวหน้ารักษาความปลอดภัยเก็บไว้ โดยใช้สมการ:</p>
-                                <div className="cc-math-formula">
-                                    <div className="cc-math-eq">Y = G<sup>x</sup> (mod P)</div>
-                                    <div className="cc-math-eq">Y = 2<sup>4</sup> (mod 11)</div>
-                                    <div className="cc-math-eq">Y = 16 (mod 11)</div>
-                                    <div className="cc-math-eq cc-math-highlight">Y = 5</div>
+                        {/* Preset buttons */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 14 }}>
+                            {roundPresets.map(preset => (
+                                <button
+                                    key={preset.value}
+                                    onClick={() => setRoundCount(preset.value)}
+                                    style={{
+                                        padding: '12px 10px', borderRadius: 12, border: '1.5px solid', cursor: 'pointer',
+                                        borderColor: roundCount === preset.value ? '#7c3aed' : 'rgba(0,0,0,0.08)',
+                                        background: roundCount === preset.value ? 'linear-gradient(135deg, #7c3aed, #d946ef)' : 'rgba(255,255,255,0.5)',
+                                        color: roundCount === preset.value ? '#fff' : '#475569',
+                                        textAlign: 'center', transition: 'all 0.2s',
+                                    }}
+                                >
+                                    <div style={{ fontSize: roundCount === preset.value ? 13 : 12, fontWeight: 700, marginBottom: 2 }}>
+                                        {preset.recommended ? '⊙ ' : preset.value === 3 ? '⚡ ' : '🔒 '}{preset.label}
+                                    </div>
+                                    <div style={{ fontSize: 11, opacity: 0.8 }}>{preset.sublabel}</div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Slider */}
+                        <div style={{ padding: '0 4px' }}>
+                            <input
+                                type="range"
+                                min={1} max={10} value={roundCount}
+                                onChange={e => setRoundCount(Number(e.target.value))}
+                                style={{ width: '100%', accentColor: '#7c3aed', cursor: 'pointer', height: 4 }}
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+                                {[1, 3, 5, 7, 10].map(n => (
+                                    <span key={n} style={{ fontSize: 10, color: '#94a3b8', fontFamily: 'monospace' }}>{n} รอบ ({((1 - Math.pow(0.5, n)) * 100).toFixed(1)}%)</span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Soundness preview */}
+                    <div style={{ background: 'rgba(15,10,30,0.96)', borderRadius: 14, padding: 20, marginBottom: 20 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace' }}>โอกาสตรวจจับคนโกงได้ทางทฤษฎี ({roundCount} รอบ)</span>
+                            <span style={{ fontSize: 16, fontWeight: 800, color: '#a78bfa', fontFamily: 'monospace' }}>{catchProb.toFixed(1)}% <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>(Soundness Error {soundnessErr.toFixed(2)}%)</span></span>
+                        </div>
+                        <SoundnessPreviewChart rounds={roundCount} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+                            <span>1 รอบ (50.0%)</span>
+                            <span>3 รอบ (87.5%)</span>
+                            <span>5 รอบ (96.9%)</span>
+                            <span>7 รอบ (99.2%)</span>
+                            <span>10 รอบ (99.9%)</span>
+                        </div>
+                    </div>
+
+                    {/* Start button */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button
+                            onClick={handleStart}
+                            disabled={!canStart}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8,
+                                padding: '13px 28px', borderRadius: 14, border: 'none',
+                                background: canStart ? 'linear-gradient(135deg, #7c3aed, #d946ef)' : 'rgba(0,0,0,0.08)',
+                                color: canStart ? '#fff' : '#94a3b8', fontSize: 15, fontWeight: 700,
+                                cursor: canStart ? 'pointer' : 'not-allowed',
+                                boxShadow: canStart ? '0 4px 20px rgba(124,58,237,0.35)' : 'none',
+                                transition: 'all 0.25s',
+                            }}
+                        >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                            เริ่มรันภารกิจ (Start Protocol Simulation)
+                        </button>
+                    </div>
+                </section>
+
+                {/* ─── Scene 2: Simulation ─── */}
+                {started && (
+                    <section className="lab3-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                        <path d="M3 3h18v18H3z" /><path d="M9 9h6v6H9z" />
+                                    </svg>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>ฉากที่ 2 · ห้องตรวจจับสัญญาณ Sigma Protocol</span>
                                 </div>
-                                <div className="cc-math-note">
-                                    <strong>สรุป:</strong> หัวหน้ารู้ว่า Public Key ของเราคือ <strong>5</strong> (แต่ไม่รู้ความลับคือ 4 เพราะเดาย้อนจากเศษไม่ได้)
+                                <div style={{ background: '#1e293b', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '3px 12px', fontFamily: 'monospace' }}>
+                                    รอบที่ {simCurrentRound} / {roundCount}
                                 </div>
                             </div>
-
-                            {/* Process */}
-                            <div className="cc-math-col">
-                                <div className="cc-math-step-title">2. กระบวนการ 3 ขั้นตอน (Commit - Challenge - Response)</div>
-                                <p className="cc-math-desc">เมื่อเรากดเริ่ม ระบบหลังบ้านจะรันสมการดังนี้:</p>
-
-                                <div className="cc-math-substep">
-                                    <strong>ขั้นที่ 1: Commit (สร้างกล่องข้อมูล)</strong>
-                                    <p>เครื่องของเราจะสุ่มเลขชั่วคราวขึ้นมา สมมติได้ <span className="cc-math-var">k = 3</span> จากนั้นเอาไปสร้างกล่องด้วยสมการ:</p>
-                                    <div className="cc-math-formula">
-                                        <div className="cc-math-eq">T = G<sup>k</sup> (mod P)</div>
-                                        <div className="cc-math-eq">T = 2<sup>3</sup> (mod 11)</div>
-                                        <div className="cc-math-eq cc-math-highlight">T = 8</div>
-                                    </div>
-                                    <div className="cc-math-note">ส่งข้อมูล: เครื่องเราส่ง <strong>T = 8</strong> ไปให้หัวหน้า (หัวหน้าไม่รู้ว่า k คือ 3)</div>
-                                </div>
-
-                                <div className="cc-math-substep">
-                                    <strong>ขั้นที่ 2: Challenge (หัวหน้าสุ่มโจทย์)</strong>
-                                    <p>หัวหน้าสุ่มตัวเลขท้าทายกลับมา 1 ตัว สมมติว่าสุ่มได้ <span className="cc-math-var">c = 2</span></p>
-                                    <div className="cc-math-note">ส่งข้อมูล: หัวหน้าส่งโจทย์ <strong>c = 2</strong> กลับมาที่เครื่องเรา</div>
-                                </div>
-
-                                <div className="cc-math-substep">
-                                    <strong>ขั้นที่ 3: Response (ผสมกุญแจยืนยัน)</strong>
-                                    <p>เครื่องของเราต้องเอาความลับ (<span className="cc-math-var">x = 4</span>), เลขชั่วคราว (<span className="cc-math-var">k = 3</span>) และโจทย์ (<span className="cc-math-var">c = 2</span>) มาผสมกัน:</p>
-                                    <div className="cc-math-formula">
-                                        <div className="cc-math-eq">r = k + (c × x)</div>
-                                        <div className="cc-math-eq">r = 3 + (2 × 4)</div>
-                                        <div className="cc-math-eq cc-math-highlight">r = 11</div>
-                                    </div>
-                                    <div className="cc-math-note">ส่งข้อมูล: เครื่องเราส่งรหัสยืนยัน <strong>r = 11</strong> กลับไปให้หัวหน้า</div>
-                                </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: proverMode === 'imposter' ? '#fef3c7' : '#dcfce7', border: `1px solid ${proverMode === 'imposter' ? '#fde68a' : '#86efac'}`, borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700, color: proverMode === 'imposter' ? '#92400e' : '#166534' }}>
+                                {proverMode === 'imposter' ? '🤫 Cheating Imposter (เดาสุ่ม 50%)' : '✅ Honest Prover (ตอบถูก 100%)'}
                             </div>
+                        </div>
 
-                            {/* Verification */}
-                            <div className="cc-math-col">
-                                <div className="cc-math-step-title">3. หัวหน้าตรวจสอบได้อย่างไร? (Verification)</div>
-                                <p className="cc-math-desc">ตอนนี้หัวหน้ามีตัวเลขในมือคือ:</p>
-                                <ul className="cc-math-list cc-math-list-compact">
-                                    <li><span className="cc-math-var">T</span> = 8 (จากขั้นที่ 1)</li>
-                                    <li><span className="cc-math-var">c</span> = 2 (จากขั้นที่ 2)</li>
-                                    <li><span className="cc-math-var">r</span> = 11 (จากขั้นที่ 3)</li>
-                                    <li><span className="cc-math-var">Y</span> = 5 (Public Key ที่มีอยู่แล้ว)</li>
-                                </ul>
-                                <p className="cc-math-desc">หัวหน้าจะเอาไปเข้า "สมการตรวจสอบ" เช็คว่า <strong>ฝั่งซ้าย = ฝั่งขวา</strong> หรือไม่:</p>
-                                <div className="cc-math-formula">
-                                    <div className="cc-math-eq cc-math-eq-main">G<sup>r</sup> (mod P) = T × Y<sup>c</sup> (mod P)</div>
-                                </div>
-
-                                <div className="cc-math-verify-split">
-                                    <div className="cc-math-verify-side">
-                                        <strong>คำนวณฝั่งซ้าย:</strong>
-                                        <div className="cc-math-eq">2<sup>11</sup> (mod 11)</div>
-                                        <div className="cc-math-eq">2048 (mod 11)</div>
-                                        <div className="cc-math-eq cc-math-highlight">ผลลัพธ์ = 2</div>
-                                    </div>
-                                    <div className="cc-math-verify-side">
-                                        <strong>คำนวณฝั่งขวา:</strong>
-                                        <div className="cc-math-eq">8 × 5<sup>2</sup> (mod 11)</div>
-                                        <div className="cc-math-eq">8 × 25 (mod 11)</div>
-                                        <div className="cc-math-eq">200 (mod 11)</div>
-                                        <div className="cc-math-eq cc-math-highlight">ผลลัพธ์ = 2</div>
-                                    </div>
-                                </div>
-
-                                <div className="cc-math-conclusion">
-                                    <strong>สรุปผล:</strong> ฝั่งซ้ายได้ 2 และฝั่งขวาก็ได้ 2 สมดุลพอดีเป๊ะ! ระบบจึงขึ้นข้อความว่า "ตรวจสอบสำเร็จ"
-                                    <br /><br />
-                                    <span className="cc-math-insight">
-                                        💡 ความเจ๋งคือ หากแฮกเกอร์พยายามสุ่มเลข r มั่วๆ มาส่ง ผลลัพธ์ของการคิดเลขยกกำลังฝั่งซ้ายจะไม่มีทางไปตรงกับเศษโมดูโลฝั่งขวาได้เลย
+                        {/* Simulation dark card */}
+                        <div style={{ background: '#0f172a', borderRadius: 16, padding: '20px 24px', marginBottom: 16 }}>
+                            {/* Stage header */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2">
+                                        <path d="m13 2-2 2.5h3L12 7" /><path d="M10 14v-3" /><path d="M14 14v-3" /><path d="M11 19H6.5a2.5 2.5 0 0 1 0-5H11" /><path d="M13 19h4.5a2.5 2.5 0 0 0 0-5H13" /></svg>
+                                    <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#a78bfa', letterSpacing: '0.08em' }}>
+                                        ACTIVE STAGE : ROUND {simCurrentRound} OF {roundCount}
                                     </span>
                                 </div>
+                                {scene2State === 'done' && (
+                                    <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#64748b', letterSpacing: '0.06em' }}>ROUND COMPLETED</span>
+                                )}
+                                {scene2State === 'running' && (
+                                    <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#f59e0b', letterSpacing: '0.06em', animation: 'pulse 1s infinite' }}>● RUNNING...</span>
+                                )}
                             </div>
+
+                            {/* 3-column steps */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+                                {/* Commit */}
+                                <div style={{ background: simPhase === 'commit' ? 'rgba(124,58,237,0.2)' : (simCommitVal !== null ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.04)'), border: `1px solid ${simPhase === 'commit' ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 12, padding: 16, textAlign: 'center', transition: 'all 0.5s' }}>
+                                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: 12 }}>1. COMMIT (ผูกมัด)</div>
+                                    {simPhase === 'commit' && simCommitVal === null ? (
+                                        /* Loading spinner while committing */
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: '50%', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                                                <svg width="52" height="52" viewBox="0 0 52 52" style={{ position: 'absolute', top: 0, left: 0, animation: 'spinCommit 1s linear infinite' }}>
+                                                    <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(124,58,237,0.2)" strokeWidth="4" />
+                                                    <circle cx="26" cy="26" r="22" fill="none" stroke="#a78bfa" strokeWidth="4" strokeDasharray="35 100" strokeLinecap="round" />
+                                                </svg>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(167,139,250,0.7)" strokeWidth="2">
+                                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                                </svg>
+                                            </div>
+                                            <div style={{ fontSize: 11, color: '#a78bfa', fontFamily: 'monospace', marginBottom: 4, animation: 'pulse 1s infinite' }}>กำลังล็อกกล่อง...</div>
+                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Generating Commitment</div>
+                                        </>
+                                    ) : simCommitVal !== null ? (
+                                        /* Locked state */
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: 12, background: '#7c3aed', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 18px rgba(124,58,237,0.6)', transition: 'all 0.5s' }}>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="2">
+                                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                                </svg>
+                                            </div>
+                                            <div style={{ fontSize: 12, color: '#c4b5fd', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>🔒 กล่องคำตอบถูกล็อกแล้ว</div>
+                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Binding &amp; Hiding Sealed</div>
+                                        </>
+                                    ) : (
+                                        /* Idle state */
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: 12, background: 'rgba(255,255,255,0.06)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(167,139,250,0.4)" strokeWidth="2">
+                                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                                </svg>
+                                            </div>
+                                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', marginBottom: 4 }}>[ รอ Commit... ]</div>
+                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>Binding &amp; Hiding Sealed</div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Challenge */}
+                                <div style={{ background: simPhase === 'challenge' ? 'rgba(245,158,11,0.15)' : (simChallenge !== null ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)'), border: `1px solid ${simPhase === 'challenge' ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 12, padding: 16, textAlign: 'center', transition: 'all 0.4s' }}>
+                                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#fbbf24', letterSpacing: '0.1em', marginBottom: 12 }}>2. CHALLENGE (สุ่มโจทย์)</div>
+                                    {simChallenge !== null ? (
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#f59e0b', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#fff', fontFamily: 'monospace' }}>
+                                                {simChallenge}
+                                            </div>
+                                            <div style={{ fontSize: 12, color: '#fcd34d', fontFamily: 'monospace', marginBottom: 4 }}>โจทย์สุ่ม: บิต {simChallenge}</div>
+                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>เส้นทางใต้ (South: {simChallenge})</div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: 12, background: 'rgba(255,255,255,0.06)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.5)" strokeWidth="2">
+                                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                                                </svg>
+                                            </div>
+                                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>รอโจทย์...</div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Response */}
+                                <div style={{ background: simRoundResult === 'pass' ? 'rgba(34,197,94,0.15)' : simRoundResult === 'fail' ? 'rgba(239,68,68,0.15)' : simPhase === 'response' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)', border: `1px solid ${simRoundResult === 'pass' ? 'rgba(34,197,94,0.4)' : simRoundResult === 'fail' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 12, padding: 16, textAlign: 'center', transition: 'all 0.4s' }}>
+                                    <div style={{ fontSize: 10, fontFamily: 'monospace', color: simRoundResult === 'pass' ? '#4ade80' : simRoundResult === 'fail' ? '#f87171' : '#94a3b8', letterSpacing: '0.1em', marginBottom: 12 }}>3. RESPONSE (เฉลย & ตรวจ)</div>
+                                    {simRoundResult ? (
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: '50%', background: simRoundResult === 'pass' ? '#22c55e' : '#ef4444', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: '#fff' }}>
+                                                {simRoundResult === 'pass' ? '✓' : '✗'}
+                                            </div>
+                                            <div style={{ fontSize: 12, color: simRoundResult === 'pass' ? '#4ade80' : '#f87171', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>
+                                                {simRoundResult === 'pass' ? '✔ ผ่านการตรวจสอบ' : '✘ จับโกงได้!'}
+                                            </div>
+                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+                                                {simRoundResult === 'pass' ? 'คำตอบตรงกับโจทย์ 100%' : 'คำตอบไม่ตรงกับโจทย์'}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div style={{ width: 52, height: 52, borderRadius: 12, background: 'rgba(255,255,255,0.06)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
+                                                    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                                                </svg>
+                                            </div>
+                                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>รอเปิดกล่อง...</div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Status bar */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14, flexWrap: 'wrap', gap: 8 }}>
+                                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
+                                    ผ่านแล้ว: <span style={{ color: '#4ade80', fontWeight: 700 }}>{simLog.filter(e => !e.caught).length}</span> รอบ
+                                </span>
+                                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
+                                    จับโกงได้: <span style={{ color: '#f87171', fontWeight: 700 }}>{simLog.filter(e => e.caught).length}</span> รอบ
+                                </span>
+                                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
+                                    สถานะ: <span style={{ color: scene2State === 'done' ? '#a78bfa' : '#fbbf24', fontWeight: 700 }}>{scene2State === 'done' ? 'จบภารกิจแล้ว' : scene2State === 'running' ? 'กำลังรัน...' : 'รอเริ่ม'}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Mission Log */}
+                        {simLog.length > 0 && (
+                            <div style={{ background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>บันทึกผลการทดสอบแต่ละรอบ (MISSION LOG)</span>
+                                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{simLog.length} / {roundCount} บันทึกแล้ว</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    {simLog.map((entry, i) => (
+                                        <div key={i} style={{
+                                            display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999,
+                                            border: '1px solid', fontSize: 12, fontWeight: 600,
+                                            background: entry.caught ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                                            borderColor: entry.caught ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.25)',
+                                            color: entry.caught ? '#dc2626' : '#16a34a',
+                                        }}>
+                                            <span style={{ width: 16, height: 16, borderRadius: '50%', background: entry.caught ? '#ef4444' : '#22c55e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>
+                                                {entry.caught ? '✗' : '✓'}
+                                            </span>
+                                            รอบที่ {entry.round} (โจทย์ {entry.challenge}) {entry.caught ? 'จับได้' : 'ผ่าน'}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Reset button */}
+                        {scene2State === 'done' && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={() => { handleResetSim(); setTimeout(() => runSimulation(), 200); }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 20px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer' }}
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                                    เริ่มใหม่ (Reset)
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                )}
+
+                {/* ─── Scene 3: Theoretical Probability Chart ─── */}
+                {started && (
+                    <section className="lab3-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                    <path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" />
+                                </svg>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>ฉากที่ 3 · จับโกงด้วยความน่าจะเป็น (Soundness Probability)</span>
+                            </div>
+                            <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#94a3b8', background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 999, padding: '3px 10px' }}>
+                                catchProbability(n) = (1 - 0.5ⁿ) × 100
+                            </div>
+                        </div>
+
+                        <h2 style={{ fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, color: '#1e293b', marginBottom: 8 }}>
+                            กราฟความน่าจะเป็นแบบเรียลไทม์ (Theoretical Curve)
+                        </h2>
+                        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.7, marginBottom: 20 }}>
+                            แสดงอัตราโอกาสที่ระบบจะ <strong>จับ Imposter ที่ไม่มีความลับจริงได้สำเร็จ</strong> เทียบกับจำนวนรอบที่รัน ยิ่งทดสอบหลายรอบ โอกาสที่คนโกงจะรอดฟลุ๊กยิ่งลดลงสู่ศูนย์
+                        </p>
+
+                        {/* Chart */}
+                        <div style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
+                            <SoundnessChartSVG rounds={roundCount} />
+                        </div>
+
+                        {/* Formula cards */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+                            <div style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 12, padding: '16px 18px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="2" /><path d="M7 7h10M7 12h10M7 17h10" /></svg>
+                                    </div>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#5b21b6' }}>สูตรคำนวณโอกาสจับได้</span>
+                                </div>
+                                <div style={{ fontFamily: 'monospace', fontSize: 15, fontWeight: 800, color: '#7c3aed', marginBottom: 6 }}>
+                                    P(Catch) = 1 - (1/2)<sup>N</sup>
+                                </div>
+                                <div style={{ fontSize: 12, color: '#475569' }}>
+                                    ณ N = {roundCount} รอบ โอกาสจับคนโกงได้คือ <strong>{catchProb.toFixed(2)}%</strong>
+                                </div>
+                            </div>
+                            <div style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 12, padding: '16px 18px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>
+                                    </div>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#5b21b6' }}>SOUNDNESS ERROR (โอกาสรอดฟลุ๊ก)</span>
+                                </div>
+                                <div style={{ fontFamily: 'monospace', fontSize: 15, fontWeight: 800, color: '#7c3aed', marginBottom: 6 }}>
+                                    Error = (1/2)<sup>N</sup>
+                                </div>
+                                <div style={{ fontSize: 12, color: '#475569' }}>
+                                    โอกาสที่คนโกงจะหายถูกทุกรอบเหลือเพียง <strong>{soundnessErr.toFixed(3)}%</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Data table */}
+                        <div style={{ border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M3 15h18M9 3v18" />
+                                    </svg>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>ตารางค่าความน่าจะเป็นเทียบตามจำนวนรอบ (N = 1 .. {roundCount})</span>
+                                </div>
+                                <span style={{ fontSize: 11, color: '#94a3b8' }}>Accessible Data</span>
+                            </div>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+                                        <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#475569', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>รอบที่ (N)</th>
+                                        <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#475569', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>โอกาสจับคนโกงได้</th>
+                                        <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#475569', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Soundness Error (โอกาสคนโกงรอด)</th>
+                                        <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: '#94a3b8', borderBottom: '1px solid rgba(0,0,0,0.05)', fontFamily: 'monospace' }}>สูตรคณิตศาสตร์</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Array.from({ length: roundCount }, (_, i) => {
+                                        const n = i + 1;
+                                        const catch_ = (1 - Math.pow(0.5, n)) * 100;
+                                        const err = Math.pow(0.5, n) * 100;
+                                        const isCurrent = n === roundCount;
+                                        return (
+                                            <tr key={n} style={{ background: isCurrent ? 'rgba(124,58,237,0.04)' : (i % 2 === 1 ? 'rgba(0,0,0,0.01)' : 'transparent') }}>
+                                                <td style={{ padding: '10px 16px', fontSize: 13, color: '#334155', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                                                    N = {n}
+                                                    {isCurrent && <span style={{ marginLeft: 8, background: '#7c3aed', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '1px 7px' }}>CURRENT</span>}
+                                                </td>
+                                                <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 700, color: '#7c3aed', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{catch_.toFixed(1)}%</td>
+                                                <td style={{ padding: '10px 16px', fontSize: 13, color: '#64748b', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{err.toFixed(2)}%</td>
+                                                <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 12, color: '#94a3b8', borderBottom: '1px solid rgba(0,0,0,0.04)', fontFamily: 'monospace' }}>1 - (0.5)^{n}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
                         </div>
                     </section>
                 )}
 
-                {/* ─── Footer bar ─── */}
-                <footer className="cc-footer">
-                    <span className="cc-footer-label">SIGMA PROTOCOL · COMMIT / CHALLENGE / RESPONSE</span>
+                {/* ─── Scene 4: Monte Carlo ─── */}
+                {started && (
+                    <section className="lab3-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
+                                </svg>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: '#d97706' }}>ฉากที่ 3 · การทดลองสถิติขนาดใหญ่ (Monte Carlo Simulation)</span>
+                            </div>
+                            <span style={{ fontSize: 12, color: '#94a3b8' }}>1,000 คนโกง (Imposters)</span>
+                        </div>
+
+                        <h2 style={{ fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, color: '#1e293b', marginBottom: 8 }}>
+                            พิสูจน์ความแม่นยำด้วยการปล่อยคนโกง 1,000 คนพร้อมกัน
+                        </h2>
+                        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.7, marginBottom: 20 }}>
+                            เมื่อคนโกง 1,000 คนพยายามสุ่มเดาผ่านด่าน {roundCount} รอบพร้อมกัน ผลลัพธ์เชิงประจักษ์ (Empirical Data) จะตรงกับทฤษฎีความน่าจะเป็นไหม?
+                        </p>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                            <button
+                                onClick={runMonteCarlo}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #7c3aed, #d946ef)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(124,58,237,0.35)' }}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+                                {mcState === 'done' ? '⚡ รันจำลอง 1,000 คนใหม่อีกครั้ง (Run Again)' : '⚡ เริ่มรันจำลอง 1,000 คนทันที (Simulate 1,000 Trials)'}
+                            </button>
+                            <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+                                ประมวลผลแบบ Real-time (0ms Latency)
+                            </span>
+                        </div>
+
+                        {mcState === 'done' && mcResults && (
+                            <>
+                                {/* Summary cards */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+                                    <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '14px 16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M18 6 6 18M6 6l12 12" /></svg>
+                                            <span style={{ fontSize: 11, color: '#64748b' }}>โดนจับได้ทั้งหมด</span>
+                                        </div>
+                                        <div style={{ fontSize: 28, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>
+                                            {mcResults.totalCaught} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>/ 1,000</span>
+                                        </div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#ef4444' }}>{mcResults.empiricalRate}% ของทั้งหมด</div>
+                                    </div>
+                                    <div style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 12, padding: '14px 16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
+                                            <span style={{ fontSize: 11, color: '#64748b' }}>หลุดรอดได้</span>
+                                        </div>
+                                        <div style={{ fontSize: 28, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>
+                                            {mcResults.survived} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>/ 1,000</span>
+                                        </div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b' }}>{(mcResults.survived / 10).toFixed(1)}% หลุดรอด</div>
+                                    </div>
+                                    <div style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 12, padding: '14px 16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg>
+                                            <span style={{ fontSize: 11, color: '#64748b' }}>เทียบกับทฤษฎี</span>
+                                        </div>
+                                        <div style={{ fontSize: 28, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>
+                                            {mcResults.theoretical}%
+                                        </div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#7c3aed' }}>ค่าเบี่ยงเบน: {mcResults.deviation}%</div>
+                                    </div>
+                                </div>
+
+                                {/* Distribution bars */}
+                                <div style={{ border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '16px 18px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
+                                            <span style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>จำนวนคนโกงที่ถูกจับได้ในแต่ละรอบ (CAUGHT DISTRIBUTION)</span>
+                                        </div>
+                                        <span style={{ fontSize: 11, color: '#94a3b8' }}>รวม 1000 คน</span>
+                                    </div>
+
+                                    {mcResults.caughtPerRound.map((cnt, i) => (
+                                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '70px 1fr 80px', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+                                            <span style={{ fontSize: 12, color: '#475569' }}>รอบที่ {i + 1}:</span>
+                                            <div style={{ height: 18, background: 'rgba(0,0,0,0.04)', borderRadius: 999, overflow: 'hidden' }}>
+                                                <div style={{ height: '100%', borderRadius: 999, width: `${(cnt / 1000) * 100}%`, background: i === mcResults.n - 1 ? 'transparent' : 'linear-gradient(to right, #7c3aed, #a78bfa)', transition: 'width 1s ease' }} />
+                                            </div>
+                                            <span style={{ fontSize: 12, color: '#334155', textAlign: 'right', fontFamily: 'monospace' }}>{cnt} คน ({(cnt / 10).toFixed(1)}%)</span>
+                                        </div>
+                                    ))}
+
+                                    {/* Survived row */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr 80px', gap: 10, alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                                        <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700 }}>รอดครบ:</span>
+                                        <div style={{ height: 18, background: 'rgba(0,0,0,0.04)', borderRadius: 999, overflow: 'hidden' }}>
+                                            <div style={{ height: '100%', borderRadius: 999, width: `${(mcResults.survived / 1000) * 100}%`, background: 'linear-gradient(to right, #f59e0b, #fbbf24)', transition: 'width 1s ease' }} />
+                                        </div>
+                                        <span style={{ fontSize: 12, color: '#f59e0b', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>{mcResults.survived} คน ({(mcResults.survived / 10).toFixed(1)}%)</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </section>
+                )}
+
+                {/* ─── Scene 5: Takeaways ─── */}
+                {started && (
+                    <section className="lab3-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
+                            </svg>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>ฉากที่ 4 · สรุปบทเรียน & การนำไปใช้จริง</span>
+                        </div>
+
+                        <h2 style={{ fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, color: '#1e293b', marginBottom: 8 }}>
+                            สรุปความรู้จากภารกิจจับผิดสายลับ (Lab 03 Takeaways)
+                        </h2>
+                        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.7, marginBottom: 20 }}>
+                            3 เสาหลักที่ทำให้ Commit-Challenge-Response กลายเป็นพิมพ์เขียวที่สำคัญของวงการ Zero-Knowledge Proofs:
+                        </p>
+
+                        {/* 3 Pillars */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                            {[
+                                {
+                                    icon: (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+                                            <path d="M17.5 6.5c0 3-2.5 5-5.5 5S6.5 9.5 6.5 6.5A5.5 5.5 0 0 1 12 1c3.04 0 5.5 2.46 5.5 5.5Z" />
+                                            <path d="M12 15v7" /><path d="M8 18h8" />
+                                        </svg>
+                                    ),
+                                    iconBg: 'rgba(124,58,237,0.08)',
+                                    title: '1. ไม่ต้องเปิดเผยรหัสจริง (Zero Data Disclosure)',
+                                    desc: 'ผู้พิสูจน์ (Prover) ไม่เคยส่งรหัสผ่านจริงหรือความลับออกมาในเครือข่ายเลย แต่ใช้การสุ่มสร้างรหัสผ่านชั่วคราวจากรหัสผ่านจริงแล้วล็อกคำตอบ (Commit) ล่วงหน้า แล้วค่อยตอบสนอง (Response) ตามโจทย์ที่ได้รับ',
+                                    bg: 'rgba(255,255,255,0.5)',
+                                    border: 'rgba(0,0,0,0.07)',
+                                },
+                                {
+                                    icon: (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                                        </svg>
+                                    ),
+                                    iconBg: 'rgba(245,158,11,0.08)',
+                                    title: '2. ความสุ่มคือกับดักคนโกง (Random Challenge Trap)',
+                                    desc: 'โจทย์ที่สุ่มจากฝั่ง Verifier ที่คาดเดาล่วงหน้าไม่ได้ ทำให้คนที่ไม่รู้ความลับจริงต้องพึ่งดวง 50/50 ในแต่ละรอบ ไม่สามารถเตรียมคำตอบปลอมไว้ล่วงหน้าได้',
+                                    bg: 'rgba(254,243,199,0.5)',
+                                    border: 'rgba(245,158,11,0.15)',
+                                },
+                                {
+                                    icon: (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2">
+                                            <path d="M4 7h16" /><path d="M5 12h14" /><path d="M6 17h12" />
+                                        </svg>
+                                    ),
+                                    iconBg: 'rgba(100,116,139,0.08)',
+                                    title: '3. ทำซ้ำจนวหมดสิทธิ์ (Exponential Soundness Amplification)',
+                                    desc: <>ยิ่งรันหลายรอบติดต่อกัน โอกาสรอดของคนโกงจะลดลงแบบเรขาคณิตตามสูตร <strong style={{ fontFamily: 'monospace' }}>(1/2)ⁿ</strong> จนกลายเป็นแทบเป็นศูนย์</>,
+                                    bg: 'rgba(255,255,255,0.5)',
+                                    border: 'rgba(0,0,0,0.07)',
+                                },
+                            ].map((pillar, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 14, padding: '16px 18px', borderRadius: 14, background: pillar.bg, border: `1px solid ${pillar.border}`, alignItems: 'flex-start' }}>
+                                    <div style={{ width: 40, height: 40, borderRadius: 10, background: pillar.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        {pillar.icon}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginBottom: 6 }}>{pillar.title}</div>
+                                        <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.7 }}>{pillar.desc}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+
+                    </section>
+                )}
+
+                {/* ─── Footer ─── */}
+                <footer className="lab3-footer">
+                    <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.08em' }}>
+                        SIGMA PROTOCOL · COMMIT / CHALLENGE / RESPONSE
+                    </span>
                 </footer>
 
             </main>

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
 /* ═══ Reset ═══ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -680,3 +682,109 @@ html, body { height: 100%; }
 .cc-math-insight { color: #065f46; font-weight: 500; display: block; }
 
 button:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; }
+
+/* ═══ Lab 3 / minigame_cipher Extracted Styles ═══ */
+
+/* Background */
+#lab3-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(135deg, #f5f0fa 0%, #ece8f2 30%, #e8e4ee 60%, #ddd5e8 100%);
+    overflow: hidden;
+}
+.lab3-blob {
+    position: absolute; border-radius: 50%; filter: blur(45px);
+}
+.lab3-blob-1 {
+    width: 700px; height: 700px; top: -220px; right: -120px;
+    background: radial-gradient(ellipse at center, rgba(90,50,130,0.85) 0%, rgba(60,20,100,0.6) 40%, transparent 70%);
+}
+.lab3-blob-2 {
+    width: 650px; height: 550px; top: 15%; right: 10%;
+    background: radial-gradient(ellipse at 55% 45%, rgba(255,150,200,0.8) 0%, rgba(255,100,180,0.5) 35%, rgba(230,130,220,0.25) 60%, transparent 80%);
+    animation: blobDrift 20s ease-in-out infinite alternate;
+}
+.lab3-blob-3 {
+    width: 400px; height: 400px; bottom: -100px; left: -80px;
+    background: radial-gradient(circle, rgba(180,140,220,0.3) 0%, transparent 65%);
+}
+
+/* Layout */
+#lab3-main {
+    position: relative; z-index: 1;
+    min-height: 100dvh;
+    max-width: 1100px; margin: 0 auto;
+    padding: 28px 20px 100px;
+    font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+    color: #1e293b;
+    display: flex; flex-direction: column; gap: 24px;
+}
+
+/* Header */
+.lab3-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    padding-bottom: 20px;
+}
+
+/* Card */
+.lab3-card {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    padding: 24px 28px;
+}
+
+/* Footer */
+.lab3-footer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 28px;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,0,0,0.07);
+}
+
+/* Range input */
+input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    height: 4px; border-radius: 999px;
+    background: rgba(0,0,0,0.1); outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #7c3aed; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+    border: 2px solid #fff;
+}
+input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #7c3aed; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+    border: 2px solid #fff;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Spin animation for commit loader */
+@keyframes spinCommit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .lab3-card { padding: 18px 16px; }
+    #lab3-main { padding: 16px 12px 100px; gap: 16px; }
+}
+@media (max-width: 480px) {
+    .lab3-header { gap: 10px; }
+}
