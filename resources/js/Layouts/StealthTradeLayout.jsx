@@ -118,10 +118,10 @@ export default function StealthTradeLayout({ children }) {
                             <div className="stealth-footer__links">
                                 <h4 className="stealth-footer__title">บริษัท</h4>
                                 <ul className="stealth-footer__list">
-                                    <li><Link href="#">เกี่ยวกับเรา</Link></li>
+                                    <li><Link href="/about/aboutme">เกี่ยวกับเรา</Link></li>
                                     <li><Link href="/about/contract">ติดต่อ</Link></li>
-                                    <li><Link href="#">นโยบายความเป็นส่วนตัว</Link></li>
-                                    <li><Link href="#">ข้อกำหนดการใช้งาน</Link></li>
+                                    <li><Link href="/about/policy">นโยบายความเป็นส่วนตัว</Link></li>
+                                    <li><Link href="/about/termsofuse">ข้อกำหนดการใช้งาน</Link></li>
                                 </ul>
                             </div>
                         </div>

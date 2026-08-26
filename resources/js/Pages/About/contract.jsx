@@ -9,7 +9,7 @@ export default function Contract() {
         { id: '67160154', name: 'นายปรเมษฐ ศิริรัตน์ (ไบรท์)' },
         { id: '67160127', name: 'นายณทชัย อินจา (กล้า)' },
         { id: '67160153', name: 'นายฉัตรชัย วิเศษโวหาร (ดรีม)' },
-        { id: '67160136', name: 'นายอนุศักดิ์ ทรัพย์กรณ์ (เฟิร์ส)' },
+        { id: '67160136', name: 'นายอนุศักดิ์ ทรัพย์การุณ (เฟิร์ส)' },
         { id: '67160299', name: 'นายภูมิพัฒน์ รื่นรวย (ปาล์ม)' },
         { id: '67160116', name: 'นายภควัต ศรีบุษย์ (ฟลุ๊ค)' },
         { id: '67160451', name: 'นางสาววิมลวรรณ แซ่จิว (เนม)' },
@@ -51,7 +51,7 @@ export default function Contract() {
                     justify-content: center;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                     cursor: pointer;
-                    transition: transform 0.2s, box-shadow 0.2s;
+                    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s; /* เพิ่ม transition ให้ opacity */
                 }
                 
                 .stealth-member-card:hover {
@@ -167,22 +167,22 @@ export default function Contract() {
                 /* 2. ชื่อเล่น แปะติดขอบซ้ายแบบธงชาติ */
                 .modal-nickname-flag {
                     position: absolute;
-                    top: 30%; /* ให้อยู่ประมาณช่วงกลางถึงล่างนิดๆ */
+                    top: 30%; 
                     left: 0;
-                    background: #002077e5; /* สีแดงเด่นๆ ตามธีม */
+                    background: #002077e5; 
                     color: white;
                     padding: 0.5rem 1.25rem 0.5rem 0.75rem;
                     font-size: 1.8rem;
                     font-weight: 900;
                     text-transform: uppercase;
-                    border-radius: 0 8px 8px 0; /* มุมมนเฉพาะด้านขวา */
+                    border-radius: 0 8px 8px 0; 
                     box-shadow: 2px 4px 15px rgba(0,0,0,0.4);
-                    border-left: 6px solid #2e2a1a; /* เพิ่มขอบสีเข้มด้านซ้ายให้ดูมีมิติ */
+                    border-left: 6px solid #2e2a1a; 
                     z-index: 10;
                     letter-spacing: 1px;
                 }
 
-                /* 3. แถบข้อมูลด้านล่าง (เหลือแค่ชื่อจริงและอีเมล) */
+                /* 3. แถบข้อมูลด้านล่าง */
                 .modal-info-overlay {
                     position: absolute;
                     bottom: 0; left: 0;
@@ -197,7 +197,7 @@ export default function Contract() {
                 }
 
                 .modal-fullname {
-                    font-size: 1.8rem; /* ขยายชื่อจริงให้ใหญ่ขึ้นแทนชื่อเล่น */
+                    font-size: 1.8rem; 
                     font-weight: 800;
                     color: #fff;
                     line-height: 1.1;
@@ -237,9 +237,16 @@ export default function Contract() {
                             key={index} 
                             className="stealth-member-card"
                             onClick={() => setActiveMember(member)} 
+                            // **********************************************
+                            // เพิ่ม Style ตรงนี้เพื่อซ่อนการ์ดที่กำลังกดดูอยู่
+                            // **********************************************
+                            style={{ 
+                                opacity: activeMember?.id === member.id ? 0 : 1,
+                                visibility: activeMember?.id === member.id ? 'hidden' : 'visible'
+                            }}
                         >
                             <div className="stealth-card-pattern">
-                                <span>STEALTH</span>
+                                <span>TEAM 4</span>
                                 <span style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>Click to reveal</span>
                             </div>
                         </div>

@@ -72,10 +72,6 @@ Route::get('/lab1/result', function () {
     return Inertia::render('Lab1Result');
 })->middleware(['auth'])->name('lab1.result');
 
-Route::get('/about/contract', function () {
-    return Inertia::render('About/contract');
-})->name('contract');
-
 Route::get('/upload-drive', function () {
     // คำว่า 'pg' ต้องตรงกับชื่อไฟล์ pg.jsx ในโฟลเดอร์ resources/js/Pages
     return Inertia::render('pg');
@@ -97,6 +93,25 @@ Route::get('/minigame_cipher', function () {
     return Inertia::render('minigame_cipher');
 })->name('minigame_cipher');
 
+
+
+///////////////////////////footer///////////////////////////
+Route::get('/about/contract', function () {
+    return Inertia::render('About/contract');
+})->name('contract');
+
 Route::get('/about/zkp', function () {
     return Inertia::render('About/Zkp'); // ชี้ไปที่ไฟล์ Zkp.jsx
 })->name('about.zkp');
+
+Route::get('/about/aboutme', function () {
+    return Inertia::render('About/aboutme'); // ชี้ไปที่ไฟล์ Zkp.jsx
+})->name('about.aboutme');
+
+Route::get('/about/termsofuse', function () {
+    return Inertia::render('About/termsOfUse'); // ชี้ไปที่ไฟล์ TermsOfUse.jsx
+})->name('about.termsofuse');
+
+Route::get('/about/policy', function () {
+    return Inertia::render('About/policy'); // ชี้ไปที่ไฟล์ Policy.jsx
+})->name('about.policy');
