@@ -89,14 +89,6 @@ function DashboardContent() {
 
     const products = [
         {
-            title: lang === 'TH' ? 'ทำความรู้จัก ZKP' : 'LAB 0',
-            description: lang === 'TH'
-                ? 'บทนำก่อนเข้าสู่บทเรียน ทำความรู้จักกับ ZKP'
-                : 'Introduction to ZKP, Getting Started',
-            icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book1.png)', maskImage: 'url(/images/book1.png)' }}></div>,
-            href: '/lab0',
-        },
-        {
             title: lang === 'TH' ? 'ลูกบอล Alibaba' : 'LAB 1',
             description: lang === 'TH'
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
@@ -118,7 +110,7 @@ function DashboardContent() {
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
             icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book3.png)', maskImage: 'url(/images/book3.png)' }}></div>,
-            href: '/minigame_cipher',
+            href: '/lab3',
         },
         {
             title: lang === 'TH' ? 'แบบทดสอบที่ 4' : 'LAB 4',

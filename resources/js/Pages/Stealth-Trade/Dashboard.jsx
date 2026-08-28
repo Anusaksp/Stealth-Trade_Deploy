@@ -127,7 +127,7 @@ function DashboardContent() {
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
             icon: <div className="stealth-icon-mask" style={{ WebkitMaskImage: 'url(/images/book1.png)', maskImage: 'url(/images/book1.png)' }}></div>,
-            href: '/lab4',
+            href: '/minigame_commitreveal',
         },
         {
             title: lang === 'TH' ? 'แบบทดสอบที่ 5' : 'LAB 5',

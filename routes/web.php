@@ -93,6 +93,9 @@ Route::get('/minigame_cipher', function () {
     return Inertia::render('minigame_cipher');
 })->name('minigame_cipher');
 
+Route::get('/minigame_commitreveal', function () {
+    return Inertia::render('minigame_commitreveal');
+})->name('minigame_commitreveal');
 
 
 ///////////////////////////footer///////////////////////////

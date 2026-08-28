@@ -1,0 +1,239 @@
+/* =====================================================
+ * CSS สำหรับ Lab 4: Commit-Reveal (Glassmorphism Theme)
+ * ===================================================== */
+
+:root {
+    --cr-bg-glass: rgba(255, 255, 255, 0.85);
+    --cr-border-glass: rgba(255, 255, 255, 0.6);
+    --cr-text-main: #0f172a;
+    --cr-text-muted: #64748b;
+    --cr-buy: #20c997;
+    --cr-sell: #fa5252;
+}
+
+.cr-page {
+    /* พื้นหลังสว่างไล่สี */
+    background: linear-gradient(135deg, #f5f0f0 0%, #eae4ec 25%, #e8e0ea 50%, #ddd5e0 100%);
+    color: var(--cr-text-main);
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.cr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+    .cr-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* === Glassmorphism Panel === */
+.cr-panel {
+    padding: 24px;
+    background: var(--cr-bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--cr-border-glass);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.cr-panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cr-text-main);
+    margin-bottom: 16px;
+}
+
+.cr-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cr-input-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cr-text-muted);
+}
+
+/* เปลี่ยน Input เป็นพื้นใส/ขาว */
+.cr-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--cr-text-main);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.cr-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.cr-input:disabled {
+    background: rgba(0, 0, 0, 0.04);
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.cr-input-danger { border-color: var(--cr-sell); }
+.cr-input-danger:focus { box-shadow: 0 0 0 3px rgba(250, 82, 82, 0.15); }
+
+/* Buttons */
+.cr-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cr-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cr-btn-primary { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
+.cr-btn-primary:not(:disabled):hover { background: #2563eb; }
+
+/* Hash Display */
+.cr-hash-display {
+    margin-top: 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.cr-hash-code {
+    display: block;
+    margin-top: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #7c3aed;
+    word-break: break-all;
+    font-weight: 600;
+}
+
+.cr-divider {
+    border: none;
+    border-top: 1px dashed rgba(0, 0, 0, 0.15);
+    margin: 24px 0;
+}
+
+/* === Verify & Flowchart === */
+.cr-verify-box {
+    margin-top: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.cr-verify-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--cr-text-muted);
+}
+
+.cr-verify-row code {
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: #0284c7;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cr-node {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: var(--cr-text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    width: 80%;
+    text-align: center;
+}
+
+.cr-node-active {
+    background: #e0e7ff;
+    border-color: #6366f1;
+    color: #4f46e5;
+}
+
+/* === Trade Terminal UI === */
+.cr-trade-terminal {
+    background: var(--cr-bg-glass);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--cr-border-glass);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.cr-trade-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 16px;
+}
+
+.cr-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--cr-text-muted);
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cr-tab-buy-active { background: #ffffff; color: var(--cr-buy); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.cr-tab-sell-active { background: #ffffff; color: var(--cr-sell); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+.cr-amount-input, .cr-select-asset {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.1);
+    color: var(--cr-text-main);
+    border-radius: 12px;
+}
+
+.cr-btn-buy {
+    background: var(--cr-buy);
+    color: white;
+    box-shadow: 0 4px 16px rgba(32, 201, 151, 0.3);
+}
+.cr-btn-buy:not(:disabled):hover { background: #12b886; }
+
+.cr-btn-sell {
+    background: var(--cr-sell);
+    color: white;
+    box-shadow: 0 4px 16px rgba(250, 82, 82, 0.3);
+}
+.cr-btn-sell:not(:disabled):hover { background: #e03131; }
