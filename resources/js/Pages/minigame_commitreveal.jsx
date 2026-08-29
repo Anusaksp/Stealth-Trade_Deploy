@@ -86,8 +86,8 @@ export default function CommitReveal() {
     const [isMatch, setIsMatch] = useState(null);
 
     // UI เสริม: พับ/กาง การ์ดเนื้อหาเสริมด้านล่าง + สถานะคัดลอก
-    const [conceptsOpen, setConceptsOpen] = useState(true);
-    const [attackOpen, setAttackOpen] = useState(true);
+    const [conceptsOpen, setConceptsOpen] = useState(false);
+    const [attackOpen, setAttackOpen] = useState(false);
     const [copied, setCopied] = useState(false);
 
     const narratorText = 'ทดลองล็อกคำสั่งซื้อขายด้วย SHA-256 ของจริงกันครับ — กำหนดคำสั่งและกด Commit แล้วลอง Challenge จากผู้ตรวจสอบ จากนั้นทดลอง Reveal ตรวจสอบว่าเป็น "คนโกง" แก้คำสั่งดู หรือรู้ว่าไม่ได้โดน';
@@ -217,8 +217,29 @@ export default function CommitReveal() {
                         </div>
                         <div className="text-[32px] font-bold text-slate-800 tracking-tight leading-none mb-4">$59,739</div>
                         {/* Fake Chart */}
-                        <svg className="w-full h-[60px] text-red-400 drop-shadow-sm" viewBox="0 0 100 30" preserveAspectRatio="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none">
-                            <path d="M2 15 Q 15 5, 30 18 T 55 10 T 75 25 T 90 8 T 98 22" />
+                        <svg className="w-full h-[60px]" viewBox="0 0 100 50" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="chart-gradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4" />
+                                    <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+
+                            {/* Area Fill (เงาใต้กราฟ) */}
+                            <path 
+                                d="M 0 25 L 5 15 L 12 17 L 18 30 L 25 30 L 30 36 L 35 25 L 40 24 L 47 38 L 53 45 L 60 38 L 65 30 L 70 20 L 75 25 L 82 15 L 88 18 L 94 10 L 100 30 L 100 50 L 0 50 Z" 
+                                fill="url(#chart-gradient)" 
+                            />
+
+                            {/* Line Stroke (เส้นกราฟหลัก) */}
+                            <path 
+                                d="M 0 25 L 5 15 L 12 17 L 18 30 L 25 30 L 30 36 L 35 25 L 40 24 L 47 38 L 53 45 L 60 38 L 65 30 L 70 20 L 75 25 L 82 15 L 88 18 L 94 10 L 100 30" 
+                                fill="none" 
+                                stroke="#ef4444" 
+                                strokeWidth="1.5" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                            />
                         </svg>
                     </div>
 
@@ -287,13 +308,19 @@ export default function CommitReveal() {
                             {/* Order Toggle */}
                             <div className="flex bg-[#F1F3F5] rounded-xl p-1 mb-5">
                                 <button
-                                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 ${order.type === 'BUY' ? 'bg-white text-[#00B873] shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
-                                    onClick={() => setOrder({...order, type: 'BUY'})} disabled={isCommitted}
-                                >ซื้อ (Buy)</button>
+                                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 ${order.type === 'BUY' ? 'bg-[#00B873] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                                    onClick={() => setOrder({...order, type: 'BUY'})} 
+                                    disabled={isCommitted}
+                                >
+                                    ซื้อ (Buy)
+                                </button>
                                 <button
-                                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 ${order.type === 'SELL' ? 'bg-white text-[#FF3B30] shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
-                                    onClick={() => setOrder({...order, type: 'SELL'})} disabled={isCommitted}
-                                >ขาย (Sell)</button>
+                                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 ${order.type === 'SELL' ? 'bg-[#FF3B30] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                                    onClick={() => setOrder({...order, type: 'SELL'})} 
+                                    disabled={isCommitted}
+                                >
+                                    ขาย (Sell)
+                                </button>
                             </div>
 
                             {/* Inputs */}
