@@ -90,7 +90,10 @@ export default function CommitReveal() {
     const [attackOpen, setAttackOpen] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const narratorText = 'ทดลองล็อกคำสั่งซื้อขายด้วย SHA-256 ของจริงกันครับ — กำหนดคำสั่งและกด Commit แล้วลอง Challenge จากผู้ตรวจสอบ จากนั้นทดลอง Reveal ตรวจสอบว่าเป็น "คนโกง" แก้คำสั่งดู หรือรู้ว่าไม่ได้โดน';
+    const narratorText = `สวัสดีครับ ผม ดร.ชิโร่ ที่ปรึกษาการเทรด — วันนี้เราจะมาล็อกคำสั่งซื้อขายไว้ก่อน แล้วค่อยเปิดทีหลัง ลองนึกภาพว่าคุณอยากซื้อ BTC แต่กลัวมีคนแอบเห็นคำสั่งแล้วชิงตัดหน้า เราจะปิดผนึกคำสั่งไว้ก่อน ไม่มีใครแก้หรือแอบดูได้
+                            - ง่ายๆ 3 จังหวะครับ — ① กรอกคำสั่งซื้อ/ขาย ② กดล็อกด้วย SHA-256 ③ เปิดเผยแล้วให้ระบบตรวจว่าตรงกับที่ล็อกไหม · เริ่มจากเลือกออเดอร์ทางซ้ายได้เลย
+                            - เลือกก่อนครับว่าจะซื้อ (Buy) หรือ ขาย (Sell) แล้วกรอกเหรียญ จำนวน และราคาที่ต้องการ — นี่คือ "ความลับ" ที่เราจะปิดผนึกไว้`;
+
     const typed = useTypewriter(narratorText, 25);
 
     // === Handlers (อัลกอริทึมเดิมทั้งหมด ไม่แก้ไข) ===
@@ -195,7 +198,7 @@ export default function CommitReveal() {
                                 รีเซ็ตการทดลอง
                             </button>
                         </div>
-                        <div className="bg-[#F8F9FA] px-4 py-3 rounded-xl text-sm text-slate-600 leading-relaxed border border-slate-100">
+                        <div className="bg-[#F8F9FA] px-4 py-3 rounded-xl text-sm text-slate-600 leading-relaxed border border-slate-100 whitespace-pre-line">
                             {typed}<span className="inline-block w-1.5 h-4 ml-1 bg-indigo-400 animate-pulse align-middle"></span>
                         </div>
                     </div>
