@@ -1,0 +1,1060 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+    background-color: #faf7fc;
+    /* Very light purple/gray background */
+}
+
+.lab4-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+.lab4-content {
+    text-align: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.lab4-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 1.1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 2.25rem;
+    background-color: #f8fafc;
+    letter-spacing: -0.01em;
+}
+
+.lab4-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+}
+
+@media (max-width: 1024px) {
+    .lab4-title {
+        white-space: normal;
+        font-size: 2.5rem;
+    }
+}
+
+.lab4-title-green {
+    color: #10b981;
+}
+
+.lab4-title-gradient {
+    background: linear-gradient(90deg, #008A3E 0%, #6D48D1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lab4-subtitle {
+    font-size: 2.00rem;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 2.25rem;
+    letter-spacing: -0.01em;
+}
+
+.lab4-description {
+    font-size: 1.05rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    font-weight: 400;
+}
+
+.lab4-description p {
+    margin: 0.2rem 0;
+}
+
+.lab4-actions {
+    margin-top: 2.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lab4-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'Prompt', sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lab4-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.lab4-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.lab4-btn-icon {
+    transition: transform 0.2s ease;
+}
+
+.lab4-btn-primary:hover .lab4-btn-icon {
+    transform: translateX(4px);
+}
+
+/* ------------------- Interactive Screen ------------------- */
+
+.lab4-interactive-container {
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Prompt', sans-serif;
+    padding-top: 2rem;
+    padding-bottom: 100px;
+}
+
+/* Header */
+.lab4-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.lab4-header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.lab4-stepper {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.lab4-step {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    background: #ffffff;
+}
+
+.lab4-step.active {
+    background: #6D48D1;
+    color: #ffffff;
+    border-color: #6D48D1;
+}
+
+.lab4-step.completed {
+    background: #10b981;
+    color: #ffffff;
+    border-color: #10b981;
+}
+
+.lab4-step-label {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* Mentor Chat Box */
+.lab4-mentor-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    margin-bottom: 2.5rem;
+    border: 1px solid #f1f5f9;
+}
+
+.lab4-mentor-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: #6D48D1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.5rem;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.lab4-mentor-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: #10b981;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+}
+
+.lab4-mentor-content {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.lab4-mentor-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.lab4-mentor-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
+.lab4-mentor-role {
+    font-size: 0.75rem;
+    color: #6D48D1;
+    background: #f3f0ff;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.lab4-mentor-dept {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.lab4-mentor-message {
+    background: #f8fafc;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 1.05rem;
+}
+
+/* Stage Heading */
+.lab4-stage-subtitle {
+    font-size: 0.9rem;
+    color: #e11d48;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: left;
+}
+
+.lab4-stage-title {
+    font-size: 1.8rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+/* Action Card */
+.lab4-action-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    border: 1px solid #f1f5f9;
+    text-align: left;
+}
+
+.lab4-action-header {
+    margin-bottom: 2rem;
+}
+
+.lab4-action-title {
+    font-size: 1.4rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.lab4-action-title span {
+    color: #6D48D1;
+    margin-right: 0.5rem;
+}
+
+.lab4-action-desc {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+/* Diagram */
+.lab4-diagram {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+    border: 1px solid #f1f5f9;
+}
+
+.lab4-diagram-nodes {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+}
+
+.lab4-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    background: #f8fafc;
+    padding: 0 1rem;
+}
+
+.lab4-node-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    background: #e2e8f0;
+}
+
+.lab4-node.prover .lab4-node-icon {
+    background: #f3f0ff;
+    color: #6D48D1;
+}
+
+.lab4-node.verifier .lab4-node-icon {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.lab4-node-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.lab4-node-title {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.lab4-node-subtitle {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.lab4-connection {
+    position: absolute;
+    top: 32px;
+    left: 80px;
+    right: 80px;
+    height: 2px;
+    background: #cbd5e1;
+    z-index: 1;
+}
+
+.lab4-connection-status {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    color: #94a3b8;
+    background: #f8fafc;
+    padding: 0 0.5rem;
+    white-space: nowrap;
+}
+
+.lab4-connection-status.danger {
+    color: #e11d48;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.lab4-mev-attack-banner {
+    margin-top: 1.5rem;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #e11d48;
+    font-size: 0.9rem;
+    font-weight: 600;
+    animation: fade-in-up 0.3s ease-out;
+}
+
+/* Attacked State Elements */
+.lab4-alert-danger {
+    background: #fff1f2;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: #e11d48;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    animation: fade-in-up 0.4s ease-out;
+}
+
+.lab4-alert-success {
+    background: #dcfce7;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: #059669;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    animation: fade-in-up 0.4s ease-out;
+}
+
+.lab4-summary-box {
+    background: #fdf2f8;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    animation: fade-in-up 0.5s ease-out;
+}
+
+.lab4-summary-box h4 {
+    color: #e11d48;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.lab4-summary-box p {
+    color: #475569;
+    font-size: 1.05rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.lab4-connection-status.hash {
+    background: #f3f0ff;
+    color: #6D48D1;
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 6px;
+    padding: 0.2rem 0.75rem;
+    border: 1px solid #e0d4fc;
+}
+
+/* Commit Stage (Stage 2) Form Styles */
+.lab4-commit-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.lab4-commit-input-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.lab4-commit-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.lab4-input-field {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #334155;
+    outline: none;
+    transition: border-color 0.2s ease;
+    font-family: 'Prompt', sans-serif;
+}
+
+.lab4-input-field:focus {
+    border-color: #6D48D1;
+    box-shadow: 0 0 0 3px rgba(109, 72, 209, 0.1);
+}
+
+.lab4-btn-confirm {
+    background: #6D48D1;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+}
+
+.lab4-btn-confirm:hover {
+    background: #5b3aa8;
+}
+
+.lab4-btn-confirm.success {
+    background: #dcfce7;
+    color: #059669;
+}
+
+.lab4-btn-confirm.success:hover {
+    background: #bbf7d0;
+}
+
+.lab4-locked-order-box {
+    border: 1px solid #c4b5fd;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    background: #ffffff;
+}
+
+.lab4-locked-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.lab4-locked-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    font-size: 1.05rem;
+}
+
+.lab4-btn-drag {
+    background: #6D48D1;
+    color: white;
+    border: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'Prompt', sans-serif;
+}
+
+.lab4-locked-value {
+    font-size: 0.95rem;
+    color: #475569;
+    margin-bottom: 0.75rem;
+}
+
+.lab4-locked-hint {
+    font-size: 0.85rem;
+    color: #6D48D1;
+    font-weight: 600;
+}
+
+.lab4-commit-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.lab4-commit-box {
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+}
+
+.lab4-commit-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.lab4-commit-box-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.lab4-commit-box-dropzone {
+    border: 1px solid transparent;
+    padding: 1rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lab4-btn-box {
+    width: 100%;
+    background: #c4b5fd;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 12px;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: not-allowed;
+}
+
+.lab4-consequence-text {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    animation: fade-in-up 0.5s ease-out;
+}
+
+.lab4-consequence-text span {
+    color: #e11d48;
+    font-weight: 600;
+}
+
+.lab4-action-row-inline {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    animation: fade-in-up 0.6s ease-out;
+}
+
+/* Action Button in Card */
+.lab4-btn-action {
+    background: #e11d48;
+    color: white;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.lab4-btn-action:hover {
+    background: #be123c;
+}
+
+.lab4-btn-outline {
+    background: transparent;
+    border: 1px solid #6D48D1;
+    color: #6D48D1;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab4-btn-outline:hover {
+    background: #f3f0ff;
+}
+
+.lab4-btn-outline-icon {
+    width: 20px;
+    height: 20px;
+    background: #6D48D1;
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.lab4-btn-success {
+    background: #10b981;
+    color: white;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab4-btn-success:hover {
+    background: #059669;
+}
+
+/* Why Explanation Box */
+.lab4-why-box {
+    margin-top: 1.5rem;
+    background: #f8f9ff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: left;
+    animation: fade-in-up 0.4s ease-out;
+}
+
+.lab4-why-box h4 {
+    font-size: 1.05rem;
+    color: #6D48D1;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.lab4-why-box p {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+.lab4-why-box p:last-child {
+    margin-bottom: 0;
+}
+
+/* Footer */
+.lab4-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.02);
+    z-index: 10;
+}
+
+.lab4-btn-reset {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab4-btn-reset:hover {
+    background: #f1f5f9;
+}
+
+.lab4-footer-msg {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.lab4-btn-next {
+    background: #c4b5fd;
+    color: #ffffff;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab4-btn-next.enabled {
+    background: #6D48D1;
+    cursor: pointer;
+}
+
+.lab4-btn-next.enabled:hover {
+    background: #5b3cae;
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Drag & Drop States */
+.lab4-commit-box.drag-over {
+    border: 2px dashed #6D48D1;
+    background: #f3f0ff;
+    transform: scale(1.01);
+    transition: all 0.15s ease;
+}
+
+.lab4-commit-box.done {
+    border: 1px solid #c4b5fd;
+    background: #faf7ff;
+}
+
+.lab4-drop-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    animation: fade-in-up 0.3s ease-out;
+}
+
+.lab4-drop-result-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f3f0ff;
+    color: #6D48D1;
+    border: 1px solid #c4b5fd;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.lab4-drop-value {
+    font-size: 0.78rem;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    word-break: break-all;
+    animation: fade-in-up 0.3s ease-out;
+}
+
+.lab4-btn-box.active {
+    background: #6D48D1;
+    cursor: grab;
+}
+
+.lab4-btn-box.active:active {
+    cursor: grabbing;
+}
+
+.lab4-btn-box.active.faded {
+    background: rgba(109, 72, 209, 0.12);
+    color: #6D48D1;
+    border: 1px solid #c4b5fd;
+    transition: all 0.2s ease;
+}
+
+.lab4-btn-box.active.faded:hover {
+    background: rgba(109, 72, 209, 0.2);
+    border-color: #6D48D1;
+}
+
+.lab4-btn-box.active.faded:active {
+    background: rgba(109, 72, 209, 0.25);
+}
+
+.lab4-drop-why {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: #f59e0b;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.lab4-drop-why-icon {
+    font-size: 1rem;
+}
+
+.lab4-drop-why-text {
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.5;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    animation: fade-in-up 0.3s ease-out;
+}
+
+.lab4-commit-box-dropzone.disabled {
+    color: #c4b5fd;
+    border-color: #e9d5ff;
+}
+
+/* Stage 7 Success Screen */
+.lab4-success-main-box {
+    background: #f3f0ff;
+    border: 2px solid #a78bfa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    text-align: left;
+    animation: fade-in-up 0.4s ease-out;
+}
+
+.lab4-success-header {
+    color: #6D48D1;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab4-success-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.lab4-success-hash {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.05rem;
+    color: #6D48D1;
+    font-weight: 600;
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+.lab4-success-split {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fade-in-up 0.5s ease-out;
+}
+
+.lab4-success-left,
+.lab4-success-right {
+    flex: 1;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.lab4-success-left {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+}
+
+.lab4-success-right {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.lab4-success-status {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.lab4-success-left .lab4-success-status {
+    color: #10b981;
+}
+
+.lab4-success-right .lab4-success-status {
+    color: #64748b;
+}
+
+.lab4-success-left div,
+.lab4-success-right div {
+    margin-bottom: 0.4rem;
+}
+
+.lab4-success-left div:last-child,
+.lab4-success-right div:last-child {
+    margin-bottom: 0;
+}
+
+.lab4-btn-submit-green {
+    background: #10b981;
+    color: white;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0.85rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+    animation: fade-in-up 0.6s ease-out;
+}
+
+.lab4-btn-submit-green:hover {
+    background: #059669;
+}
