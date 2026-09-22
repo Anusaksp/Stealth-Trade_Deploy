@@ -163,10 +163,10 @@ export default function Lab4() {
                 </div>
 
                 <div className="lab4-mentor-box">
-                    <div className="lab4-mentor-avatar">ฮี</div>
+                    <div className="lab4-mentor-avatar">ซี</div>
                     <div className="lab4-mentor-content">
                         <div className="lab4-mentor-header">
-                            <span className="lab4-mentor-name">ดร.ฮีโร่ วรรณรัตน์</span>
+                            <span className="lab4-mentor-name">ดร.ซีโร่ วรรณรัตน์</span>
                             <span className="lab4-mentor-role">Head of Cryptography Research</span>
                             <span className="lab4-mentor-dept">(Research &amp; Applied Math)</span>
                         </div>
@@ -372,7 +372,7 @@ export default function Lab4() {
                         })}
                     </div>
                     <div className="lab4-step-label">
-                        {stage < 3 && "ด่านที่ 1 - ส่งข้อมูลดิบ"}
+                        {stage < 3 && "ด่านที่ 1 - ถ้าสั่งซื้อโดยไม่มีการป้องกันอะไรเลยล่ะ?"}
                         {(stage === 3 || stage === 4) && "ด่านที่ 1 - ลองเข้ารหัสดู"}
                         {stage >= 5 && stage <= 8 && "ด่าน 2 · Commit"}
                         {stage === 9 && "ด่าน 2 - Challenge"}
@@ -386,10 +386,10 @@ export default function Lab4() {
                 </div>
 
                 <div className="lab4-mentor-box">
-                    <div className="lab4-mentor-avatar">ฮี</div>
+                    <div className="lab4-mentor-avatar">ซี</div>
                     <div className="lab4-mentor-content">
                         <div className="lab4-mentor-header">
-                            <span className="lab4-mentor-name">ดร.ฮีโร่ วรรณรัตน์</span>
+                            <span className="lab4-mentor-name">ดร.ซีโร่ วรรณรัตน์</span>
                             <span className="lab4-mentor-role">Head of Cryptography Research</span>
                             <span className="lab4-mentor-dept">(Research & Applied Math)</span>
                         </div>
@@ -397,20 +397,22 @@ export default function Lab4() {
                             {stage === 1 && (
                                 <>
                                     <strong>ลองนึกภาพตามว่าเรากำลังจะเทรดเหรียญคริปโตกัน</strong><br />
-                                    เราจะมาลองทำแบบวิธีปกติกับวิธีแบบ ZKP ดูกันครับ
+                                    แต่ทว่ามีผู้ไม่ประสงค์ดีกำลังดักเอาคำสั่งซื้อของคุณไปใช้!
+                                    ขั้นตอนที่คุณจะได้เรียนรู้ต่อไปนี้เป็นการสาธิตวิธีการต่างๆในการส่งคำสั่งซื้อ
+                                    ของเราครับ!
                                 </>
                             )}
-                            {stage === 2 && "ส่งคำสั่งแบบปกติ คำสั่งจะถูกดักจับกลางทาง"}
-                            {stage === 3 && "งั้นมาลองแบบที่ 2 กันดูครับ"}
-                            {stage === 4 && "บอทก๊อปปี้รหัสเดิมไปส่งซ้ำ แล้วสวมรอยเป็นเราได้ — ยังพังอยู่ดี"}
-                            {stage === 5 && "คราวนี้ทำให้ถูกวิธี — ล็อกคำตอบลงกล่องก่อน แล้วค่อยเปิดพิสูจน์ทีหลัง"}
-                            {(stage === 6 || stage === 7) && "คราวนี้ทำให้ถูกวิธี — ล็อกคำตอบลงกล่องก่อน แล้วค่อยเปิดพิสูจน์ทีหลัง"}
-                            {stage === 8 && "คราวนี้ทำให้ถูกวิธี — ล็อกคำตอบลงกล่องก่อน แล้วค่อยเปิดพิสูจน์ทีหลัง"}
-                            {stage === 9 && "ต่อมาคุณจะได้รับรหัสยืนยันชั่วคราว (Ticket) เพื่อใช้สำหรับยืนยันคำสั่งซื้อของคุณ"}
-                            {stage === 10 && "ระบบกรอกค่าที่ถูกต้องให้แล้ว ตรวจทานแล้วกดยืนยันเพื่อเปิดพิสูจน์ได้เลย"}
+                            {stage === 2 && "โดนขโมยคำสั่งซื้อไปครับ! แต่เรายังไม่มีทางแก้!"}
+                            {stage === 3 && "มาลองเข้ารหัสกันครับคำสั่งซื้อก่อนส่งกันครับ!"}
+                            {stage === 4 && "บอทก๊อปปี้รหัสเดิมไปส่งซ้ำ แล้วสวมรอยเป็นเราได้ ไม่เวิร์กอยู่ดี"}
+                            {stage === 5 && "มาลองดูวิธีใช้งานการเข้ารหัสของ ZKP กันเถอะครับ! ขั้นตอนต่อไปนี้ที่เรากำลังจะทำกันไม่ใช่วิธีการเทรดจริงๆแต่จะเป็นการแสดงให้เห็นว่าระบบจะมีวิธีการเข้ารหัสคำสั่งซื้อของเรายังไงให้ปลอดภัย"}
+                            {(stage === 6 || stage === 7) && "ล็อกคำสั่งซื้อเป็นแค่ขั้นตอนแรกสู่ความปลอดภัยของเรา ลากวางคำสั่งซื้อที่ถูกล็อกแล้วไปไว้ในช่อง Salt ต่อเลยครับ!"}
+                            {stage === 8 && "ส่งไปแล้ว! ตอนนี้ระบบมีคำสั่งซื้อของเราแล้ว ต่อไปจะเป็นหน้าที่ของระบบแล้วที่จะต้องตรวจสอบคำสั่งทซื้อที่ถูกออกไป ไปกันต่อ!"}
+                            {stage === 9 && "ขั้นตอน Challenge ขั้นนี้จะเป็นขั้นตอนของระบบที่จะส่ง Ticket หรือตัวที่เราจะเป็นคนเดียวที่มีเพื่อนำไปยืนยันคำสั่้งซื้อของคุณ"}
+                            {stage === 10 && "ระบบดึงค่าที่คุณล็อกไว้มาให้เรียบร้อยแล้ว ตรวจสอบความถูกต้อง แล้วกด ยืนยันและเปิดพิสูจน์ ได้เลยครับ"}
                             {stage >= 12 && stage < 14 && (
-                                (appliedMaliciousAction === 'buy' && appliedMaliciousPrice === '68420')
-                                    ? (hasCheated ? "แก้กลับเป็นค่าเดิมทั้งหมด รหัสก็กลับมาตรงกับที่ล็อกไว้พอดี" : "ลองสวมบทคนโกงดูสิครับ แล้วดูว่าระบบจับได้ไหม")
+                                (appliedMaliciousAction === 'buy' && appliedMaliciousPrice === '68420') 
+                                    ? (hasCheated ? "แก้กลับเป็นค่าเดิมทั้งหมด รหัสก็กลับมาตรงกับที่ล็อกไว้พอดี" : "ลองสวมบทคนโกง! สมมุติว่าคุณล็อกคำสั่งซื้อที่ราคา 68,420 ไปแล้ว แต่นึกอยากแอบเนียนแก้ราคาซื้อให้ถูกลง ลองพิมพ์เปลี่ยนราคาดูว่าระบบจะจับได้ไหม")
                                     : "เห็นไหมครับ รหัสเปลี่ยนไปแล้ว ระบบรู้ทันทีว่าถูกแอบแก้"
                             )}
                             {stage >= 14 && stage < 15 && "รหัสไม่ตรง ระบบจับได้ทันทีว่าถูกแก้ไข คุณถูกระบุเป็น Imposter"}
@@ -436,23 +438,23 @@ export default function Lab4() {
 
                 {stage < 5 && <div className="lab4-stage-subtitle">ด่าน 1</div>}
                 <div className="lab4-stage-title">
-                    {stage < 3 && "มาดูขั้นตอนการสั่งซื้อแบบปกติกันเถอะ"}
-                    {(stage === 3 || stage === 4) && "งั้นมาดูขั้นตอนการสั่งซื้อด้วยการ Hash กันเถอะ"}
-                    {stage >= 5 && stage < 12 && "วิธีการ ZKP — ล็อก ➔ รับรหัสยืนยัน ➔ พิสูจน์"}
-                    {stage >= 12 && "ลองโกง แก้ข้อมูลหลังล็อกแล้วเกิดอะไรขึ้น"}
+                    {stage < 3 && "ถ้าสั่งซื้อโดยไม่มีการป้องกันอะไรเลยล่ะ?"}
+                    {(stage === 3 || stage === 4) && "แบบที่ 2 แปลงรหัสเป็น Hash ก่อนส่งล่ะ?"}
+                    {stage >= 5 && stage < 12 && "วิถีแห่ง ZKP ขั้นกว่าของความปลอดภัย"}
+                    {stage >= 12 && " ทดสอบความปลอดภัย ลองแอบแก้ข้อมูล"}
                 </div>
 
                 {stage < 8 && (
                     <div className="lab4-action-card">
                         <div className="lab4-action-header">
                         <div className="lab4-action-title">
-                            {stage < 3 && <><span>1.1</span> ส่งข้อมูลดิบ</>}
-                            {(stage === 3 || stage === 4) && <><span>1.2</span> ลองเข้ารหัสดู</>}
-                            {stage >= 5 && <><strong style={{ color: '#1e293b' }}>COMMIT</strong> <span style={{ color: '#94a3b8', fontWeight: 400 }}>(ผูกมัดคำตอบ)</span></>}
+                            {stage < 3 && <><span>1.1</span> ถ้าสั่งซื้อโดยไม่มีการป้องกันอะไรเลยล่ะ?</>}
+                            {(stage === 3 || stage === 4) && <><span>1.2</span> มาดูว่าหลังแปลง รหัส Hash ปลอดภัยไหม?</>}
+                            {stage >= 5 && <><strong style={{ color: '#1e293b' }}>ขั้นแรก COMMIT</strong> <span style={{ color: '#94a3b8', fontWeight: 400 }}>(ผูกมัดคำตอบ)</span></>}
                         </div>
                         <div className="lab4-action-desc">
                             {stage < 3 && "วิธีที่ 1: ลองส่งคำสั่งตรงๆ แบบไม่ปิดบังอะไรเลย ดูว่าจะเกิดอะไรขึ้น"}
-                            {(stage === 3 || stage === 4) && "วิธีที่ 2: คำสั่งเดิมไม่ปลอดภัย เพราะ MEV Bot อ่านออก งั้นเราเข้ารหัส (hash) ก่อนส่งคำสั่งดูว่าปิดบังข้อมูลได้จริงไหม แล้วมาดูกันว่าจะเป็นยังไง?"}
+                            {(stage === 3 || stage === 4) && "วิธีแรกไม่ปลอดภัยเพราะ ผู้โจมตีสามารถดัก และเข้ารหัสตันได้โดยตรงเลย การเข้ารหัส (Hash) อาจเป็นทางแก้ปัญหานี้!"}
                             {stage >= 5 && stage <= 7 && "ใส่คำสั่งซื้อ ➔ ผสมกับ Salt ➔ ผสมกับ nonce ➔ แฮช SHA-256 ➔ แล้วค่อยล็อก แล้วส่งเฉพาะรหัสที่ล็อกไว้"}
                             {stage === 8 && "ใส่คำสั่งซื้อ ➔ ล็อก ➔ ลากไปผสม Salt แล้ว nonce ➔ แฮช SHA-256 แล้วส่งเฉพาะรหัสที่ล็อกไว้"}
                         </div>
@@ -604,7 +606,7 @@ export default function Lab4() {
                                                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                                 </svg>
-                                                MEV Bot (ผู้โจมตี) — ก๊อปรหัสไปส่งซ้ำ
+                                                MEV Bot (ผู้โจมตี) — ดักรหัสที่เข้า Hash ของคุณอยู่
                                             </div>
                                         )}
                                     </div>
@@ -623,7 +625,7 @@ export default function Lab4() {
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                     <polyline points="20 6 9 17 4 12"></polyline>
                                                 </svg>
-                                                เท่านี้ MEV Bot อ่านไม่ออกแล้ว!
+                                                เย่ เท่านี้ Bot ก็อ่านไม่ออกแล้ว!
                                             </div>
                                             <div className="lab4-alert-danger">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -631,10 +633,10 @@ export default function Lab4() {
                                                     <line x1="12" y1="9" x2="12" y2="13"></line>
                                                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                                 </svg>
-                                                แต่บอทอาจก๊อปปี้ hash ไปใช้ซ้ำได้!
+                                                แต่บอทอาจก๊อปปี้ hash ไปใช้ซ้ำได้ เอ้าได้ไงกัน!
                                             </div>
                                             <div className="lab4-consequence-text">
-                                                บอกส่ง hash ตัวเดิมไปที่ระบบตลาด &rarr; ระบบรับ &rarr; <span>บอทสวมรอยเป็นคุณสำเร็จ</span>
+                                                บอทส่ง hash ตัวเดิมไปที่ระบบตลาด &rarr; ระบบรับ &rarr; <span>บอทสวมรอยเป็นคุณสำเร็จ</span>
                                             </div>
 
                                             <div className="lab4-action-row-inline">
@@ -658,7 +660,8 @@ export default function Lab4() {
 
                                             <div className="lab4-summary-box">
                                                 <h4>สรุปด่าน 1</h4>
-                                                <p>2 วิธีแรกพังทั้งคู่ — วิธีที่ 1 โดนแอบดู &middot; วิธีที่ 2 โดนสวมรอย</p>
+                                                <p>วิธีที่ 1 โดนแอบดูตรงๆได้เลย ไม่ปลอดภัยเลย &middot; วิธีที่ 2 ปลอดภัยขึ้นนะ แต่ยังมีโอกาสโดนสวมรอยได้อยู่</p>
+                                                <p>2 วิธีแรกยังไม่ปลอดภัยพอ แต่เรามีวิธีที่ช่วยให้ปลอดภัยยิ่งขึ้นนะ รอดูได้เลย</p>
                                             </div>
 
                                             <button className="lab4-btn-success" onClick={() => {
@@ -805,7 +808,7 @@ export default function Lab4() {
                                                             ทำไม?
                                                         </div>
                                                         <div className="lab4-drop-why-text">
-                                                            เติมคำสุ่มเข้าในข้อมูล ทำให้คำสั่งเดียวกัน<br />ทำให้รหัสไม่ซ้ำกันเลย
+                                                            เพื่อกันการเดาวสุ่มรหัส การใส่คำสุ่ม<br />ทำให้เดาสุ่มรหัสได้ยากขึ้น
                                                         </div>
                                                     </>
                                                 ) : (
@@ -859,7 +862,7 @@ export default function Lab4() {
                                                 )}
                                             </div>
                                             <div className="lab4-commit-box-desc">
-                                                เลขสุ่มที่ใช้ได้ครั้งเดียว ทำให้รหัสต่างกันไม่ซ้ำ<br />กันบอทก็อปส่งค่าไม่ได้ซ้ำ
+                                                ระบบสุ่มที่ใช้ได้ครั้งเดียว ทำให้รหัสแต่ละรอบไม่ซ้ำ<br />กันบอทก๊อปรหัสเก่าไปใช้ซ้ำ
                                             </div>
                                             {nonceDone ? (
                                                 nonceClicked ? (
@@ -879,7 +882,7 @@ export default function Lab4() {
                                                             ทำไม?
                                                         </div>
                                                         <div className="lab4-drop-why-text">
-                                                            เพื่อทำให้เอาคำสั่งเดิมไปใช้ซ้ำไม่ได้อีก
+                                                            เพื่อทำให้คำสั่งซื้อไม่สามารถใช้ซ้ำได้
                                                         </div>
                                                     </>
                                                 ) : (
@@ -914,8 +917,8 @@ export default function Lab4() {
                                             <div className="lab4-why-box" style={{marginTop:'1.5rem', background:'#f8f9ff', border:'1px solid #c4b5fd'}}>
                                                 <h4 style={{color:'#6D48D1'}}>ทำไมต้องผสม 3 อย่างนี้เข้าด้วยกัน?</h4>
                                                 <p>ถ้าล็อกแค่คำสั่งอย่างเดียว → คนเดาออกได้ง่าย</p>
-                                                <p>ใส่ Salt → ทำให้เดาไม่ออก</p>
-                                                <p>ใส่ nonce → ทำให้ใช้ซ้ำไม่ได้</p>
+                                                <p>ใส่ Salt → ทำให้เดาไม่ออก ระบบจะไม่เก็บค่านี้</p>
+                                                <p>ใส่ nonce → ทำให้ใช้ซ้ำไม่ได้ ระบบจะบันทึกค่านี้</p>
                                                 <p style={{fontSize:'0.9rem', color:'#64748b'}}>
                                                     ทั้ง 3 อย่างถูกผสมแล้วแปลงเป็นรหัสเดียวด้วย <strong>SHA-256</strong> (เครื่องแปลงข้อมูลเป็นรหัส) รหัสนี้ย้อนกลับไปหาข้อมูลเดิมไม่ได้ และถ้าแก้ข้อมูลแม้นิดเดียว รหัสจะเปลี่ยนไปทั้งชุด
                                                 </p>
@@ -997,10 +1000,10 @@ export default function Lab4() {
                             <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                 <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
                                 <p>คุณเปลี่ยนคำสั่งข้างในไม่ได้อีก ถ้าแก้แม้แต่ตัวเลขเดียว รหัสที่ล็อกไว้จะเปลี่ยนใหม่หมด</p>
-
+                                
                                 <h4 style={{ color: '#6D48D1' }}>ทำไมถึงสำคัญ?</h4>
                                 <p>นี่คือ <strong>Binding (ผูกมัด)</strong> - ล็อกแล้วผูกกับคำสั่งเดียวเท่านั้น และ <strong>Hiding (ปิดบัง)</strong> - ระบบเดาย้อนกลับไปหาคำสั่งข้างในไม่ได้ เพราะมี Salt กับ nonce สุ่มปนอยู่</p>
-
+                                
                                 <h4 style={{ color: '#6D48D1' }}>เอาไปใช้จริงยังไง?</h4>
                                 <p>เหมือนยื่นคำสั่งที่ล็อกไว้ให้กรรมการถือไว้ ก่อนประกาศผล</p>
                             </div>
@@ -1014,7 +1017,7 @@ export default function Lab4() {
                         </button>
                     </div>
                 )}
-
+                
                 {stage === 9 && (
                     <>
                         <div style={{background:'#eef2ff', borderRadius:'12px', padding:'1.25rem', marginTop:'1.5rem', border:'1px solid #c7d2fe', animation:'fade-in-up 0.4s ease-out'}}>
@@ -1034,7 +1037,6 @@ export default function Lab4() {
                         <div className="lab4-action-card" style={{marginTop:'1.5rem', animation:'fade-in-up 0.4s ease-out'}}>
                             <div className="lab4-action-header">
                                 <div className="lab4-action-title">
-                                    <span style={{ color: '#8b5cf6', marginRight: '0.5rem' }}>2.2</span>
                                     <strong style={{color:'#1e293b'}}>CHALLENGE</strong> <span style={{color:'#94a3b8', fontWeight:400}}>(ระบบส่ง Ticket มาให้)</span>
                                 </div>
                                 <div className="lab4-action-desc" style={{marginTop:'0.75rem'}}>
@@ -1066,7 +1068,7 @@ export default function Lab4() {
                                     </div>
                                     <div style={{flex:1, border:'1px solid #e2e8f0', borderRadius:'8px', padding:'1rem'}}>
                                         <div style={{fontSize:'0.85rem', color:'#64748b', marginBottom:'0.25rem'}}>ระบบตลาด</div>
-                                        <div style={{fontSize:'0.9rem', color:'#334155'}}>รหัสใส่คำสั่งซื้อ + Ticket #763 เท่านั้น<br/><span style={{color:'#64748b'}}>(ไม่เห็นคำสั่งจริง)</span></div>
+                                        <div style={{fontSize:'0.9rem', color:'#334155'}}>ตลาด: Hash คำสั่ง + Ticket #763 เท่านั้น<br/><span style={{color:'#64748b'}}>(ไม่เห็นคำสั่งจริง)</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -1094,12 +1096,12 @@ export default function Lab4() {
                                 style={{marginTop:'1.5rem', width:'100%', justifyContent:'center', borderRadius:'8px', background:'linear-gradient(135deg, #10b981, #059669)'}}
                                 onClick={() => { setStage(10); setShowWhy(false); }}
                             >
-                                ไปขั้นต่อไป: ประกอบคำตอบ →
+                                ไปขั้นต่อไป: RESPOND
                             </button>
                         </div>
                     </>
                 )}
-
+                
                 {stage >= 10 && stage < 12 && (
                     <div className="lab4-action-card" style={{marginTop:'1.5rem', animation:'fade-in-up 0.4s ease-out'}}>
                         <div className="lab4-action-header">
@@ -1114,7 +1116,7 @@ export default function Lab4() {
                                 )}
                             </div>
                             <div className="lab4-action-desc" style={{marginTop:'0.75rem'}}>
-                                ขั้นยืนยันคำสั่งซื้อ (คล้ายหน้ายืนยัน OTP) — ระบบเติมค่าที่ถูกต้องให้อัตโนมัติจากตอนที่คุณล็อกไว้ คุณไม่ต้องจำหรือกรอกเอง แค่ตรวจแล้วกดยืนยัน ระบบจะเปิดกล่องและตรวจแฮชต่อให้ในขั้นเดียว
+                               ระบบดึงคำสั่ง Hash และ Ticket มาเตรียมไว้ให้แล้ว เพื่อใช้คำนวณแฮชเปิดพิสูจน์กับตลาด
                             </div>
                         </div>
 
@@ -1161,11 +1163,12 @@ export default function Lab4() {
 
                         <div style={{background:'#dcfce7', border:'1px solid #86efac', borderRadius:'12px', padding:'1.25rem', marginTop:'1.5rem'}}>
                             <div style={{fontWeight:600, color:'#166534', marginBottom:'1rem'}}>ใครรู้อะไรบ้าง</div>
-                            <div style={{fontWeight:600, color:'#14532d', marginBottom:'0.25rem', fontSize:'0.9rem'}}>คุณ (ผู้พิสูจน์) รู้ครบทั้ง คำสั่ง, Salt และ Ticket</div>
-                            <div style={{fontSize:'0.85rem', color:'#166534', marginBottom:'1rem'}}>แต่ระบบเก็บไว้เพียง 2 อย่างเท่านั้น คือ nonce กับรหัสแฮช ส่วนตัว คำสั่งจริงไม่เคยถูกเก็บหรือเปิดเผยเลย</div>
-
+                            <div style={{fontWeight:600, color:'#14532d', marginBottom:'0.25rem', fontSize:'0.9rem'}}>คุณ: รู้ข้อมูลจริงทั้งหมด (คำสั่งซื้อ + Salt + Ticket) 3 อย่าง</div>
+                            <div style={{fontSize:'0.85rem', color:'#166534', marginBottom:'1rem'}}>ระบบตลาด: เก็บไว้แค่ 2 ค่าเพื่อใช้ตรวจคำตอบ คือ รหัส Hash (คำสั่งซื้อ + Salt) และ Ticket
+(โดยที่ตลาดไม่เคยเห็นคำสั่งจริงของคุณเลย)</div>
+                            
                             <div style={{display:'flex', alignItems:'center', gap:'1rem', marginBottom:'0.75rem'}}>
-                                <div style={{width:'120px', fontSize:'0.85rem', color:'#166534'}}>Nonce ที่ระบบเก็บ:</div>
+                                <div style={{width:'120px', fontSize:'0.85rem', color:'#166534'}}>Tickey ที่ระบบส่ง:</div>
                                 <div style={{background:'#bbf7d0', color:'#166534', padding:'0.35rem 0.75rem', borderRadius:'6px', fontSize:'0.9rem', fontFamily:'JetBrains Mono, monospace'}}>
                                     4962868189
                                 </div>
@@ -1185,11 +1188,11 @@ export default function Lab4() {
                                         <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                     </button>
                                 </div>
-
+                                
                                 {showWhy && (
                                     <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                         <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
-                                        <p>ค่าทั้งสามถูกกำหนดตายตัวมาตั้งแต่ตอน Commit แล้ว ระบบจึงเติมให้เองโดยไม่ต้องให้คุณจำหรือกรอกซ้ำ</p>
+                                        <p>ระบบดึงข้อมูลคำสั่งซื้อและ Salt ของคุณ ร่วมกับ Ticket จากตลาด มาเตรียมให้อัตโนมัติ โดยที่คุณไม่ต้องจำหรือพิมพ์กรอกใหม่</p>
                                         <h4 style={{ color: '#6D48D1', marginTop: '1rem' }}>ทำไมถึงสำคัญ?</h4>
                                         <p>ผู้พิสูจน์ต้องรู้ข้อมูลทั้งชุด (Order + Salt + Challenge) เพื่อสร้างคำตอบ แต่ Verifier เก็บแค่ nonce กับแฮช - นี่คือหลัก Hiding ที่ทำให้ยืนยันได้โดยไม่เปิดเผยคำสั่ง</p>
                                         <h4 style={{ color: '#6D48D1', marginTop: '1rem' }}>เอาไปใช้จริงยังไง?</h4>
@@ -1250,7 +1253,7 @@ export default function Lab4() {
                                         <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                     </button>
                                 </div>
-
+                                
                                 {showWhy && (
                                     <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                         <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
@@ -1287,10 +1290,10 @@ export default function Lab4() {
                             <div className="lab4-action-card" style={{marginTop:'1.5rem', animation:'fade-in-up 0.4s ease-out'}}>
                                 <div className="lab4-action-header">
                                     <div className="lab4-action-title">
-                                        <strong style={{color:'#1e293b'}}>ตั้งกับดัก</strong>
+                                        <strong style={{color:'#1e293b'}}>แก้ข้อมูลแค่ 1 ตัว ตัวแฮชเปลี่ยนทันที</strong>
                                     </div>
                                 </div>
-
+                                
                                 <div style={{display:'flex', gap:'1rem', marginTop:'1.5rem', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem'}}>
                                     <div style={{flex: 1, borderRight: '1px solid #e2e8f0'}}>
                                         <div style={{fontSize: '0.85rem', color: '#64748b', marginBottom: '0.25rem'}}>สั่ง</div>
@@ -1312,13 +1315,13 @@ export default function Lab4() {
                                         <div>
                                             <div style={{fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem'}}>สั่ง</div>
                                             <div style={{display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '0.25rem'}}>
-                                                <button
+                                                <button 
                                                     style={{padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: maliciousAction === 'buy' ? '#6D48D1' : 'white', color: maliciousAction === 'buy' ? 'white' : '#64748b', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: maliciousAction === 'sell' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'}}
                                                     onClick={() => setMaliciousAction('buy')}
                                                 >
                                                     ซื้อ
                                                 </button>
-                                                <button
+                                                <button 
                                                     style={{padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: maliciousAction === 'sell' ? '#6D48D1' : 'white', color: maliciousAction === 'sell' ? 'white' : '#64748b', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: maliciousAction === 'buy' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'}}
                                                     onClick={() => setMaliciousAction('sell')}
                                                 >
@@ -1328,14 +1331,14 @@ export default function Lab4() {
                                         </div>
                                         <div style={{flex: 1}}>
                                             <div style={{fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem'}}>ราคา (USDT)</div>
-                                            <input
-                                                type="text"
+                                            <input 
+                                                type="text" 
                                                 value={maliciousPrice}
                                                 onChange={(e) => setMaliciousPrice(e.target.value)}
                                                 style={{width: '100%', padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem'}}
                                             />
                                         </div>
-                                        <button
+                                        <button 
                                             style={{background: '#b48600', color: 'white', border: 'none', borderRadius: '8px', padding: '0.65rem 1.25rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'}}
                                             onClick={() => {
                                                 setAppliedMaliciousAction(maliciousAction);
@@ -1345,7 +1348,7 @@ export default function Lab4() {
                                                 }
                                             }}
                                         >
-                                            เปลี่ยนราคา
+                                            ยืนยันการแก้ไข
                                         </button>
                                     </div>
                                 </div>
@@ -1365,25 +1368,25 @@ export default function Lab4() {
                                     </div>
                                     {(appliedMaliciousAction === 'buy' && appliedMaliciousPrice === '68420') ? (
                                         <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                            ✓ ตรงกัน
+                                            ✓ รหัส Hash ตรงกันกันอยู่ ลองแก้ไขดูสิ
                                         </div>
                                     ) : (
                                         <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                            ✗ ไม่ตรงกัน
+                                            ✗ ไม่ตรงกัน รหัส Hash มีการเปลี่ยนแปลง
                                         </div>
                                     )}
                                 </div>
-
+                                
                                 <div style={{marginTop: '1.5rem'}}>
-                                    <button
-                                        className="lab4-btn-primary"
+                                    <button 
+                                        className="lab4-btn-primary" 
                                         style={{
-                                            background: hasCheated ? '#10b981' : '#94a3b8',
-                                            borderColor: hasCheated ? '#10b981' : '#94a3b8',
+                                            background: hasCheated ? '#10b981' : '#94a3b8', 
+                                            borderColor: hasCheated ? '#10b981' : '#94a3b8', 
                                             padding: '0.5rem 1.25rem',
                                             cursor: hasCheated ? 'pointer' : 'not-allowed',
                                             opacity: hasCheated ? 1 : 0.6
-                                        }}
+                                        }} 
                                         onClick={() => hasCheated && setStage(13)}
                                         disabled={!hasCheated}
                                     >
@@ -1407,8 +1410,8 @@ export default function Lab4() {
                                     </div>
                                 </div>
                                 <div>
-                                    <button
-                                        style={{background: stage >= 14 ? '#e879a0' : '#10b981', borderColor: stage >= 14 ? '#e879a0' : '#10b981', padding: '0.65rem 1.5rem', borderRadius: '24px', color: 'white', fontWeight: 600, cursor: stage >= 14 ? 'default' : 'pointer', display: 'inline-block', border: 'none', fontSize: '0.95rem'}}
+                                    <button 
+                                        style={{background: stage >= 14 ? '#e879a0' : '#10b981', borderColor: stage >= 14 ? '#e879a0' : '#10b981', padding: '0.65rem 1.5rem', borderRadius: '24px', color: 'white', fontWeight: 600, cursor: stage >= 14 ? 'default' : 'pointer', display: 'inline-block', border: 'none', fontSize: '0.95rem'}} 
                                         onClick={() => {
                                             if (stage < 14) {
                                                 setStage(14);
@@ -1425,25 +1428,25 @@ export default function Lab4() {
                                             <span style={{fontWeight:700}}>✗</span> ตรวจพบการแก้ไข! คำสั่งถูกปฏิเสธ คุณไม่รู้ข้อมูลจริง
                                         </div>
                                         <div style={{marginTop:'1rem'}}>
-                                            <button
+                                            <button 
                                                 onClick={() => setShowWhy(!showWhy)}
                                                 style={{
-                                                    background:'white',
-                                                    border:'1px solid #c7d2fe',
-                                                    borderRadius:'20px',
-                                                    padding:'0.45rem 1rem',
-                                                    color:'#4f46e5',
-                                                    fontWeight:600,
-                                                    fontSize:'0.9rem',
-                                                    cursor:'pointer',
-                                                    display:'inline-flex',
-                                                    alignItems:'center',
+                                                    background:'white', 
+                                                    border:'1px solid #c7d2fe', 
+                                                    borderRadius:'20px', 
+                                                    padding:'0.45rem 1rem', 
+                                                    color:'#4f46e5', 
+                                                    fontWeight:600, 
+                                                    fontSize:'0.9rem', 
+                                                    cursor:'pointer', 
+                                                    display:'inline-flex', 
+                                                    alignItems:'center', 
                                                     gap:'0.45rem',
                                                     boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                                 }}
                                             >
                                                 <span style={{background:'#6D48D1', color:'white', borderRadius:'50%', width:'18px', height:'18px', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:'0.7rem', fontWeight:700}}>?</span>
-                                                ทำไม?
+                                                ทำไม? 
                                                 <span style={{color: '#818cf8', fontSize: '0.8rem', marginLeft: '2px'}}>❚❚</span>
                                             </button>
                                         </div>
@@ -1465,7 +1468,7 @@ export default function Lab4() {
                                                         เกิดอะไรขึ้น?
                                                     </div>
                                                     <div style={{color: '#475569', fontSize: '0.9rem', lineHeight: 1.55}}>
-                                                        SHA-256 ย้อนกลับไม่ได้ ต่อให้อยากหาข้อมูลที่ให้รหัสเดิมเป๊ะ ก็ต้องสุ่มลองเป็นพันล้านปี
+                                                        พอเราแอบเปลี่ยนราคาซื้อ แม้แต่ตัวเลขเดียว รหัส Hash ชุดใหม่จะเปลี่ยนไปทันที ทำให้ไม่ตรงกับรหัสเดิมที่ล็อกไว้ในตอนแรก ระบบจึงจับได้และปฏิเสธรายการ
                                                     </div>
                                                 </div>
 
@@ -1474,7 +1477,7 @@ export default function Lab4() {
                                                         ทำไมถึงสำคัญ?
                                                     </div>
                                                     <div style={{color: '#475569', fontSize: '0.9rem', lineHeight: 1.55}}>
-                                                        นี่คือ Binding (ผูกมัด): ล็อกแล้วคือล็อกเลย เปลี่ยนใจทีหลังไม่ได้
+                                                        นี่คือคุณสมบัติ Binding (ผูกมัด): ล็อกแล้วคือล็อกเลย ทั้งเราและคนอื่นไม่สามารถแอบเปลี่ยนใจมาเนียนแก้ข้อมูลทีหลังได้
                                                     </div>
                                                 </div>
 
@@ -1483,7 +1486,7 @@ export default function Lab4() {
                                                         เอาไปใช้จริงยังไง?
                                                     </div>
                                                     <div style={{color: '#475569', fontSize: '0.9rem', lineHeight: 1.55}}>
-                                                        นี่คือเหตุผลที่ blockchain แก้ประวัติย้อนหลังไม่ได้
+                                                        เป็นหลักการเดียวกับที่บล็อกเชนใช้ป้องกันไม่ให้ใครแอบแก้ไขประวัติการโอนเงินย้อนหลังได้นั่นเอง
                                                     </div>
                                                 </div>
                                             </div>
@@ -1567,13 +1570,12 @@ export default function Lab4() {
                 </h1>
 
                 <h2 className="lab4-subtitle">
-                    มาเรียนรู้วิธีการล็อคคำตอบให้ปลอดภัย
+                    ไม่อยากโดนบอทสวมรอยซื้อเหรียญแซงหน้าต้องทำไง?
                 </h2>
 
                 <div className="lab4-description">
-                    <p>ลองส่งคำสั่งเทรดแบบซ่อนข้อมูลจริง! ด้วย Cryptographic Hash</p>
-                    <p>ที่ช่วยจะป้องกันคำสั่งของคุณไว้ไม่ให้ถูกแก้ไข (Binding)</p>
-                    <p>รักษาความเป็นส่วนตัวจนกว่าจะเฉลยข้อมูล (Hiding)</p>
+                    <p>เมื่อความปลอดภัยในการซื้อกำลังตกอยู่ในอันตราย</p>
+                    <p>เราจะรับมือยังไง?</p>
                 </div>
 
                 <div className="lab4-actions">
