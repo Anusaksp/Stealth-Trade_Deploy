@@ -97,6 +97,9 @@ Route::get('/minigame_commitreveal', function () {
     return Inertia::render('minigame_commitreveal');
 })->name('minigame_commitreveal');
 
+Route::get('/lab5', function () {
+    return Inertia::render('lab5');
+})->name('lab5');
 
 ///////////////////////////footer///////////////////////////
 Route::get('/about/contract', function () {
