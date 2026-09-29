@@ -158,17 +158,17 @@ export const STEP_META = [
     index: 1,
     topic: "ปัญหาที่เราจะแก้",
     mentor:
-      "ก่อนสร้างต้นไม้ เรามาดูปัญหากันก่อนครับ เราจะพิสูจน์ได้ยังไงว่า Order อยู่ในข้อมูลจริง โดยไม่ต้องเปิดเผยทุก Order?",
+      "เราได้ส่งคำสั่งซื้อของเราไปแล้ว! แต่เอ๊ะ? เราจะแน่ในได้ยังไงว่าคำสั่งซื้อของเราหมุนเวียนอยู่ในระบบหรือเปล่า?",
   },
   {
     index: 2,
     topic: "สร้างรอยประทับ",
-    mentor: "ก่อนเอาข้อมูลมาจับคู่กัน เราทำให้แต่ละ Order กลายเป็นรอยประทับดิจิทัลก่อนครับ",
+    mentor: "ทบทวนการสั่งซื้อแบบปลอดภัยของเรากันเถอะครับ! เรามาสร้างรอยประทับ (Hash) เพื่อปกป้องข้อมูลคำสั่งซื้อ (Order) ของเรากัน",
   },
   {
     index: 3,
     topic: "ประกอบต้นไม้",
-    mentor: "ลองจับ Hash สองตัวมารวมกันครับ เราจะได้รอยประทับของ “คู่นี้”",
+    mentor: "เอาล่ะครับ! เรามาดูวิธีการที่ผู้ตวจสอบ (ระบบ) ตรวจหา Order ของเรากันครับ",
   },
   {
     index: 4,
@@ -588,7 +588,7 @@ function MentorMessage({ message }) {
       </div>
       <div className="lab5-min-w-0">
         <div className="lab5-flex lab5-items-baseline lab5-gap-2">
-          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">อ.มิน</span>
+          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร.ซีโร่</span>
           <span className="lab5-text-xs lab5-text-muted-foreground">ผู้สอน</span>
         </div>
         <p className="lab5-mt-0.5 lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80 lab5-text-pretty">{message}</p>
@@ -801,8 +801,8 @@ function StepIntro() {
           Merkle Trees
         </h1>
         <p className="lab5-mx-auto lab5-max-w-md lab5-text-pretty lab5-text-base lab5-leading-relaxed lab5-text-muted-foreground">
-          วันนี้เราจะเรียนรู้ส่วนหนึ่งของระบบที่ใช้พิสูจน์ข้อมูล: เราจะพิสูจน์ว่า Order หนึ่งรายการ
-          อยู่ในชุดข้อมูลจริง โดยไม่ต้องเปิดเผย Order อื่นทั้งหมด
+          ถ้าเราอยากจะเช็คว่าคำสั่งซื้อของเราอยู่ในระบบรึเปล่า?
+          <p> <strong> จะต้องทำยังไง? </strong></p>
         </p>
       </div>
 
@@ -816,7 +816,7 @@ function StepIntro() {
 
       <div className="lab5-mx-auto lab5-max-w-md lab5-space-y-2">
         <p className="lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-foreground-70">
-          วันนี้คุณจะลองสร้างต้นไม้เอง แล้วพิสูจน์ Order หนึ่งรายการด้วย hash เพียงบางส่วน
+          เรามาเรียนรู้กระบวนการตรวจสอบคำสั่งซื้อที่เราส่งกันไปเมื่อแล็บ 4 กันครับ
         </p>
         <p className="lab5-text-pretty lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground">
           หมายเหตุ: นี่ไม่ใช่ ZKP ทั้งระบบ แต่เป็นกลไกพื้นฐานที่ช่วยสร้างหลักฐานการมีอยู่ของข้อมูล
@@ -855,8 +855,8 @@ function Step1WhyMerkle() {
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ปัญหาที่เราจะแก้"
-        title="เราจะพิสูจน์ได้อย่างไรว่า Order อยู่ในชุดข้อมูล?"
-        description="สมมติคุณต้องการพิสูจน์ว่า Order B อยู่ในข้อมูลจริง แต่คุณไม่อยากเปิดเผย Order A, C และ D ทั้งหมด เราจะทำยังไงดี?"
+        title="เราจะพิสูจน์ได้อย่างไรว่า “คำสั่งซื้อ” อยู่ในชุดข้อมูลของระบบ?"
+        description="สมมติคุณต้องการพิสูจน์ว่า Order B ของคุณอยู่ในชุดข้อมูลจริง แต่ข้อมูลคำสั่งซื้อมีปริมาณมหาศาล หาทั้งวันก็ไม่เจอแน่ และเราไม่ต้องการให้ข้อมูลอื่นๆที่เราส่งไปก่อนหน้าถูกเปิดเผย"
       />
 
       <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
@@ -893,8 +893,7 @@ function Step1WhyMerkle() {
 
       {step1Correct && (
         <FeedbackCard variant="correct" title="ถูกต้อง">
-          เราไม่จำเป็นต้องเปิดเผยทุก Order เราสามารถส่ง Order ที่ต้องการพิสูจน์ + หลักฐานบางส่วน
-          แล้วให้คนตรวจสอบคำนวณกลับไปหา Root ได้
+          เราไม่จำเป็นต้องเปิดเผยทุก “คำสั่งซื้อ” ของเรา เราสามารถส่ง ”คำสั่งซื้อที” ต้องการพิสูจน์ + หลักฐานบางส่วน แล้วให้คนตรวจสอบคำนวณกลับไปหาคำสั่งซื้อได้
         </FeedbackCard>
       )}
     </div>
@@ -910,8 +909,8 @@ function Step2HashOrders() {
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="สร้างรอยประทับ"
-        title="ก่อนสร้างต้นไม้ เราต้องทำให้แต่ละ Order เป็น “รอยประทับ” ก่อน"
-        description="เรามี Order A, B, C และ D — ก่อนจะเอาข้อมูลมาสร้างต้นไม้ เราต้องเปลี่ยนแต่ละ Order ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
+        title="ก่อนยืนยันคำสั่งซื้อว่ามีจริงหรือเปล่า? เราต้องทำให้แต่ละ คำสั่งซื้อ เป็น “Hash” ก่อน"
+        description="เรามี Order A, B, C และ D เราจะเอาข้อมูลมาเป็นสร้างต้นไม้ เพื่อค้นหาข้อมูลของเรา เราต้องเปลี่ยนแต่ละ “คำสั่งซื้อ” ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
       />
 
       <MentorMessage message="ทำไปทำไม? เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้างต้นไม้" />
@@ -956,9 +955,8 @@ function Step2HashOrders() {
 
       {hashedCount === 1 && !allHashed && (
         <FeedbackCard variant="correct" title="รอยประทับแรกเสร็จแล้ว">
-          Order นี้ถูกเปลี่ยนเป็น Hash แล้ว ถ้าข้อมูลเดิมเหมือนเดิม Hash ก็จะได้ค่าเดิม
-          จุดสำคัญคือ ถ้าข้อมูลเปลี่ยนแม้เพียงเล็กน้อย Hash ที่ได้ก็จะเปลี่ยนตาม —
-          ลองสร้างรอยประทับให้ Order ที่เหลือ →
+         Order แต่ละใบถูกเปลี่ยนเป็นรอยประทับดิจิทัล (Hash) ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ของ Order A, B, C และ D
+          พร้อมนำไปประกอบเป็นต้นไม้แล้ว
         </FeedbackCard>
       )}
 
@@ -1015,8 +1013,8 @@ function Step3BuildTree() {
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ประกอบต้นไม้"
-        title="เอา Hash มาจับคู่กัน เพื่อสร้างต้นไม้"
-        description="ตอนนี้เรามีรอยประทับของ Order A, B, C และ D แล้ว ขั้นต่อไป เราจะเอา Hash ทีละ 2 ตัวมารวมกัน"
+        title="นำค่า Hash มาจับคู่กันเพื่อสร้างโครงสร้าง Merkle Tree"
+        description="สร้างค่า Hash A, B, C, D เรียบร้อยแล้ว ขั้นถัดไปคือจับคู่ Hash เพื่อหาค่า Root Hash เพื่อยืนยันว่าเรามีคำสั่งซื้อนี้จริงๆ"
       />
 
       <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
