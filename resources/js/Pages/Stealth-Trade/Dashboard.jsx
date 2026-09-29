@@ -130,7 +130,7 @@ function DashboardContent() {
             href: '/minigame_commitreveal',
         },
         {
-            title: lang === 'TH' ? 'แบบทดสอบที่ 5' : 'LAB 5',
+            title: lang === 'TH' ? 'Merkle Proof of Inclusion' : 'LAB 5',
             description: lang === 'TH'
                 ? 'การทดสอบที่จะทำให้คุณเข้าใจเกี่ยวกับ ZKP ได้มากขึ้น'
                 : 'Test to make you understand more about ZKP.',
