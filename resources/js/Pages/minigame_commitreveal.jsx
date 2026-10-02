@@ -812,7 +812,7 @@ export default function Lab4() {
                                                         </button>
                                                         <div className="lab4-drop-why">
                                                             <span className="lab4-drop-why-icon">❓</span>
-                                                            ทำไม?
+                                                            Why (ทำไม?)
                                                         </div>
                                                         <div className="lab4-drop-why-text">
                                                             เพื่อกันการเดาวสุ่มรหัส การใส่คำสุ่ม<br />ทำให้เดาสุ่มรหัสได้ยากขึ้น
@@ -886,7 +886,7 @@ export default function Lab4() {
                                                         <button className="lab4-btn-box active faded">→ nonce แล้ว</button>
                                                         <div className="lab4-drop-why">
                                                             <span className="lab4-drop-why-icon">❓</span>
-                                                            ทำไม?
+                                                            Why (ทำไม?)
                                                         </div>
                                                         <div className="lab4-drop-why-text">
                                                             เพื่อทำให้คำสั่งซื้อไม่สามารถใช้ซ้ำได้

@@ -816,13 +816,13 @@ export default function MiniGameCave() {
                                         className={`mg-btn-keep ${hasSecretKnowledge ? 'mg-selected' : ''}`}
                                         onClick={() => handleChooseKnowledge(true)}
                                     >
-                                        🔑 ฉันรู้คำวิเศษจริง
+                                        ฉันรู้คำวิเศษจริง
                                     </button>
                                     <button
                                         className={`mg-btn-swap ${!hasSecretKnowledge ? 'mg-selected' : ''}`}
                                         onClick={() => handleChooseKnowledge(false)}
                                     >
-                                        🎭 ฉันไม่รู้ แต่จะแกล้งทำ
+                                        ฉันไม่รู้ แต่จะแกล้งทำ
                                     </button>
                                 </div>
                             </div>

@@ -263,7 +263,7 @@ export default function MiniGameCipher() {
     const [isSeqDiagramVisible, setIsSeqDiagramVisible] = useState(false);
     const accordionItems = [
         {
-            icon: '✉️',
+            //icon: '✉️',
             iconBg: '#ede9fe',
             title: '1. Commit — ผูกมัดคำตอบ',
             badge: 'Binding & Hiding',
@@ -278,17 +278,17 @@ export default function MiniGameCipher() {
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                         <div style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#5b21b6' }}>
-                            🔒 <strong>Binding:</strong> ล็อคแล้วเปลี่ยนใจสลับคำตอบทายหลังไม่ได้
+                            <strong>Binding:</strong> ล็อคแล้วเปลี่ยนใจสลับคำตอบทายหลังไม่ได้
                         </div>
                         <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#991b1b' }}>
-                            🙈 <strong>Hiding:</strong> ฝั่ง Verifier มองไม่เห็นข้อมูลข้างในกล่อง
+                            <strong>Hiding:</strong> ฝั่ง Verifier มองไม่เห็นข้อมูลข้างในกล่อง
                         </div>
                     </div>
                 </div>
             ),
         },
         {
-            icon: '🔑',
+            //icon: '🔑',
             iconBg: '#fef3c7',
             title: '2. Challenge — ส่งโจทย์ท้าทาย',
             badge: 'Unpredictable Randomness',
@@ -300,7 +300,7 @@ export default function MiniGameCipher() {
             ),
         },
         {
-            icon: '🔓',
+            //icon: '🔓',
             iconBg: '#d1fae5',
             title: '3. Response — เปิดกล่องเฉลย',
             badge: 'Verification',
@@ -902,7 +902,7 @@ export default function MiniGameCipher() {
                                     }}
                                 >
                                     <div style={{ fontSize: roundCount === preset.value ? 13 : 12, fontWeight: 700, marginBottom: 2 }}>
-                                        {preset.recommended ? '⊙ ' : preset.value === 3 ? '⚡ ' : '🔒 '}{preset.label}
+                                        {preset.recommended ? '' : preset.value === 3 ? '' : ''}{preset.label}
                                     </div>
                                     <div style={{ fontSize: 11, opacity: 0.8 }}>{preset.sublabel}</div>
                                 </button>
@@ -1033,7 +1033,7 @@ export default function MiniGameCipher() {
                                                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                                 </svg>
                                             </div>
-                                            <div style={{ fontSize: 12, color: '#c4b5fd', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>🔒 กล่องคำตอบถูกล็อกแล้ว</div>
+                                            <div style={{ fontSize: 12, color: '#c4b5fd', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>กล่องคำตอบถูกล็อกแล้ว</div>
                                             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Binding &amp; Hiding Sealed</div>
                                         </>
                                     ) : (
@@ -1286,7 +1286,7 @@ export default function MiniGameCipher() {
                                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #7c3aed, #d946ef)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(124,58,237,0.35)' }}
                             >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
-                                {monteCarloState === 'done' ? '⚡ รันจำลอง 1,000 คนใหม่อีกครั้ง (Run Again)' : '⚡ เริ่มรันจำลอง 1,000 คนทันที (Simulate 1,000 Trials)'}
+                                {monteCarloState === 'done' ? 'รันจำลอง 1,000 คนใหม่อีกครั้ง (Run Again)' : 'เริ่มรันจำลอง 1,000 คนทันที (Simulate 1,000 Trials)'}
                             </button>
                             <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 5 }}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>

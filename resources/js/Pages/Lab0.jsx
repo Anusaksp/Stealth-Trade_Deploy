@@ -14,10 +14,10 @@ const QUESTIONS = [
         mainImage: '/images/Lab0_All.jpg',
         targetImage: '/images/Lab0_people.png',
         targetDesc: 'ชายเสื้อขาว',
-        storyTitle: '🔍 ข้อที่ 1 : ลองนึกภาพแบบนี้ก่อน',
+        storyTitle: 'ข้อที่ 1 : ลองนึกภาพแบบนี้ก่อน',
         storyP1: 'สมมติเราเล่นเกมตามหา <b>ชายเสื้อขาวที่แอบอยู่ในฝูงชน</b> กับเพื่อน เราก็บอกเพื่อนไปว่าเราหาเจอแล้ว แต่เพื่อนไม่เชื่อ หาว่าเราโม้',
         storyP2: 'ทีนี้ปัญหาคือ ถ้าเราชี้ให้ดูตรง ๆ เกมก็จบ เพื่อนได้คำตอบไปฟรี และจะทำให้เกมที่เล่นไม่สนุก เพราะฉะนั้นเราจะพิสูจน์ให้เพื่อนดูว่าเราสามารถหาเจอแล้วจริงๆ <b>โดยไม่บอกว่ามันอยู่ตรงไหน</b>?',
-        noteIdle: '🔍 ชายเสื้อขาว ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
+        noteIdle: 'ชายเสื้อขาว ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
         x: 72.3,
         y: 52.6,
         spanX: 4.0,
@@ -32,10 +32,10 @@ const QUESTIONS = [
         mainImage: '/images/lab_0_all.jpg',
         targetImage: '/images/lab0_1.jpg',
         targetDesc: 'หนุ่มผมฟูสีส้ม',
-        storyTitle: '🏖️ ข้อที่ 2 : ฝูงชนริมชายหาด',
+        storyTitle: 'ข้อที่ 2 : ฝูงชนริมชายหาด',
         storyP1: 'คราวนี้เปลี่ยนมาที่ <b>ฝูงชนริมชายหาดแสนคึกคัก</b> เราบอกเพื่อนว่าเราหา <b>หนุ่มผมฟูสีส้ม</b> ที่ยืนอยู่ในภาพเจอแล้ว!',
         storyP2: 'เพื่อนท้าให้เราแสดงหลักฐานอีกรอบ! เราจะพิสูจน์ให้เพื่อนเชื่อได้ไหม โดยที่เพื่อนยังไม่รู้ตำแหน่งจริง?',
-        noteIdle: '🔍 หนุ่มผมฟูสีส้ม ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
+        noteIdle: 'หนุ่มผมฟูสีส้ม ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
         x: 23.12,
         y: 41.88,
         spanX: 4.5,
@@ -50,9 +50,9 @@ const QUESTIONS = [
         mainImage: '/images/lab_0_all.jpg',
         targetImage: '/images/lab0_2.jpg',
         targetDesc: 'ลุงเสื้อขาวนั่งเก้าอี้',
-        storyTitle: '🏖️ ข้อที่ 3: ใครแอบนั่งพักอยู่?',
+        storyTitle: 'ข้อที่ 3: ใครแอบนั่งพักอยู่?',
         storyP2: 'ถ้าเราเปิดทั้งหาดให้เพื่อนดู เพื่อนก็จะรู้ทันทีว่าลุงนั่งอยู่ที่ไหน แต่ถ้าเราใช้ <b>Zero-Knowledge Proof</b> เราจะพิสูจน์ได้ว่าเรารู้จริงโดยไม่เปิดเผยตำแหน่ง!',
-        noteIdle: '🔍 ลุงเสื้อขาวนั่งเก้าอี้ ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
+        noteIdle: 'ลุงเสื้อขาวนั่งเก้าอี้ ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
         x: 56.82,
         y: 55.19,
         spanX: 4.5,
@@ -67,10 +67,10 @@ const QUESTIONS = [
         mainImage: '/images/lab_0_all.jpg',
         targetImage: '/images/lab0_3.jpg',
         targetDesc: 'เด็กเสื้อลายเขียวขาว',
-        storyTitle: '🏖️ ข้อที่ 4 : กองเชียร์วอลเลย์บอล',
+        storyTitle: 'ข้อที่ 4 : กองเชียร์วอลเลย์บอล',
         storyP1: 'ข้อท้าทายสุดท้ายของสถานีนี้! แถวสนามวอลเลย์บอลริมหาด มี <b>เด็กหนุ่มผมฟูในเสื้อลายทางเขียวขาว</b> ยืนมองการแข่งขันอยู่',
         storyP2: 'ลองแสดง ZKP ให้เพื่อนของคุณ ดูอีกครั้งเพื่อตอกย้ำความเข้าใจว่า ทำไม ZKP ถึงเป็นเทคโนโลยีที่ทรงพลังและปลอดภัย!',
-        noteIdle: '🔍 เด็กเสื้อลายเขียวขาว ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
+        noteIdle: 'เด็กเสื้อลายเขียวขาว ซ่อนอยู่ในภาพนี้ — ลองเลือกวิธีพิสูจน์ให้เพื่อนดู',
         x: 87.80,
         y: 21.60,
         spanX: 4.5,
@@ -246,13 +246,13 @@ export default function Lab0() {
     let scannerTxt = '';
     if (!ageOn) {
         scannerCls = 'warn';
-        scannerTxt = '❌ พนักงานยังไม่ได้คำตอบที่ต้องการ — เข้าไม่ได้';
+        scannerTxt = 'พนักงานยังไม่ได้คำตอบที่ต้องการ — เข้าไม่ได้';
     } else if (extraCount === 0) {
         scannerCls = 'ok';
-        scannerTxt = '🟢 ไฟเขียว "อายุเกิน 20" — พนักงานไม่เห็นข้อมูลอื่นเลย';
+        scannerTxt = 'ไฟเขียว "อายุเกิน 20" — พนักงานไม่เห็นข้อมูลอื่นเลย';
     } else {
         scannerCls = 'warn';
-        scannerTxt = `🟡 ผ่านเข้าได้ แต่พนักงานเห็นข้อมูลส่วนตัวเกินไป ${extraCount} อย่าง`;
+        scannerTxt = `ผ่านเข้าได้ แต่พนักงานเห็นข้อมูลส่วนตัวเกินไป ${extraCount} อย่าง`;
     }
 
     const handleCheckChange = (id, checked_val) => {
@@ -276,7 +276,7 @@ export default function Lab0() {
         const zkpChecked = {};
         ID_FIELDS.forEach(f => { zkpChecked[f.id] = f.need; });
         setChecked(zkpChecked);
-        setV2Verdict({ cls: 'good', html: '<b>⌚ นาฬิกาอัจฉริยะขึ้นไฟเขียว — คุณเลือกข้อมูลที่จะแสดงได้ถูกต้อง</b> เครื่องสแกนบอกพนักงานแค่ว่า "ใช่ อายุเกิน 20" เขาได้คำตอบที่ต้องการครบ ส่วนชื่อ เลขบัตร ที่อยู่ และวันเกิดจริง ยังเป็นความลับทั้งหมด หลักการนี้เรียกว่า Zero-Knowledge Proof' });
+        setV2Verdict({ cls: 'good', html: '<b>นาฬิกาอัจฉริยะขึ้นไฟเขียว — คุณเลือกข้อมูลที่จะแสดงได้ถูกต้อง</b> เครื่องสแกนบอกพนักงานแค่ว่า "ใช่ อายุเกิน 20" เขาได้คำตอบที่ต้องการครบ ส่วนชื่อ เลขบัตร ที่อยู่ และวันเกิดจริง ยังเป็นความลับทั้งหมด หลักการนี้เรียกว่า Zero-Knowledge Proof' });
         complete(3, ['ben3']);
     };
 
@@ -507,7 +507,7 @@ export default function Lab0() {
                                     <p>ระบบจะสร้างหลักฐานทางคณิตศาสตร์ที่ยืนยันได้ว่า คุณรู้รหัสผ่านที่ถูกต้องจริง โดยที่ Victor (ผู้ตรวจสอบ) จะไม่มีทางเห็นตัวรหัสผ่านจริงเลยแม้แต่น้อย เห็นเพียงหลักฐานที่ยืนยันได้ว่า "ใช่ รหัสถูกต้อง" เท่านั้น ส่วนรหัสผ่านตัวจริงจะถูกเก็บไว้กับ Peggy (ผู้พิสูจน์) เพียงผู้เดียว</p>
                                 </div>
                             </div>
-                            <label className="lab0-field-label" htmlFor="secretIn">🔒 รหัสผ่านของคุณ (ไม่ถูกส่งออกไปไหน)</label>
+                            <label className="lab0-field-label" htmlFor="secretIn">รหัสผ่านของคุณ (ไม่ถูกส่งออกไปไหน)</label>
                             <input
                                 id="secretIn"
                                 className="lab0-txt"
@@ -524,13 +524,13 @@ export default function Lab0() {
 
                             <div className="lab0-two">
                                 <div className="lab0-box keep">
-                                    <div className="lab0-box-h">🔒 ความลับ (อยู่กับคุณ)</div>
+                                    <div className="lab0-box-h">ความลับ (อยู่กับคุณ)</div>
                                     <div className={`lab0-box-val${secretOut ? ' blur' : ''}`}>{secretOut || '—'}</div>
                                     <div className="lab0-box-note">ไม่ถูกส่งออก · Victor ไม่เห็น</div>
                                 </div>
                                 <div className="lab0-box send">
                                     <div className="lab0-box-h">
-                                        📤 หลักฐาน ZKP (ส่งออกได้)
+                                        หลักฐาน ZKP (ส่งออกได้)
 
                                     </div>
                                     <div className="lab0-box-val">{proofOut || '—'}</div>
@@ -544,7 +544,7 @@ export default function Lab0() {
 
                             {/* ── Login Simulation Block ── */}
                             <div className="lab0-story" style={{ marginTop: '24px' }}>
-                                <div className="lab0-story-h">🚪 จำลองการเข้าสู่ระบบ</div>
+                                <div className="lab0-story-h">จำลองการเข้าสู่ระบบ</div>
                                 <div className="lab0-story-text">
                                     <p>ลองใส่ <b>รหัสผ่านจริงของคุณ</b> เพื่อเข้าสู่ระบบดู ระบบจะ Hash รหัสผ่านของคุณแล้วเทียบกับรหัสผ่านชั่วคราวที่เก็บไว้ในฐานข้อมูล เพื่อเช็คว่าตรงกันหรือไม่
                                         ถ้ารหัส Hash ตรงกันหมายความว่ารหัสผ่านจริงที่คุณใช้ถูกต้อง</p>
@@ -620,7 +620,7 @@ export default function Lab0() {
 
                             <div style={{ background: '#FCF9FF', border: '1px solid #EBE2FA', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
                                 <div style={{ color: '#887B99', fontSize: '13px', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    🪪 บัตรประชาชนของคุณ
+                                    บัตรประชาชนของคุณ
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <div style={{ width: '100px', background: '#FDE4E4', border: '1px solid #F9D0D0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6A4A4A', fontSize: '12px', fontWeight: 'bold', flexShrink: 0 }}>
@@ -697,7 +697,7 @@ export default function Lab0() {
                             </div>
 
                             <div className="lab0-btn-row" style={{ marginTop: '16px' }}>
-                                <button className="lab0-btn green" onClick={handleUseZKP}>⌚ ใช้นาฬิกาอัจฉริยะ ZKP</button>
+                                <button className="lab0-btn green" onClick={handleUseZKP}>ใช้นาฬิกาอัจฉริยะ ZKP</button>
                             </div>
 
                             {v2Verdict.html && (
@@ -800,12 +800,12 @@ export default function Lab0() {
 
                         {/* Benefits */}
                         <div className="lab0-panel">
-                            <p className="lab0-panel-title">🎁 สิ่งที่คุณจะได้</p>
+                            <p className="lab0-panel-title">สิ่งที่คุณจะได้</p>
                             <div className="lab0-benefits">
                                 {[
-                                    { id: 'ben1', st: 1, ic: '🔍', title: 'เข้าใจ ZKP แบบเห็นภาพ', desc: 'จากเกมตามหาในฝูงชน' },
-                                    { id: 'ben2', st: 2, ic: '🔐', title: 'รู้ว่าหลักฐาน ≠ ความลับ', desc: 'Proof ไม่ได้เปิดเผย Secret' },
-                                    { id: 'ben3', st: 3, ic: '🛡️', title: 'Selective Disclosure', desc: 'เปิดเผยแค่เท่าที่จำเป็น' },
+                                    { id: 'ben1', st: 1, ic: '', title: 'เข้าใจ ZKP แบบเห็นภาพ', desc: 'จากเกมตามหาในฝูงชน' },
+                                    { id: 'ben2', st: 2, ic: '', title: 'รู้ว่าหลักฐาน ≠ ความลับ', desc: 'Proof ไม่ได้เปิดเผย Secret' },
+                                    { id: 'ben3', st: 3, ic: '', title: 'Selective Disclosure', desc: 'เปิดเผยแค่เท่าที่จำเป็น' },
                                 ].map(b => (
                                     <div key={b.id} className={`lab0-ben${doneSet.has(b.st) ? ' on' : ''}`}>
                                         <span className="ic">{b.ic}</span>
@@ -821,7 +821,7 @@ export default function Lab0() {
 
                         {/* Glossary */}
                         <div className="lab0-panel">
-                            <p className="lab0-panel-title">🔤 คำศัพท์ที่ต้องจำ</p>
+                            <p className="lab0-panel-title">คำศัพท์ที่ต้องจำ</p>
                             <div className="lab0-gloss-item">
                                 <b>ผู้พิสูจน์ <span className="en">Prover · Peggy</span></b>
                                 <span>ฝ่ายที่รู้ความลับและต้องพิสูจน์ตัวเอง</span>
