@@ -2,16 +2,23 @@ import React, { useState } from 'react';
 import '../../css/lab4.css';
 import { Head } from '@inertiajs/react';
 
+/**
+ * หน้าบทเรียน Lab 4 (Cryptographic Commitments: ล็อกก่อน เปิดทีหลัง)
+ * แสดงเนื้อหาตามค่า stage ตั้งแต่หน้าแรก ด่านที่ 1-3 แบบทดสอบ และหน้าสรุป
+ *
+ * @return {JSX.Element} หน้าบทเรียนตาม stage ปัจจุบัน
+ * @author StealthTrade Team
+ */
 export default function Lab4() {
     // 0 = Intro, 1 = Stage 1.1, 2 = Stage 1.1 (attacked), 3 = Stage 1.2, 4 = Stage 1.2 (attacked), 5 = Stage 2 Commit input, 6 = Stage 2 Salt/nonce
     const [stage, setStage] = useState(0);
-    const [showWhy, setShowWhy] = useState(false);
+    const [isWhyVisible, setIsWhyVisible] = useState(false);
     const [orderText, setOrderText] = useState('ซื้อ BTC 0.25 @ 68,420');
-    const [saltDone, setSaltDone] = useState(false);
-    const [nonceDone, setNonceDone] = useState(false);
-    const [saltClicked, setSaltClicked] = useState(false);
-    const [nonceClicked, setNonceClicked] = useState(false);
-    const [dragOver, setDragOver] = useState(null);
+    const [isSaltDone, setIsSaltDone] = useState(false);
+    const [isNonceDone, setIsNonceDone] = useState(false);
+    const [isSaltClicked, setIsSaltClicked] = useState(false);
+    const [isNonceClicked, setIsNonceClicked] = useState(false);
+    const [dragOverTarget, setDragOverTarget] = useState(null);
     const [maliciousAction, setMaliciousAction] = useState('buy');
     const [maliciousPrice, setMaliciousPrice] = useState('68420');
     const [appliedMaliciousAction, setAppliedMaliciousAction] = useState('buy');
@@ -21,7 +28,7 @@ export default function Lab4() {
     const saltValue = 'a7f3c2';
     const nonceValue = 'n#8291';
 
-    const quizData = [
+    const quizQuestions = [
         {
             question: 'ทำไมส่งคำสั่งแบบเข้ารหัสเฉยๆ ถึงยังไม่ปลอดภัย?',
             answers: [
@@ -115,8 +122,8 @@ export default function Lab4() {
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
                             transition: 'background 0.2s'
                         }}
-                        onMouseOver={(e) => e.target.style.background = '#5b3aa8'}
-                        onMouseOut={(e) => e.target.style.background = '#6D48D1'}
+                        onMouseOver={(event) => event.target.style.background = '#5b3aa8'}
+                        onMouseOut={(event) => event.target.style.background = '#6D48D1'}
                     >
                         ไป Lab 5 &rarr;
                     </button>
@@ -128,8 +135,8 @@ export default function Lab4() {
                             fontSize: '1.05rem', fontWeight: 600, cursor: 'pointer',
                             transition: 'background 0.2s'
                         }}
-                        onMouseOver={(e) => e.target.style.background = '#f8fafc'}
-                        onMouseOut={(e) => e.target.style.background = 'white'}
+                        onMouseOver={(event) => event.target.style.background = '#f8fafc'}
+                        onMouseOut={(event) => event.target.style.background = 'white'}
                     >
                         เริ่มใหม่อีกครั้ง
                     </button>
@@ -140,8 +147,8 @@ export default function Lab4() {
 
     // === QUIZ PAGE (stage >= 15) ===
     if (stage >= 15) {
-        const quizScore = quizAnswers.filter((a, i) => a === quizData[i].correct).length;
-        const allDone = stage >= 18;
+        const quizScore = quizAnswers.filter((answer, index) => answer === quizQuestions[index].correct).length;
+        const isAllDone = stage >= 18;
 
         return (
             <div className="lab4-interactive-container">
@@ -153,12 +160,12 @@ export default function Lab4() {
                         {[1,2,3,4,5,6,7,8].map(step => {
                             let className = 'lab4-step';
                             if (step < 8) className += ' completed';
-                            if (step === 8) className += allDone ? ' completed' : ' active';
+                            if (step === 8) className += isAllDone ? ' completed' : ' active';
                             return <div key={step} className={className}>{step}</div>;
                         })}
                     </div>
                     <div className="lab4-step-label">
-                        {allDone ? 'ควิซ · เสร็จแล้ว! 🎉' : `ควิซ · ข้อ ${stage - 14}`}
+                        {isAllDone ? 'ควิซ · เสร็จแล้ว! 🎉' : `ควิซ · ข้อ ${stage - 14}`}
                     </div>
                 </div>
 
@@ -172,9 +179,9 @@ export default function Lab4() {
                         </div>
                         <div className="lab4-mentor-message">
                             {stage === 15 && 'ทวนความเข้าใจกันหน่อย เลือกให้ถูกครบทั้ง 3 ข้อนะครับ'}
-                            {stage === 16 && (quizAnswers[0] === quizData[0].correct ? 'ถูกต้อง! ไปข้อ 2 กันต่อ' : 'ยังไม่ใช่ครับ! ลองดูอีกที')}
-                            {stage === 17 && (quizAnswers[1] === quizData[1].correct ? 'เยี่ยม! ข้อสุดท้ายแล้ว' : 'ยังไม่ใช่ครับ! ลองดูอีกที')}
-                            {stage >= 18 && (allDone && quizScore === 3 ? '🎉 เยี่ยมมาก! ครบทั้ง 3 ข้อ คุณเข้าใจ Cryptographic Commitments แล้ว!' : '📝 ทำแบบทดสอบเสร็จแล้ว! ลองทบทวนข้อที่ตอบผิดอีกครั้งนะครับ')}
+                            {stage === 16 && (quizAnswers[0] === quizQuestions[0].correct ? 'ถูกต้อง! ไปข้อ 2 กันต่อ' : 'ยังไม่ใช่ครับ! ลองดูอีกที')}
+                            {stage === 17 && (quizAnswers[1] === quizQuestions[1].correct ? 'เยี่ยม! ข้อสุดท้ายแล้ว' : 'ยังไม่ใช่ครับ! ลองดูอีกที')}
+                            {stage >= 18 && (isAllDone && quizScore === 3 ? '🎉 เยี่ยมมาก! ครบทั้ง 3 ข้อ คุณเข้าใจ Cryptographic Commitments แล้ว!' : '📝 ทำแบบทดสอบเสร็จแล้ว! ลองทบทวนข้อที่ตอบผิดอีกครั้งนะครับ')}
                         </div>
                     </div>
                 </div>
@@ -188,17 +195,17 @@ export default function Lab4() {
                         ตอบผิดได้ ทุกตัวเลือกมีคำอธิบาย — เลือกคำตอบที่ถูกต้องเพื่อไปข้อต่อไป
                     </div>
 
-                    {quizData.map((q, qi) => {
-                        const questionStage = qi + 15;
+                    {quizQuestions.map((question, questionIndex) => {
+                        const questionStage = questionIndex + 15;
                         // Only show the question for the current stage (one question per page)
                         if (questionStage !== stage || stage >= 18) return null;
 
-                        const selected = quizAnswers[qi];
-                        const isCorrect = selected === q.correct;
-                        const nextLabel = qi < 2 ? `ถูกต้อง! ไปข้อ ${qi + 2} กันต่อ` : 'ถูกต้อง! ทำแบบทดสอบเสร็จแล้ว 🎉';
+                        const selectedAnswerIndex = quizAnswers[questionIndex];
+                        const isCorrect = selectedAnswerIndex === question.correct;
+                        const nextLabel = questionIndex < 2 ? `ถูกต้อง! ไปข้อ ${questionIndex + 2} กันต่อ` : 'ถูกต้อง! ทำแบบทดสอบเสร็จแล้ว 🎉';
 
                         return (
-                            <div key={qi} style={{
+                            <div key={questionIndex} style={{
                                 background: 'white',
                                 border: '1px solid #e2e8f0',
                                 borderRadius: '16px',
@@ -208,40 +215,40 @@ export default function Lab4() {
                                 animation: 'fade-in-up 0.35s ease-out'
                             }}>
                                 <div style={{fontWeight:600, color:'#1e293b', fontSize:'0.95rem', marginBottom:'1rem'}}>
-                                    <span style={{color:'#6D48D1', marginRight:'0.4rem', fontWeight:700}}>ข้อ {qi+1}</span>
-                                    {q.question}
+                                    <span style={{color:'#6D48D1', marginRight:'0.4rem', fontWeight:700}}>ข้อ {questionIndex+1}</span>
+                                    {question.question}
                                 </div>
                                 <div style={{display:'flex', flexDirection:'column', gap:'0.6rem'}}>
-                                    {q.answers.map((ans, ai) => {
-                                        const isSelected = selected === ai;
-                                        const isRight = ai === q.correct;
-                                        let bg = 'white', borderColor = '#e2e8f0', color = '#374151', icon = null;
+                                    {question.answers.map((answerText, answerIndex) => {
+                                        const isSelected = selectedAnswerIndex === answerIndex;
+                                        const isRight = answerIndex === question.correct;
+                                        let backgroundColor = 'white', borderColor = '#e2e8f0', color = '#374151', icon = null;
 
                                         if (isSelected && isRight) {
-                                            bg = '#f0fdf4'; borderColor = '#86efac'; color = '#15803d';
+                                            backgroundColor = '#f0fdf4'; borderColor = '#86efac'; color = '#15803d';
                                             icon = <span style={{background:'#16a34a', color:'white', borderRadius:'50%', width:'20px', height:'20px', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:'0.75rem', fontWeight:700, marginRight:'0.5rem', flexShrink:0}}>✓</span>;
                                         } else if (isSelected && !isRight) {
-                                            bg = '#fef2f2'; borderColor = '#fca5a5'; color = '#dc2626';
+                                            backgroundColor = '#fef2f2'; borderColor = '#fca5a5'; color = '#dc2626';
                                             icon = <span style={{background:'#dc2626', color:'white', borderRadius:'50%', width:'20px', height:'20px', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:'0.75rem', fontWeight:700, marginRight:'0.5rem', flexShrink:0}}>✗</span>;
                                         }
 
                                         return (
-                                            <div key={ai}>
+                                            <div key={answerIndex}>
                                                 <button
                                                     disabled={isCorrect}
                                                     onClick={() => {
                                                         const newAnswers = [...quizAnswers];
-                                                        newAnswers[qi] = ai;
+                                                        newAnswers[questionIndex] = answerIndex;
                                                         setQuizAnswers(newAnswers);
                                                         // For last question: auto-advance to score page
-                                                        if (ai === q.correct && qi === 2) {
+                                                        if (answerIndex === question.correct && questionIndex === 2) {
                                                             setTimeout(() => setStage(18), 800);
                                                         }
                                                     }}
                                                     style={{
                                                         width:'100%', textAlign:'left', padding:'0.75rem 1rem',
                                                         borderRadius:'10px', border:`1px solid ${borderColor}`,
-                                                        background:bg, color, fontSize:'0.9rem',
+                                                        background:backgroundColor, color, fontSize:'0.9rem',
                                                         cursor: isCorrect ? 'default' : 'pointer',
                                                         display:'flex', alignItems:'center', transition:'all 0.2s',
                                                         fontWeight: isSelected ? 600 : 400,
@@ -250,7 +257,7 @@ export default function Lab4() {
                                                     {isSelected ? icon : (
                                                         <span style={{width:'20px', height:'20px', borderRadius:'50%', border:'2px solid #cbd5e1', display:'inline-flex', marginRight:'0.5rem', flexShrink:0}} />
                                                     )}
-                                                    {ans}
+                                                    {answerText}
                                                 </button>
                                                 {isSelected && !isRight && (
                                                     <div style={{fontSize:'0.85rem', marginTop:'0.35rem', paddingLeft:'0.5rem', color:'#dc2626', fontWeight:600}}>
@@ -259,7 +266,7 @@ export default function Lab4() {
                                                 )}
                                                 {isSelected && isRight && (
                                                     <div style={{fontSize:'0.85rem', marginTop:'0.35rem', paddingLeft:'0.5rem', color:'#16a34a', fontWeight:600}}>
-                                                        {q.correctExplain}
+                                                        {question.correctExplain}
                                                     </div>
                                                 )}
                                             </div>
@@ -268,7 +275,7 @@ export default function Lab4() {
                                 </div>
 
                                 {/* Next button: show immediately when correct (for q0 and q1) */}
-                                {isCorrect && qi < 2 && (
+                                {isCorrect && questionIndex < 2 && (
                                     <div style={{marginTop:'1rem'}}>
                                         <button
                                             onClick={() => setStage(questionStage + 1)}
@@ -279,7 +286,7 @@ export default function Lab4() {
                                                 display:'inline-flex', alignItems:'center', gap:'0.4rem'
                                             }}
                                         >
-                                            ถัดไป → ข้อ {qi+2}
+                                            ถัดไป → ข้อ {questionIndex+2}
                                         </button>
                                     </div>
                                 )}
@@ -418,17 +425,17 @@ export default function Lab4() {
                             {stage >= 14 && stage < 15 && "รหัสไม่ตรง ระบบจับได้ทันทีว่าถูกแก้ไข คุณถูกระบุเป็น Imposter"}
                             {stage === 15 && "ทวนความเข้าใจกันหน่อย เลือกให้ถูกครบทั้ง 3 ข้อนะครับ"}
                             {stage === 16 && (
-                                quizAnswers[0] === quizData[0].correct
+                                quizAnswers[0] === quizQuestions[0].correct
                                     ? 'ถูกต้อง! ไปข้อ 2 กันต่อ'
                                     : 'ยังไม่ใช่ครับ! ลองดูอีกที'
                             )}
                             {stage === 17 && (
-                                quizAnswers[1] === quizData[1].correct
+                                quizAnswers[1] === quizQuestions[1].correct
                                     ? 'เยี่ยม! ข้อสุดท้ายแล้ว'
                                     : 'ยังไม่ใช่ครับ! ลองดูอีกที'
                             )}
                             {stage >= 18 && (
-                                quizAnswers.every((a, i) => a === quizData[i].correct)
+                                quizAnswers.every((answer, index) => answer === quizQuestions[index].correct)
                                     ? '🎉 เยี่ยมมาก! ครบทั้ง 3 ข้อ คุณเข้าใจ Cryptographic Commitments แล้ว!'
                                     : '📝 ทำแบบทดสอบเสร็จแล้ว! ลองทบทวนข้อที่ตอบผิดอีกครั้งนะครับ'
                             )}
@@ -536,18 +543,18 @@ export default function Lab4() {
                                                 บอทชิงซื้อก่อนคุณ &rarr; ราคาขยับขึ้น &rarr; <span>คุณซื้อแพงกว่าเดิม</span>
                                             </div>
                                             <div className="lab4-action-row-inline">
-                                                <button className="lab4-btn-outline" onClick={() => setShowWhy(!showWhy)}>
+                                                <button className="lab4-btn-outline" onClick={() => setIsWhyVisible(!isWhyVisible)}>
                                                     <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                                 </button>
                                                 <button className="lab4-btn-success" onClick={() => {
                                                     setStage(3);
-                                                    setShowWhy(false);
+                                                    setIsWhyVisible(false);
                                                 }}>
                                                     ถัดไป &rarr;
                                                 </button>
                                             </div>
 
-                                            {showWhy && (
+                                            {isWhyVisible && (
                                                 <div className="lab4-why-box">
                                                     <h4>เกิดอะไรขึ้น?</h4>
                                                     <p>ข้อมูลถูกส่งแบบเปิดเผย ใครดักฟังบนเครือข่ายก็อ่านได้</p>
@@ -640,12 +647,12 @@ export default function Lab4() {
                                             </div>
 
                                             <div className="lab4-action-row-inline">
-                                                <button className="lab4-btn-outline" onClick={() => setShowWhy(!showWhy)}>
+                                                <button className="lab4-btn-outline" onClick={() => setIsWhyVisible(!isWhyVisible)}>
                                                     <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                                 </button>
                                             </div>
 
-                                            {showWhy && (
+                                            {isWhyVisible && (
                                                 <div className="lab4-why-box">
                                                     <h4>เกิดอะไรขึ้น?</h4>
                                                     <p>hash ปิดบังข้อมูลได้จริง แต่มันเป็นค่าคงที่ - ส่งเมื่อไหร่ก็เหมือนเดิม</p>
@@ -666,7 +673,7 @@ export default function Lab4() {
 
                                             <button className="lab4-btn-success" onClick={() => {
                                                 setStage(5);
-                                                setShowWhy(false);
+                                                setIsWhyVisible(false);
                                             }}>
                                                 เข้าใจแล้ว <svg style={{ marginLeft: '0.25rem' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                             </button>
@@ -684,7 +691,7 @@ export default function Lab4() {
                                     className="lab4-input-field"
                                     placeholder="ซื้อ BTC 0.25 @ 68,420"
                                     value={orderText}
-                                    onChange={(e) => setOrderText(e.target.value)}
+                                    onChange={(event) => setOrderText(event.target.value)}
                                 />
                                 <button className="lab4-btn-confirm" onClick={() => setStage(6)}>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -716,9 +723,9 @@ export default function Lab4() {
                             <div className="lab4-commit-input-label" style={{ marginTop: '1.5rem' }}>คำสั่งที่ล็อกไว้ของคุณ · ลากไปวางในช่องด้านล่างทีละชั้น</div>
                             <div
                                 className="lab4-locked-order-box"
-                                draggable={!saltDone}
-                                onDragStart={(e) => e.dataTransfer.setData('text/plain', 'order')}
-                                style={{ opacity: saltDone ? 0.4 : 1, cursor: saltDone ? 'default' : 'grab' }}
+                                draggable={!isSaltDone}
+                                onDragStart={(event) => event.dataTransfer.setData('text/plain', 'order')}
+                                style={{ opacity: isSaltDone ? 0.4 : 1, cursor: isSaltDone ? 'default' : 'grab' }}
                             >
                                 <div className="lab4-locked-header">
                                     <div className="lab4-locked-title">
@@ -728,7 +735,7 @@ export default function Lab4() {
                                         </svg>
                                         <strong>คำสั่งที่ล็อกแล้ว</strong>
                                     </div>
-                                    {!saltDone && (
+                                    {!isSaltDone && (
                                         <button className="lab4-btn-drag">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <circle cx="9" cy="5" r="1.5"></circle>
@@ -745,7 +752,7 @@ export default function Lab4() {
                                 <div className="lab4-locked-value">
                                     {orderText || "ซื้อ BTC 0.25 @ 68,420"}
                                 </div>
-                                {!saltDone && <div className="lab4-locked-hint">ลากคำสั่งนี้ไปวางในช่องด้านล่าง (หรือแตะเพื่อย้าย)</div>}
+                                {!isSaltDone && <div className="lab4-locked-hint">ลากคำสั่งนี้ไปวางในช่องด้านล่าง (หรือแตะเพื่อย้าย)</div>}
                             </div>
 
                             {stage === 6 && (
@@ -753,13 +760,13 @@ export default function Lab4() {
                                     <div className="lab4-commit-boxes">
                                         {/* Salt Box */}
                                         <div
-                                            className={`lab4-commit-box${saltDone ? ' done' : ''}${dragOver === 'salt' ? ' drag-over' : ''}`}
-                                            onDragOver={(e) => { e.preventDefault(); setDragOver('salt'); }}
-                                            onDragLeave={() => setDragOver(null)}
-                                            onDrop={(e) => { e.preventDefault(); setDragOver(null); setSaltDone(true); }}
+                                            className={`lab4-commit-box${isSaltDone ? ' done' : ''}${dragOverTarget === 'salt' ? ' drag-over' : ''}`}
+                                            onDragOver={(event) => { event.preventDefault(); setDragOverTarget('salt'); }}
+                                            onDragLeave={() => setDragOverTarget(null)}
+                                            onDrop={(event) => { event.preventDefault(); setDragOverTarget(null); setIsSaltDone(true); }}
                                         >
                                             <div className="lab4-commit-box-header">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={saltDone ? '#6D48D1' : '#475569'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isSaltDone ? '#6D48D1' : '#475569'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M10 2v7.31"></path>
                                                     <path d="M14 9.3V1.99"></path>
                                                     <path d="M8.5 2h7"></path>
@@ -767,7 +774,7 @@ export default function Lab4() {
                                                     <path d="M5.52 16h12.96"></path>
                                                 </svg>
                                                 <span><strong>Salt</strong> (สุ่มค่า)</span>
-                                                {saltDone && (
+                                                {isSaltDone && (
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto'}}>
                                                         <polyline points="20 6 9 17 4 12"></polyline>
                                                     </svg>
@@ -776,8 +783,8 @@ export default function Lab4() {
                                             <div className="lab4-commit-box-desc">
                                                 เติมคำสุ่มปนก่อนเข้ารหัส<br />กันไม่ให้ใครเดาคำสั่งย้อนกลับจากรหัสได้
                                             </div>
-                                            {saltDone ? (
-                                                saltClicked ? (
+                                            {isSaltDone ? (
+                                                isSaltClicked ? (
                                                     <>
                                                         <div className="lab4-drop-result">
                                                             <div className="lab4-drop-result-pill">
@@ -785,8 +792,8 @@ export default function Lab4() {
                                                                 ผสม Salt แล้ว
                                                             </div>
                                                             <button className="lab4-btn-drag" style={{fontSize:'0.75rem',padding:'0.2rem 0.6rem'}}
-                                                                draggable={!nonceDone}
-                                                                onDragStart={(e) => e.dataTransfer.setData('text/plain', 'salted')}
+                                                                draggable={!isNonceDone}
+                                                                onDragStart={(event) => event.dataTransfer.setData('text/plain', 'salted')}
                                                             >
                                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="9" cy="19" r="1.5"></circle><circle cx="15" cy="5" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="15" cy="19" r="1.5"></circle></svg>
                                                                 ลาก
@@ -797,9 +804,9 @@ export default function Lab4() {
                                                         </div>
                                                         <button
                                                             className="lab4-btn-box active faded"
-                                                            draggable={!nonceDone}
-                                                            onDragStart={(e) => e.dataTransfer.setData('text/plain', 'salted')}
-                                                            style={{ cursor: nonceDone ? 'default' : 'grab' }}
+                                                            draggable={!isNonceDone}
+                                                            onDragStart={(event) => event.dataTransfer.setData('text/plain', 'salted')}
+                                                            style={{ cursor: isNonceDone ? 'default' : 'grab' }}
                                                         >
                                                             → Salt แล้ว
                                                         </button>
@@ -828,7 +835,7 @@ export default function Lab4() {
                                                         </div>
                                                         <button
                                                             className="lab4-btn-box active"
-                                                            onClick={() => setSaltClicked(true)}
+                                                            onClick={() => setIsSaltClicked(true)}
                                                         >
                                                             ทำการ Salt
                                                         </button>
@@ -843,19 +850,19 @@ export default function Lab4() {
 
                                         {/* Nonce Box */}
                                         <div
-                                            className={`lab4-commit-box${nonceDone ? ' done' : ''}${dragOver === 'nonce' ? ' drag-over' : ''}`}
-                                            onDragOver={(e) => { if (saltDone) { e.preventDefault(); setDragOver('nonce'); } }}
-                                            onDragLeave={() => setDragOver(null)}
-                                            onDrop={(e) => { e.preventDefault(); setDragOver(null); if (saltDone) setNonceDone(true); }}
+                                            className={`lab4-commit-box${isNonceDone ? ' done' : ''}${dragOverTarget === 'nonce' ? ' drag-over' : ''}`}
+                                            onDragOver={(event) => { if (isSaltDone) { event.preventDefault(); setDragOverTarget('nonce'); } }}
+                                            onDragLeave={() => setDragOverTarget(null)}
+                                            onDrop={(event) => { event.preventDefault(); setDragOverTarget(null); if (isSaltDone) setIsNonceDone(true); }}
                                         >
                                             <div className="lab4-commit-box-header">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={nonceDone ? '#6D48D1' : '#475569'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isNonceDone ? '#6D48D1' : '#475569'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                                     <circle cx="15.5" cy="15.5" r="1.5"></circle>
                                                 </svg>
                                                 <span><strong>nonce</strong> (สุ่มเลขครั้งเดียว)</span>
-                                                {nonceDone && (
+                                                {isNonceDone && (
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto'}}>
                                                         <polyline points="20 6 9 17 4 12"></polyline>
                                                     </svg>
@@ -864,8 +871,8 @@ export default function Lab4() {
                                             <div className="lab4-commit-box-desc">
                                                 ระบบสุ่มที่ใช้ได้ครั้งเดียว ทำให้รหัสแต่ละรอบไม่ซ้ำ<br />กันบอทก๊อปรหัสเก่าไปใช้ซ้ำ
                                             </div>
-                                            {nonceDone ? (
-                                                nonceClicked ? (
+                                            {isNonceDone ? (
+                                                isNonceClicked ? (
                                                     <>
                                                         <div className="lab4-drop-result">
                                                             <div className="lab4-drop-result-pill">
@@ -898,21 +905,21 @@ export default function Lab4() {
                                                         </div>
                                                         <button
                                                             className="lab4-btn-box active"
-                                                            onClick={() => setNonceClicked(true)}
+                                                            onClick={() => setIsNonceClicked(true)}
                                                         >
                                                             ทำการ Nonce
                                                         </button>
                                                     </>
                                                 )
                                             ) : (
-                                                <div className={`lab4-commit-box-dropzone${!saltDone ? ' disabled' : ''}`}>
-                                                    {saltDone ? 'ลากคำสั่งที่ Salt แล้วมาวางที่นี่' : 'ทำ Salt ก่อนนะครับ'}
+                                                <div className={`lab4-commit-box-dropzone${!isSaltDone ? ' disabled' : ''}`}>
+                                                    {isSaltDone ? 'ลากคำสั่งที่ Salt แล้วมาวางที่นี่' : 'ทำ Salt ก่อนนะครับ'}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
 
-                                    {nonceClicked && (
+                                    {isNonceClicked && (
                                         <>
                                             <div className="lab4-why-box" style={{marginTop:'1.5rem', background:'#f8f9ff', border:'1px solid #c4b5fd'}}>
                                                 <h4 style={{color:'#6D48D1'}}>ทำไมต้องผสม 3 อย่างนี้เข้าด้วยกัน?</h4>
@@ -960,7 +967,7 @@ export default function Lab4() {
                                             <div><strong>salt:</strong> {saltValue}</div>
                                         </div>
                                     </div>
-                                    <button className="lab4-btn-submit-green" onClick={() => { setStage(8); setShowWhy(false); }}>
+                                    <button className="lab4-btn-submit-green" onClick={() => { setStage(8); setIsWhyVisible(false); }}>
                                         ล็อกคำสั่งนี้ และส่งคำสั่งซื้อ
                                     </button>
                                 </div>
@@ -992,11 +999,11 @@ export default function Lab4() {
                             </div>
                         </div>
                         <div style={{ marginTop: '1rem' }}>
-                            <button className="lab4-btn-outline" onClick={() => setShowWhy(!showWhy)}>
+                            <button className="lab4-btn-outline" onClick={() => setIsWhyVisible(!isWhyVisible)}>
                                 <span className="lab4-btn-outline-icon">?</span> ทำไม?
                             </button>
                         </div>
-                        {showWhy && (
+                        {isWhyVisible && (
                             <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                 <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
                                 <p>คุณเปลี่ยนคำสั่งข้างในไม่ได้อีก ถ้าแก้แม้แต่ตัวเลขเดียว รหัสที่ล็อกไว้จะเปลี่ยนใหม่หมด</p>
@@ -1011,7 +1018,7 @@ export default function Lab4() {
                         <button
                             className="lab4-btn-primary"
                             style={{marginTop:'1.25rem', width:'100%', justifyContent:'center', borderRadius:'8px', background:'linear-gradient(135deg, #10b981, #059669)'}}
-                            onClick={() => { setStage(9); setShowWhy(false); }}
+                            onClick={() => { setStage(9); setIsWhyVisible(false); }}
                         >
                             ถัดไป →
                         </button>
@@ -1074,11 +1081,11 @@ export default function Lab4() {
                             </div>
 
                             <div style={{ marginTop: '1.25rem' }}>
-                                <button className="lab4-btn-outline" onClick={() => setShowWhy(!showWhy)}>
+                                <button className="lab4-btn-outline" onClick={() => setIsWhyVisible(!isWhyVisible)}>
                                     <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                 </button>
                             </div>
-                            {showWhy && (
+                            {isWhyVisible && (
                                 <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                     <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
                                     <p>Ticket นี้ระบบ (Verifier) เป็นผู้สุ่มเองเท่านั้น หลังจากคุณล็อกคำตอบไปแล้ว คุณไม่มีส่วนกำหนดเลย</p>
@@ -1094,7 +1101,7 @@ export default function Lab4() {
                             <button
                                 className="lab4-btn-primary"
                                 style={{marginTop:'1.5rem', width:'100%', justifyContent:'center', borderRadius:'8px', background:'linear-gradient(135deg, #10b981, #059669)'}}
-                                onClick={() => { setStage(10); setShowWhy(false); }}
+                                onClick={() => { setStage(10); setIsWhyVisible(false); }}
                             >
                                 ไปขั้นต่อไป: RESPOND
                             </button>
@@ -1184,12 +1191,12 @@ export default function Lab4() {
                         {stage === 10 && (
                             <>
                                 <div style={{ marginTop: '1.25rem' }}>
-                                    <button className="lab4-btn-outline" onClick={() => setShowWhy(!showWhy)}>
+                                    <button className="lab4-btn-outline" onClick={() => setIsWhyVisible(!isWhyVisible)}>
                                         <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                     </button>
                                 </div>
                                 
-                                {showWhy && (
+                                {isWhyVisible && (
                                     <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                         <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
                                         <p>ระบบดึงข้อมูลคำสั่งซื้อและ Salt ของคุณ ร่วมกับ Ticket จากตลาด มาเตรียมให้อัตโนมัติ โดยที่คุณไม่ต้องจำหรือพิมพ์กรอกใหม่</p>
@@ -1203,7 +1210,7 @@ export default function Lab4() {
                                 <button
                                     className="lab4-btn-primary"
                                     style={{marginTop:'1.5rem', width:'100%', justifyContent:'center', borderRadius:'8px', background:'linear-gradient(135deg, #10b981, #059669)'}}
-                                    onClick={() => { setStage(11); setShowWhy(false); }}
+                                    onClick={() => { setStage(11); setIsWhyVisible(false); }}
                                 >
                                     🔒 ยืนยันและเปิดพิสูจน์ →
                                 </button>
@@ -1249,12 +1256,12 @@ export default function Lab4() {
                                 </div>
 
                                 <div style={{ marginTop: '1.25rem' }}>
-                                    <button className="lab4-btn-outline" onClick={() => setShowWhy(!showWhy)}>
+                                    <button className="lab4-btn-outline" onClick={() => setIsWhyVisible(!isWhyVisible)}>
                                         <span className="lab4-btn-outline-icon">?</span> ทำไม?
                                     </button>
                                 </div>
                                 
-                                {showWhy && (
+                                {isWhyVisible && (
                                     <div className="lab4-why-box" style={{ marginTop: '1rem' }}>
                                         <h4 style={{ color: '#6D48D1', marginTop: 0 }}>เกิดอะไรขึ้น?</h4>
                                         <p>ระบบพิสูจน์ได้ว่าคุณรู้คำสั่งจริงมาตั้งแต่แรก โดยที่ระหว่างทางไม่มีใครเห็นคำสั่งเลย</p>
@@ -1334,7 +1341,7 @@ export default function Lab4() {
                                             <input 
                                                 type="text" 
                                                 value={maliciousPrice}
-                                                onChange={(e) => setMaliciousPrice(e.target.value)}
+                                                onChange={(event) => setMaliciousPrice(event.target.value)}
                                                 style={{width: '100%', padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem'}}
                                             />
                                         </div>
@@ -1415,7 +1422,7 @@ export default function Lab4() {
                                         onClick={() => {
                                             if (stage < 14) {
                                                 setStage(14);
-                                                setShowWhy(true);
+                                                setIsWhyVisible(true);
                                             }
                                         }}
                                     >
@@ -1429,7 +1436,7 @@ export default function Lab4() {
                                         </div>
                                         <div style={{marginTop:'1rem'}}>
                                             <button 
-                                                onClick={() => setShowWhy(!showWhy)}
+                                                onClick={() => setIsWhyVisible(!isWhyVisible)}
                                                 style={{
                                                     background:'white', 
                                                     border:'1px solid #c7d2fe', 
@@ -1451,7 +1458,7 @@ export default function Lab4() {
                                             </button>
                                         </div>
 
-                                        {showWhy && (
+                                        {isWhyVisible && (
                                             <div style={{
                                                 marginTop: '0.85rem',
                                                 background: '#f5f3ff',
@@ -1511,8 +1518,8 @@ export default function Lab4() {
                                                     boxShadow: '0 4px 12px rgba(109,72,209,0.35)',
                                                     transition: 'transform 0.15s, box-shadow 0.15s'
                                                 }}
-                                                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-1px)'; e.currentTarget.style.boxShadow='0 6px 16px rgba(109,72,209,0.45)'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 12px rgba(109,72,209,0.35)'; }}
+                                                onMouseEnter={event => { event.currentTarget.style.transform='translateY(-1px)'; event.currentTarget.style.boxShadow='0 6px 16px rgba(109,72,209,0.45)'; }}
+                                                onMouseLeave={event => { event.currentTarget.style.transform=''; event.currentTarget.style.boxShadow='0 4px 12px rgba(109,72,209,0.35)'; }}
                                             >
                                                 ถัดไป → ไปทำแบบทดสอบ
                                             </button>

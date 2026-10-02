@@ -14,63 +14,88 @@ const ZKP_P = 11;
 const ZKP_G = 2;
 const ZKP_X = 4; // real secret
 
-function modPow(base, exp, mod) {
+/**
+ * คำนวณ (base ^ exponent) mod modulus ด้วยวิธียกกำลังแบบทวีคูณ (square-and-multiply)
+ *
+ * @param {number} base ฐานที่จะยกกำลัง
+ * @param {number} exponent เลขชี้กำลัง
+ * @param {number} modulus ตัวหาร
+ * @return {number} ผลลัพธ์ของ (base ^ exponent) mod modulus
+ * @author StealthTrade Team
+ */
+function ModPow(base, exponent, modulus) {
     let result = 1n;
-    let b = BigInt(base) % BigInt(mod);
-    let e = BigInt(exp);
-    const m = BigInt(mod);
-    while (e > 0n) {
-        if (e % 2n === 1n) result = (result * b) % m;
-        e = e / 2n;
-        b = (b * b) % m;
+    let currentBase = BigInt(base) % BigInt(modulus);
+    let remainingExponent = BigInt(exponent);
+    const bigModulus = BigInt(modulus);
+    while (remainingExponent > 0n) {
+        if (remainingExponent % 2n === 1n) result = (result * currentBase) % bigModulus;
+        remainingExponent = remainingExponent / 2n;
+        currentBase = (currentBase * currentBase) % bigModulus;
     }
     return Number(result);
 }
 
 // ─── Typewriter Hook ───
+/**
+ * Hook แสดงข้อความทีละตัวอักษรเหมือนพิมพ์ดีด
+ *
+ * @param {string} text ข้อความเต็มที่ต้องการแสดง
+ * @param {number} [speed=22] ช่วงเวลาระหว่างตัวอักษร (มิลลิวินาที)
+ * @return {string} ข้อความที่แสดงถึงตัวอักษรปัจจุบัน
+ * @author StealthTrade Team
+ */
 function useTypewriter(text, speed = 22) {
     const [displayed, setDisplayed] = useState('');
     const idxRef = useRef(0);
     useEffect(() => {
         setDisplayed('');
         idxRef.current = 0;
-        const iv = setInterval(() => {
+        const intervalId = setInterval(() => {
             if (idxRef.current < text.length) {
                 setDisplayed(text.slice(0, idxRef.current + 1));
                 idxRef.current++;
             } else {
-                clearInterval(iv);
+                clearInterval(intervalId);
             }
         }, speed);
-        return () => clearInterval(iv);
+        return () => clearInterval(intervalId);
     }, [text]);
     return displayed;
 }
 
 // ─── Soundness Chart SVG ───
+/**
+ * กราฟ SVG แสดงโอกาสจับคนโกงได้ตามจำนวนรอบ (ฉากที่ 3)
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {number} props.rounds จำนวนรอบที่ต้องการแสดงบนกราฟ
+ * @return {JSX.Element} กราฟ SVG
+ * @author StealthTrade Team
+ */
 function SoundnessChartSVG({ rounds }) {
-    const W = 640, H = 240;
-    const padL = 52, padR = 32, padT = 28, padB = 44;
-    const chartW = W - padL - padR;
-    const chartH = H - padT - padB;
+    const svgWidth = 640, svgHeight = 240;
+    const paddingLeft = 52, paddingRight = 32, paddingTop = 28, paddingBottom = 44;
+    const chartWidth = svgWidth - paddingLeft - paddingRight;
+    const chartHeight = svgHeight - paddingTop - paddingBottom;
 
-    const points = Array.from({ length: rounds }, (_, i) => {
-        const n = i + 1;
-        const y = (1 - Math.pow(0.5, n)) * 100;
-        const px = padL + (i / (rounds - 1 || 1)) * chartW;
-        const py = padT + chartH - (y / 100) * chartH;
-        return { n, y, px, py };
+    const points = Array.from({ length: rounds }, (unusedValue, index) => {
+        const roundNumber = index + 1;
+        const catchPercent = (1 - Math.pow(0.5, roundNumber)) * 100;
+        const positionX = paddingLeft + (index / (rounds - 1 || 1)) * chartWidth;
+        const positionY = paddingTop + chartHeight - (catchPercent / 100) * chartHeight;
+        return { roundNumber, catchPercent, positionX, positionY };
     });
 
-    const polyline = points.map(p => `${p.px},${p.py}`).join(' ');
-    const areaPath = `M ${points[0].px},${padT + chartH} ` +
-        points.map(p => `L ${p.px},${p.py}`).join(' ') +
-        ` L ${points[points.length - 1].px},${padT + chartH} Z`;
+    const polyline = points.map(point => `${point.positionX},${point.positionY}`).join(' ');
+    const areaPath = `M ${points[0].positionX},${paddingTop + chartHeight} ` +
+        points.map(point => `L ${point.positionX},${point.positionY}`).join(' ') +
+        ` L ${points[points.length - 1].positionX},${paddingTop + chartHeight} Z`;
 
     const yLines = [0, 25, 50, 75, 100];
 
     return (
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
             <defs>
                 <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.6" />
@@ -78,25 +103,25 @@ function SoundnessChartSVG({ rounds }) {
                 </linearGradient>
             </defs>
             {/* Background */}
-            <rect x="0" y="0" width={W} height={H} rx="12" fill="#0f0a1e" />
+            <rect x="0" y="0" width={svgWidth} height={svgHeight} rx="12" fill="#0f0a1e" />
 
             {/* Grid lines */}
-            {yLines.map(pct => {
-                const cy = padT + chartH - (pct / 100) * chartH;
+            {yLines.map(percent => {
+                const centerY = paddingTop + chartHeight - (percent / 100) * chartHeight;
                 return (
-                    <g key={pct}>
-                        <line x1={padL} y1={cy} x2={W - padR} y2={cy} stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4,4" />
-                        <text x={padL - 6} y={cy + 4} textAnchor="end" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="monospace">{pct}%</text>
+                    <g key={percent}>
+                        <line x1={paddingLeft} y1={centerY} x2={svgWidth - paddingRight} y2={centerY} stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4,4" />
+                        <text x={paddingLeft - 6} y={centerY + 4} textAnchor="end" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="monospace">{percent}%</text>
                     </g>
                 );
             })}
 
             {/* Axes labels */}
-            <text x={padL - 36} y={padT + chartH / 2} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="monospace" textAnchor="middle"
-                transform={`rotate(-90, ${padL - 36}, ${padT + chartH / 2})`}>
+            <text x={paddingLeft - 36} y={paddingTop + chartHeight / 2} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="monospace" textAnchor="middle"
+                transform={`rotate(-90, ${paddingLeft - 36}, ${paddingTop + chartHeight / 2})`}>
                 Y: โอกาสจับได้ (%)
             </text>
-            <text x={W - padR} y={padT + chartH + 32} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="monospace" textAnchor="end">
+            <text x={svgWidth - paddingRight} y={paddingTop + chartHeight + 32} fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="monospace" textAnchor="end">
                 X: จำนวนรอบ (N = 1 .. {rounds})
             </text>
 
@@ -107,19 +132,19 @@ function SoundnessChartSVG({ rounds }) {
             <polyline points={polyline} fill="none" stroke="#a78bfa" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
 
             {/* X axis ticks */}
-            {points.map(p => (
-                <text key={p.n} x={p.px} y={padT + chartH + 18} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontFamily="monospace">{p.n}</text>
+            {points.map(point => (
+                <text key={point.roundNumber} x={point.positionX} y={paddingTop + chartHeight + 18} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontFamily="monospace">{point.roundNumber}</text>
             ))}
 
             {/* Dots + last tooltip */}
-            {points.map((p, i) => (
-                <g key={i}>
-                    <circle cx={p.px} cy={p.py} r={i === points.length - 1 ? 6 : 4} fill={i === points.length - 1 ? '#a78bfa' : '#7c3aed'} stroke="#fff" strokeWidth="1.5" />
-                    {i === points.length - 1 && (
+            {points.map((point, index) => (
+                <g key={index}>
+                    <circle cx={point.positionX} cy={point.positionY} r={index === points.length - 1 ? 6 : 4} fill={index === points.length - 1 ? '#a78bfa' : '#7c3aed'} stroke="#fff" strokeWidth="1.5" />
+                    {index === points.length - 1 && (
                         <g>
-                            <rect x={p.px - 26} y={p.py - 28} width={52} height={20} rx={5} fill="#7c3aed" />
-                            <text x={p.px} y={p.py - 14} textAnchor="middle" fill="#fff" fontSize="11" fontWeight="700" fontFamily="monospace">
-                                {p.y.toFixed(1)}%
+                            <rect x={point.positionX - 26} y={point.positionY - 28} width={52} height={20} rx={5} fill="#7c3aed" />
+                            <text x={point.positionX} y={point.positionY - 14} textAnchor="middle" fill="#fff" fontSize="11" fontWeight="700" fontFamily="monospace">
+                                {point.catchPercent.toFixed(1)}%
                             </text>
                         </g>
                     )}
@@ -130,70 +155,91 @@ function SoundnessChartSVG({ rounds }) {
 }
 
 // ─── Mini soundness preview chart for Scene 1 ───
+/**
+ * กราฟ SVG ขนาดเล็กสำหรับพรีวิวโอกาสจับคนโกงได้ (ฉากที่ 1)
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {number} props.rounds จำนวนรอบที่ต้องการแสดงบนกราฟ
+ * @return {JSX.Element} กราฟ SVG
+ * @author StealthTrade Team
+ */
 function SoundnessPreviewChart({ rounds }) {
-    const W = 320, H = 120;
-    const padL = 36, padR = 16, padT = 14, padB = 28;
-    const chartW = W - padL - padR;
-    const chartH = H - padT - padB;
+    const svgWidth = 320, svgHeight = 120;
+    const paddingLeft = 36, paddingRight = 16, paddingTop = 14, paddingBottom = 28;
+    const chartWidth = svgWidth - paddingLeft - paddingRight;
+    const chartHeight = svgHeight - paddingTop - paddingBottom;
 
-    const pts = Array.from({ length: rounds }, (_, i) => {
-        const n = i + 1;
-        const yv = (1 - Math.pow(0.5, n)) * 100;
-        const px = padL + (i / (rounds - 1 || 1)) * chartW;
-        const py = padT + chartH - (yv / 100) * chartH;
-        return { n, yv, px, py };
+    const pts = Array.from({ length: rounds }, (unusedValue, index) => {
+        const roundNumber = index + 1;
+        const catchPercent = (1 - Math.pow(0.5, roundNumber)) * 100;
+        const positionX = paddingLeft + (index / (rounds - 1 || 1)) * chartWidth;
+        const positionY = paddingTop + chartHeight - (catchPercent / 100) * chartHeight;
+        return { roundNumber, catchPercent, positionX, positionY };
     });
 
-    const poly = pts.map(p => `${p.px},${p.py}`).join(' ');
-    const area = `M ${pts[0].px},${padT + chartH} ` +
-        pts.map(p => `L ${p.px},${p.py}`).join(' ') +
-        ` L ${pts[pts.length - 1].px},${padT + chartH} Z`;
+    const polylinePoints = pts.map(point => `${point.positionX},${point.positionY}`).join(' ');
+    const areaPath = `M ${pts[0].positionX},${paddingTop + chartHeight} ` +
+        pts.map(point => `L ${point.positionX},${point.positionY}`).join(' ') +
+        ` L ${pts[pts.length - 1].positionX},${paddingTop + chartHeight} Z`;
 
     return (
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
             <defs>
                 <linearGradient id="prevGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.5" />
                     <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.02" />
                 </linearGradient>
             </defs>
-            <rect x="0" y="0" width={W} height={H} rx="8" fill="#0f0a1e" />
-            {[0, 50, 100].map(pct => {
-                const cy = padT + chartH - (pct / 100) * chartH;
+            <rect x="0" y="0" width={svgWidth} height={svgHeight} rx="8" fill="#0f0a1e" />
+            {[0, 50, 100].map(percent => {
+                const centerY = paddingTop + chartHeight - (percent / 100) * chartHeight;
                 return (
-                    <g key={pct}>
-                        <line x1={padL} y1={cy} x2={W - padR} y2={cy} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                        <text x={padL - 4} y={cy + 3} textAnchor="end" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">{pct}%</text>
+                    <g key={percent}>
+                        <line x1={paddingLeft} y1={centerY} x2={svgWidth - paddingRight} y2={centerY} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                        <text x={paddingLeft - 4} y={centerY + 3} textAnchor="end" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">{percent}%</text>
                     </g>
                 );
             })}
-            <path d={area} fill="url(#prevGrad)" />
-            <polyline points={poly} fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-            {pts.map((p, i) => (
-                <circle key={i} cx={p.px} cy={p.py} r={i === pts.length - 1 ? 5 : 3}
-                    fill={i === pts.length - 1 ? '#a78bfa' : '#7c3aed'} stroke="#fff" strokeWidth="1.2" />
+            <path d={areaPath} fill="url(#prevGrad)" />
+            <polyline points={polylinePoints} fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+            {pts.map((point, index) => (
+                <circle key={index} cx={point.positionX} cy={point.positionY} r={index === pts.length - 1 ? 5 : 3}
+                    fill={index === pts.length - 1 ? '#a78bfa' : '#7c3aed'} stroke="#fff" strokeWidth="1.2" />
             ))}
-            {pts.map(p => (
-                <text key={p.n} x={p.px} y={padT + chartH + 16} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="monospace">{p.n}</text>
+            {pts.map(point => (
+                <text key={point.roundNumber} x={point.positionX} y={paddingTop + chartHeight + 16} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="monospace">{point.roundNumber}</text>
             ))}
         </svg>
     );
 }
 
 // ─── Main Component ───
+/**
+ * หน้า Lab 3 ภารกิจจับผิดสายลับ (The Imposter's Cipher)
+ * จำลอง Sigma Protocol แบบโต้ตอบ: ตั้งค่า รันจำลอง กราฟความน่าจะเป็น และ Monte Carlo
+ *
+ * @return {JSX.Element} หน้าบทเรียนทั้งหมด
+ * @author StealthTrade Team
+ */
 export default function MiniGameCipher() {
     // ── Clock ──
     const [clockStr, setClockStr] = useState('');
     useEffect(() => {
-        const update = () => {
+        /**
+         * อ่านเวลาปัจจุบันแล้วอัปเดตนาฬิกาที่แสดงบนหน้า
+         *
+         * @return {void}
+         * @author StealthTrade Team
+         */
+        const updateClock = () => {
             const now = new Date();
-            const h = now.getHours().toString().padStart(2, '0');
-            const m = now.getMinutes().toString().padStart(2, '0');
-            setClockStr(`${h}:${m} น.`);
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            setClockStr(`${hours}:${minutes} น.`);
         };
-        update();
-        const t = setInterval(update, 60000);
-        return () => clearInterval(t);
+        updateClock();
+        const clockTimer = setInterval(updateClock, 60000);
+        return () => clearInterval(clockTimer);
     }, []);
 
     // ── Advisory team tabs ──
@@ -214,7 +260,7 @@ export default function MiniGameCipher() {
 
     // ── Sigma Protocol accordion ──
     const [openAccordion, setOpenAccordion] = useState(0);
-    const [showSeqDiagram, setShowSeqDiagram] = useState(false);
+    const [isSeqDiagramVisible, setIsSeqDiagramVisible] = useState(false);
     const accordionItems = [
         {
             icon: '✉️',
@@ -282,76 +328,89 @@ export default function MiniGameCipher() {
     const [scene2State, setScene2State] = useState('idle');
     const [simCurrentRound, setSimCurrentRound] = useState(0);
     const [simPhase, setSimPhase] = useState(''); // 'commit' | 'challenge' | 'response'
-    const [simLog, setSimLog] = useState([]); // [{round, challenge, caught, south}]
+    const [simLogEntries, setSimLogEntries] = useState([]); // [{round, challenge, caught, south}]
     const [simCaughtRound, setSimCaughtRound] = useState(null); // round when caught (null = survived all)
-    const [simCommitVal, setSimCommitVal] = useState(null);
+    const [simCommitValue, setSimCommitValue] = useState(null);
     const [simChallenge, setSimChallenge] = useState(null);
     const [simResponse, setSimResponse] = useState(null);
     const [simRoundResult, setSimRoundResult] = useState(null); // 'pass'|'fail'
     const [simStatus, setSimStatus] = useState(''); // 'ผ่านแล้ว N รอบ | จับโกงได้ N รอบ'
-    const simRunning = useRef(false);
-    const simAbort = useRef(false);
+    const isSimRunningRef = useRef(false);
+    const isSimAbortedRef = useRef(false);
 
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    /**
+     * หน่วงเวลาตามที่กำหนด (ใช้คั่นขั้นตอนของการจำลอง)
+     *
+     * @param {number} milliseconds เวลาที่ต้องการหน่วง (มิลลิวินาที)
+     * @return {Promise<void>} Promise ที่สำเร็จเมื่อครบเวลา
+     * @author StealthTrade Team
+     */
+    const sleep = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
+    /**
+     * รันการจำลอง Sigma Protocol ทีละรอบ (Commit → Challenge → Response)
+     *
+     * @return {Promise<void>}
+     * @author StealthTrade Team
+     */
     const runSimulation = useCallback(async () => {
-        if (simRunning.current) return;
-        simRunning.current = true;
-        simAbort.current = false;
+        if (isSimRunningRef.current) return;
+        isSimRunningRef.current = true;
+        isSimAbortedRef.current = false;
         setScene2State('running');
         setSimCurrentRound(0);
-        setSimLog([]);
+        setSimLogEntries([]);
         setSimCaughtRound(null);
         setSimRoundResult(null);
         setSimStatus('');
 
-        let log = [];
-        let caught = false;
+        let logEntries = [];
+        let isCaught = false;
         let caughtAt = null;
 
-        for (let r = 1; r <= roundCount; r++) {
-            if (simAbort.current) break;
-            setSimCurrentRound(r);
+        for (let round = 1; round <= roundCount; round++) {
+            if (isSimAbortedRef.current) break;
+            setSimCurrentRound(round);
             setSimPhase('commit');
-            setSimCommitVal(null);
+            setSimCommitValue(null);
             setSimChallenge(null);
             setSimResponse(null);
             setSimRoundResult(null);
 
             // Phase commit
             await sleep(1400);
-            const k = Math.floor(Math.random() * 9) + 1; // Imposter's random guess for k
-            setSimCommitVal(k);
+            const randomGuess = Math.floor(Math.random() * 9) + 1; // Imposter's random guess for k
+            setSimCommitValue(randomGuess);
 
             // Phase challenge
             setSimPhase('challenge');
             await sleep(1600);
-            const c = Math.floor(Math.random() * 2); // 0 or 1 (South)
-            setSimChallenge(c);
+            const challengeBit = Math.floor(Math.random() * 2); // 0 or 1 (South)
+            setSimChallenge(challengeBit);
 
             // Phase response
             setSimPhase('response');
             await sleep(1600);
 
-            let passed;
+            let isPassed;
             if (proverMode === 'honest') {
-                passed = true; // always passes
+                isPassed = true; // always passes
             } else {
                 // Imposter: 50% chance each round
-                passed = Math.random() < 0.5;
+                isPassed = Math.random() < 0.5;
             }
 
-            setSimResponse(passed ? '✓' : '✗');
-            setSimRoundResult(passed ? 'pass' : 'fail');
+            setSimResponse(isPassed ? '✓' : '✗');
+            setSimRoundResult(isPassed ? 'pass' : 'fail');
 
-            const entry = { round: r, challenge: c, south: c, caught: !passed };
-            log = [...log, entry];
-            setSimLog([...log]);
+            const entry = { round: round, challenge: challengeBit, south: challengeBit, isCaught: !isPassed };
+            logEntries = [...logEntries, entry];
+            setSimLogEntries([...logEntries]);
 
-            if (!passed) {
-                caught = true;
-                caughtAt = r;
-                setSimCaughtRound(r);
+            if (!isPassed) {
+                isCaught = true;
+                caughtAt = round;
+                setSimCaughtRound(round);
                 await sleep(1400);
                 break;
             }
@@ -359,82 +418,106 @@ export default function MiniGameCipher() {
             await sleep(1200);
         }
 
-        const passedCount = log.filter(e => !e.caught).length;
-        const caughtCount = log.filter(e => e.caught).length;
+        const passedCount = logEntries.filter(entry => !entry.isCaught).length;
+        const caughtCount = logEntries.filter(entry => entry.isCaught).length;
         setSimStatus(`ผ่านแล้ว: ${passedCount} รอบ  |  จับโกงได้: ${caughtCount} รอบ`);
         setScene2State('done');
-        simRunning.current = false;
+        isSimRunningRef.current = false;
     }, [proverMode, roundCount]);
 
+    /**
+     * หยุดและรีเซ็ตสถานะการจำลองทั้งหมดกลับเป็นค่าเริ่มต้น
+     *
+     * @return {void}
+     * @author StealthTrade Team
+     */
     const handleResetSim = useCallback(() => {
-        simAbort.current = true;
-        simRunning.current = false;
+        isSimAbortedRef.current = true;
+        isSimRunningRef.current = false;
         setScene2State('idle');
         setSimCurrentRound(0);
-        setSimLog([]);
+        setSimLogEntries([]);
         setSimCaughtRound(null);
         setSimRoundResult(null);
         setSimStatus('');
-        setSimCommitVal(null);
+        setSimCommitValue(null);
         setSimChallenge(null);
         setSimResponse(null);
         setSimPhase('');
     }, []);
 
     // ── Monte Carlo ──
-    const [mcState, setMcState] = useState('idle'); // 'idle' | 'done'
-    const [mcResults, setMcResults] = useState(null);
+    const [monteCarloState, setMonteCarloState] = useState('idle'); // 'idle' | 'done'
+    const [monteCarloResult, setMonteCarloResult] = useState(null);
 
+    /**
+     * จำลองคนโกง 1,000 คนเดาสุ่มผ่านด่านตามจำนวนรอบ แล้วเก็บสถิติที่จับได้ในแต่ละรอบ
+     *
+     * @return {void}
+     * @author StealthTrade Team
+     */
     const runMonteCarlo = useCallback(() => {
-        const N = 1000;
-        const n = roundCount;
-        let caughtPerRound = Array(n).fill(0);
+        const trialCount = 1000;
+        const totalRounds = roundCount;
+        let caughtCounts = Array(totalRounds).fill(0);
         let survived = 0;
-        for (let i = 0; i < N; i++) {
-            let thisSurvived = true;
-            for (let r = 0; r < n; r++) {
+        for (let i = 0; i < trialCount; i++) {
+            let hasSurvived = true;
+            for (let roundIndex = 0; roundIndex < totalRounds; roundIndex++) {
                 if (Math.random() < 0.5) {
-                    // caught at round r+1
-                    caughtPerRound[r]++;
-                    thisSurvived = false;
+                    // caught at round roundIndex+1
+                    caughtCounts[roundIndex]++;
+                    hasSurvived = false;
                     break;
                 }
             }
-            if (thisSurvived) survived++;
+            if (hasSurvived) survived++;
         }
-        const totalCaught = N - survived;
-        const empiricalRate = (totalCaught / N * 100).toFixed(1);
-        const theoretical = ((1 - Math.pow(0.5, n)) * 100).toFixed(1);
+        const totalCaught = trialCount - survived;
+        const empiricalRate = (totalCaught / trialCount * 100).toFixed(1);
+        const theoretical = ((1 - Math.pow(0.5, totalRounds)) * 100).toFixed(1);
         const deviation = Math.abs(parseFloat(empiricalRate) - parseFloat(theoretical)).toFixed(3);
-        setMcResults({ N, survived, totalCaught, empiricalRate, theoretical, deviation, caughtPerRound, n });
-        setMcState('done');
+        setMonteCarloResult({ trialCount, survived, totalCaught, empiricalRate, theoretical, deviation, caughtCounts, totalRounds });
+        setMonteCarloState('done');
     }, [roundCount]);
 
     // ── Started ──
-    const [started, setStarted] = useState(false);
+    const [hasStarted, setHasStarted] = useState(false);
     const canStart = proverMode !== null;
 
+    /**
+     * เริ่มการจำลองหลังเลือกโหมด Prover แล้ว (รีเซ็ตสถิติเดิมและรันอัตโนมัติ)
+     *
+     * @return {void}
+     * @author StealthTrade Team
+     */
     const handleStart = () => {
         if (!canStart) return;
-        setStarted(true);
+        setHasStarted(true);
         handleResetSim();
-        setMcState('idle');
-        setMcResults(null);
+        setMonteCarloState('idle');
+        setMonteCarloResult(null);
         // auto-run simulation
         setTimeout(() => runSimulation(), 300);
     };
 
+    /**
+     * เริ่มแล็บใหม่ทั้งหมด กลับไปหน้าตั้งค่าเริ่มต้น
+     *
+     * @return {void}
+     * @author StealthTrade Team
+     */
     const handleRestartLab = () => {
-        setStarted(false);
+        setHasStarted(false);
         setProverMode(null);
         setRoundCount(5);
         handleResetSim();
-        setMcState('idle');
-        setMcResults(null);
+        setMonteCarloState('idle');
+        setMonteCarloResult(null);
     };
 
     // ── Roadmap modal ──
-    const [showRoadmap, setShowRoadmap] = useState(false);
+    const [isRoadmapVisible, setIsRoadmapVisible] = useState(false);
 
     const catchProb = (1 - Math.pow(0.5, roundCount)) * 100;
     const soundnessErr = Math.pow(0.5, roundCount) * 100;
@@ -451,14 +534,14 @@ export default function MiniGameCipher() {
             </div>
 
             {/* ── Roadmap Modal ── */}
-            {showRoadmap && (
+            {isRoadmapVisible && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-                    onClick={() => setShowRoadmap(false)}>
+                    onClick={() => setIsRoadmapVisible(false)}>
                     <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', maxWidth: 480, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
-                        onClick={e => e.stopPropagation()}>
+                        onClick={event => event.stopPropagation()}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                             <div style={{ fontSize: 16, fontWeight: 800, color: '#1e293b' }}>🗺️ Stealth Trade Lab Roadmap</div>
-                            <button onClick={() => setShowRoadmap(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#94a3b8' }}>×</button>
+                            <button onClick={() => setIsRoadmapVisible(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#94a3b8' }}>×</button>
                         </div>
                         {[
                             { n: 1, name: 'Zero-Knowledge Basics', done: true },
@@ -488,18 +571,18 @@ export default function MiniGameCipher() {
             )}
 
             {/* ── Sequence Diagram Modal ── */}
-            {showSeqDiagram && (
+            {isSeqDiagramVisible && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-                    onClick={() => setShowSeqDiagram(false)}>
+                    onClick={() => setIsSeqDiagramVisible(false)}>
                     <div style={{ background: '#0f0a1e', borderRadius: 16, padding: '0', maxWidth: 680, width: '100%', overflow: 'hidden' }}
-                        onClick={e => e.stopPropagation()}>
+                        onClick={event => event.stopPropagation()}>
                         <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                             <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>
                                 SEQUENCE DIAGRAM : SIGMA PROTOCOL ROUND i
                             </span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                                 <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>ROUND (1 .. N)</span>
-                                <button onClick={() => setShowSeqDiagram(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer' }}>×</button>
+                                <button onClick={() => setIsSeqDiagramVisible(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer' }}>×</button>
                             </div>
                         </div>
                         {/* Headers */}
@@ -512,8 +595,8 @@ export default function MiniGameCipher() {
                             { left: '1. Commit', arrow: '→', arrowLabel: 'ล็อคกล่องคำตอบ [ c ]', right: 'รับกล่องปิดผนึก' },
                             { left: 'รับโจทย์สุ่ม', arrow: '←', arrowLabel: 'สุ่มโจทย์ [ 0 หรือ 1 ]', right: '2. Challenge' },
                             { left: '3. Response', arrow: '→', arrowLabel: 'เปิดกล่องเฉลย [ r ]', right: 'ตรวจความสอดคล้อง' },
-                        ].map((row, i) => (
-                            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0 20px 2px', gap: 8 }}>
+                        ].map((row, index) => (
+                            <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', padding: '0 20px 2px', gap: 8 }}>
                                 <div style={{ fontSize: 12, fontFamily: 'monospace', color: row.arrow === '→' ? '#a78bfa' : 'rgba(255,255,255,0.4)', textAlign: row.arrow === '→' ? 'left' : 'right', padding: '12px 8px' }}>{row.left}</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                                     <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
@@ -563,7 +646,7 @@ export default function MiniGameCipher() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <button
                             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, color: '#475569', cursor: 'pointer' }}
-                            onClick={() => setShowRoadmap(true)}
+                            onClick={() => setIsRoadmapVisible(true)}
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
                             3/8 labs
@@ -586,42 +669,42 @@ export default function MiniGameCipher() {
 
                     {/* Tabs */}
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-                        {advisors.map((adv, i) => (
+                        {advisors.map((advisor, index) => (
                             <button
-                                key={adv.id}
-                                onClick={() => setActiveAdvisor(i)}
+                                key={advisor.id}
+                                onClick={() => setActiveAdvisor(index)}
                                 style={{
                                     padding: '5px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid',
-                                    background: activeAdvisor === i ? adv.badgeColor : 'transparent',
-                                    borderColor: activeAdvisor === i ? adv.badgeColor : 'rgba(0,0,0,0.12)',
-                                    color: activeAdvisor === i ? '#fff' : '#64748b',
+                                    background: activeAdvisor === index ? advisor.badgeColor : 'transparent',
+                                    borderColor: activeAdvisor === index ? advisor.badgeColor : 'rgba(0,0,0,0.12)',
+                                    color: activeAdvisor === index ? '#fff' : '#64748b',
                                     transition: 'all 0.2s',
                                     display: 'flex', alignItems: 'center', gap: 5,
                                 }}
                             >
-                                <span style={{ width: 7, height: 7, borderRadius: '50%', background: activeAdvisor === i ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.15)', display: 'inline-block' }} />
-                                {adv.name.split(' ')[0]} · {adv.badge}
+                                <span style={{ width: 7, height: 7, borderRadius: '50%', background: activeAdvisor === index ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.15)', display: 'inline-block' }} />
+                                {advisor.name.split(' ')[0]} · {advisor.badge}
                             </button>
                         ))}
                     </div>
 
                     {/* Advisor card */}
                     {(() => {
-                        const adv = advisors[activeAdvisor];
+                        const advisor = advisors[activeAdvisor];
                         return (
                             <div style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                                 <div style={{ position: 'relative', flexShrink: 0 }}>
-                                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: adv.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 12, border: '2px solid rgba(255,255,255,0.6)' }}>
-                                        {adv.initials}
+                                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: advisor.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 12, border: '2px solid rgba(255,255,255,0.6)' }}>
+                                        {advisor.initials}
                                     </div>
                                     <span style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, background: '#22c55e', border: '2px solid #fff', borderRadius: '50%' }} />
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8, justifyContent: 'space-between' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                            <span style={{ fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{adv.name}</span>
-                                            <span style={{ background: adv.badgeColor, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 10px' }}>{adv.role}</span>
-                                            <span style={{ fontSize: 11, color: '#64748b' }}>({adv.specialty})</span>
+                                            <span style={{ fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{advisor.name}</span>
+                                            <span style={{ background: advisor.badgeColor, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 10px' }}>{advisor.role}</span>
+                                            <span style={{ fontSize: 11, color: '#64748b' }}>({advisor.specialty})</span>
                                         </div>
                                         <span style={{ fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /></svg>
@@ -629,7 +712,7 @@ export default function MiniGameCipher() {
                                         </span>
                                     </div>
                                     <div style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
-                                        {adv.quote}
+                                        {advisor.quote}
                                     </div>
                                 </div>
                             </div>
@@ -648,7 +731,7 @@ export default function MiniGameCipher() {
                     </p>
 
                     {/* Sequence Diagram (inline toggle) */}
-                    {showSeqDiagram && (
+                    {isSeqDiagramVisible && (
                         <div style={{ background: '#0f0a1e', borderRadius: 12, padding: 20, marginBottom: 16 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                                 <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>SEQUENCE DIAGRAM : SIGMA PROTOCOL ROUND i</span>
@@ -662,8 +745,8 @@ export default function MiniGameCipher() {
                                 { left: '1. Commit', dir: '→', label: 'ล็อคกล่องคำตอบ [ c ]', right: 'รับกล่องปิดผนึก' },
                                 { left: 'รับโจทย์สุ่ม', dir: '←', label: 'สุ่มโจทย์ [ 0 หรือ 1 ]', right: '2. Challenge' },
                                 { left: '3. Response', dir: '→', label: 'เปิดกล่องเฉลย [ r ]', right: 'ตรวจความสอดคล้อง' },
-                            ].map((row, i) => (
-                                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, padding: '10px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none', alignItems: 'center' }}>
+                            ].map((row, index) => (
+                                <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, padding: '10px 0', borderBottom: index < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none', alignItems: 'center' }}>
                                     <div style={{ fontFamily: 'monospace', fontSize: 12, color: row.dir === '→' ? '#a78bfa' : 'rgba(255,255,255,0.35)', textAlign: row.dir === '→' ? 'left' : 'right' }}>{row.left}</div>
                                     <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                         {row.dir === '→' ? `—— ${row.label} ——→` : `←—— ${row.label} ——`}
@@ -679,11 +762,11 @@ export default function MiniGameCipher() {
 
                     {/* Accordion */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {accordionItems.map((item, i) => (
-                            <div key={i} style={{ border: '1px solid', borderColor: openAccordion === i ? 'rgba(124,58,237,0.2)' : 'rgba(0,0,0,0.07)', borderRadius: 12, overflow: 'hidden', transition: 'all 0.2s' }}>
+                        {accordionItems.map((item, index) => (
+                            <div key={index} style={{ border: '1px solid', borderColor: openAccordion === index ? 'rgba(124,58,237,0.2)' : 'rgba(0,0,0,0.07)', borderRadius: 12, overflow: 'hidden', transition: 'all 0.2s' }}>
                                 <button
-                                    onClick={() => setOpenAccordion(openAccordion === i ? -1 : i)}
-                                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: openAccordion === i ? 'rgba(124,58,237,0.04)' : 'rgba(255,255,255,0.4)', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                                    onClick={() => setOpenAccordion(openAccordion === index ? -1 : index)}
+                                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: openAccordion === index ? 'rgba(124,58,237,0.04)' : 'rgba(255,255,255,0.4)', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                                 >
                                     <div style={{ width: 32, height: 32, borderRadius: 8, background: item.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
                                         {item.icon}
@@ -692,11 +775,11 @@ export default function MiniGameCipher() {
                                     <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 10px', border: '1px solid', color: item.badgeColor, borderColor: `${item.badgeColor}40`, background: `${item.badgeColor}10` }}>
                                         {item.badge}
                                     </span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" style={{ flexShrink: 0, transform: openAccordion === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" style={{ flexShrink: 0, transform: openAccordion === index ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
                                         <path d="M6 9l6 6 6-6" />
                                     </svg>
                                 </button>
-                                {openAccordion === i && (
+                                {openAccordion === index && (
                                     <div style={{ padding: '12px 16px 16px', background: 'rgba(255,255,255,0.3)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                                         {item.content}
                                     </div>
@@ -831,12 +914,12 @@ export default function MiniGameCipher() {
                             <input
                                 type="range"
                                 min={1} max={10} value={roundCount}
-                                onChange={e => setRoundCount(Number(e.target.value))}
+                                onChange={event => setRoundCount(Number(event.target.value))}
                                 style={{ width: '100%', accentColor: '#7c3aed', cursor: 'pointer', height: 4 }}
                             />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-                                {[1, 3, 5, 7, 10].map(n => (
-                                    <span key={n} style={{ fontSize: 10, color: '#94a3b8', fontFamily: 'monospace' }}>{n} รอบ ({((1 - Math.pow(0.5, n)) * 100).toFixed(1)}%)</span>
+                                {[1, 3, 5, 7, 10].map(roundNumber => (
+                                    <span key={roundNumber} style={{ fontSize: 10, color: '#94a3b8', fontFamily: 'monospace' }}>{roundNumber} รอบ ({((1 - Math.pow(0.5, roundNumber)) * 100).toFixed(1)}%)</span>
                                 ))}
                             </div>
                         </div>
@@ -882,7 +965,7 @@ export default function MiniGameCipher() {
                 </section>
 
                 {/* ─── Scene 2: Simulation ─── */}
-                {started && (
+                {hasStarted && (
                     <section className="lab3-card">
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -923,9 +1006,9 @@ export default function MiniGameCipher() {
                             {/* 3-column steps */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
                                 {/* Commit */}
-                                <div style={{ background: simPhase === 'commit' ? 'rgba(124,58,237,0.2)' : (simCommitVal !== null ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.04)'), border: `1px solid ${simPhase === 'commit' ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 12, padding: 16, textAlign: 'center', transition: 'all 0.5s' }}>
+                                <div style={{ background: simPhase === 'commit' ? 'rgba(124,58,237,0.2)' : (simCommitValue !== null ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.04)'), border: `1px solid ${simPhase === 'commit' ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 12, padding: 16, textAlign: 'center', transition: 'all 0.5s' }}>
                                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: 12 }}>1. COMMIT (ผูกมัด)</div>
-                                    {simPhase === 'commit' && simCommitVal === null ? (
+                                    {simPhase === 'commit' && simCommitValue === null ? (
                                         /* Loading spinner while committing */
                                         <>
                                             <div style={{ width: 52, height: 52, borderRadius: '50%', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -941,7 +1024,7 @@ export default function MiniGameCipher() {
                                             <div style={{ fontSize: 11, color: '#a78bfa', fontFamily: 'monospace', marginBottom: 4, animation: 'pulse 1s infinite' }}>กำลังล็อกกล่อง...</div>
                                             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Generating Commitment</div>
                                         </>
-                                    ) : simCommitVal !== null ? (
+                                    ) : simCommitValue !== null ? (
                                         /* Locked state */
                                         <>
                                             <div style={{ width: 52, height: 52, borderRadius: 12, background: '#7c3aed', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 18px rgba(124,58,237,0.6)', transition: 'all 0.5s' }}>
@@ -1022,10 +1105,10 @@ export default function MiniGameCipher() {
                             {/* Status bar */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14, flexWrap: 'wrap', gap: 8 }}>
                                 <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
-                                    ผ่านแล้ว: <span style={{ color: '#4ade80', fontWeight: 700 }}>{simLog.filter(e => !e.caught).length}</span> รอบ
+                                    ผ่านแล้ว: <span style={{ color: '#4ade80', fontWeight: 700 }}>{simLogEntries.filter(entry => !entry.isCaught).length}</span> รอบ
                                 </span>
                                 <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
-                                    จับโกงได้: <span style={{ color: '#f87171', fontWeight: 700 }}>{simLog.filter(e => e.caught).length}</span> รอบ
+                                    จับโกงได้: <span style={{ color: '#f87171', fontWeight: 700 }}>{simLogEntries.filter(entry => entry.isCaught).length}</span> รอบ
                                 </span>
                                 <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
                                     สถานะ: <span style={{ color: scene2State === 'done' ? '#a78bfa' : '#fbbf24', fontWeight: 700 }}>{scene2State === 'done' ? 'จบภารกิจแล้ว' : scene2State === 'running' ? 'กำลังรัน...' : 'รอเริ่ม'}</span>
@@ -1034,25 +1117,25 @@ export default function MiniGameCipher() {
                         </div>
 
                         {/* Mission Log */}
-                        {simLog.length > 0 && (
+                        {simLogEntries.length > 0 && (
                             <div style={{ background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                                     <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>บันทึกผลการทดสอบแต่ละรอบ (MISSION LOG)</span>
-                                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{simLog.length} / {roundCount} บันทึกแล้ว</span>
+                                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{simLogEntries.length} / {roundCount} บันทึกแล้ว</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    {simLog.map((entry, i) => (
-                                        <div key={i} style={{
+                                    {simLogEntries.map((entry, index) => (
+                                        <div key={index} style={{
                                             display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999,
                                             border: '1px solid', fontSize: 12, fontWeight: 600,
-                                            background: entry.caught ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
-                                            borderColor: entry.caught ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.25)',
-                                            color: entry.caught ? '#dc2626' : '#16a34a',
+                                            background: entry.isCaught ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                                            borderColor: entry.isCaught ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.25)',
+                                            color: entry.isCaught ? '#dc2626' : '#16a34a',
                                         }}>
-                                            <span style={{ width: 16, height: 16, borderRadius: '50%', background: entry.caught ? '#ef4444' : '#22c55e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>
-                                                {entry.caught ? '✗' : '✓'}
+                                            <span style={{ width: 16, height: 16, borderRadius: '50%', background: entry.isCaught ? '#ef4444' : '#22c55e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>
+                                                {entry.isCaught ? '✗' : '✓'}
                                             </span>
-                                            รอบที่ {entry.round} (โจทย์ {entry.challenge}) {entry.caught ? 'จับได้' : 'ผ่าน'}
+                                            รอบที่ {entry.round} (โจทย์ {entry.challenge}) {entry.isCaught ? 'จับได้' : 'ผ่าน'}
                                         </div>
                                     ))}
                                 </div>
@@ -1075,7 +1158,7 @@ export default function MiniGameCipher() {
                 )}
 
                 {/* ─── Scene 3: Theoretical Probability Chart ─── */}
-                {started && (
+                {hasStarted && (
                     <section className="lab3-card">
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1154,20 +1237,20 @@ export default function MiniGameCipher() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {Array.from({ length: roundCount }, (_, i) => {
-                                        const n = i + 1;
-                                        const catch_ = (1 - Math.pow(0.5, n)) * 100;
-                                        const err = Math.pow(0.5, n) * 100;
-                                        const isCurrent = n === roundCount;
+                                    {Array.from({ length: roundCount }, (unusedValue, index) => {
+                                        const roundNumber = index + 1;
+                                        const catchPercent = (1 - Math.pow(0.5, roundNumber)) * 100;
+                                        const errorPercent = Math.pow(0.5, roundNumber) * 100;
+                                        const isCurrent = roundNumber === roundCount;
                                         return (
-                                            <tr key={n} style={{ background: isCurrent ? 'rgba(124,58,237,0.04)' : (i % 2 === 1 ? 'rgba(0,0,0,0.01)' : 'transparent') }}>
+                                            <tr key={roundNumber} style={{ background: isCurrent ? 'rgba(124,58,237,0.04)' : (index % 2 === 1 ? 'rgba(0,0,0,0.01)' : 'transparent') }}>
                                                 <td style={{ padding: '10px 16px', fontSize: 13, color: '#334155', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                                                    N = {n}
+                                                    N = {roundNumber}
                                                     {isCurrent && <span style={{ marginLeft: 8, background: '#7c3aed', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '1px 7px' }}>CURRENT</span>}
                                                 </td>
-                                                <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 700, color: '#7c3aed', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{catch_.toFixed(1)}%</td>
-                                                <td style={{ padding: '10px 16px', fontSize: 13, color: '#64748b', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{err.toFixed(2)}%</td>
-                                                <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 12, color: '#94a3b8', borderBottom: '1px solid rgba(0,0,0,0.04)', fontFamily: 'monospace' }}>1 - (0.5)^{n}</td>
+                                                <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 700, color: '#7c3aed', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{catchPercent.toFixed(1)}%</td>
+                                                <td style={{ padding: '10px 16px', fontSize: 13, color: '#64748b', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{errorPercent.toFixed(2)}%</td>
+                                                <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: 12, color: '#94a3b8', borderBottom: '1px solid rgba(0,0,0,0.04)', fontFamily: 'monospace' }}>1 - (0.5)^{roundNumber}</td>
                                             </tr>
                                         );
                                     })}
@@ -1178,7 +1261,7 @@ export default function MiniGameCipher() {
                 )}
 
                 {/* ─── Scene 4: Monte Carlo ─── */}
-                {started && (
+                {hasStarted && (
                     <section className="lab3-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1203,7 +1286,7 @@ export default function MiniGameCipher() {
                                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #7c3aed, #d946ef)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(124,58,237,0.35)' }}
                             >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
-                                {mcState === 'done' ? '⚡ รันจำลอง 1,000 คนใหม่อีกครั้ง (Run Again)' : '⚡ เริ่มรันจำลอง 1,000 คนทันที (Simulate 1,000 Trials)'}
+                                {monteCarloState === 'done' ? '⚡ รันจำลอง 1,000 คนใหม่อีกครั้ง (Run Again)' : '⚡ เริ่มรันจำลอง 1,000 คนทันที (Simulate 1,000 Trials)'}
                             </button>
                             <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 5 }}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
@@ -1211,7 +1294,7 @@ export default function MiniGameCipher() {
                             </span>
                         </div>
 
-                        {mcState === 'done' && mcResults && (
+                        {monteCarloState === 'done' && monteCarloResult && (
                             <>
                                 {/* Summary cards */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
@@ -1221,9 +1304,9 @@ export default function MiniGameCipher() {
                                             <span style={{ fontSize: 11, color: '#64748b' }}>โดนจับได้ทั้งหมด</span>
                                         </div>
                                         <div style={{ fontSize: 28, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>
-                                            {mcResults.totalCaught} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>/ 1,000</span>
+                                            {monteCarloResult.totalCaught} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>/ 1,000</span>
                                         </div>
-                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#ef4444' }}>{mcResults.empiricalRate}% ของทั้งหมด</div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#ef4444' }}>{monteCarloResult.empiricalRate}% ของทั้งหมด</div>
                                     </div>
                                     <div style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 12, padding: '14px 16px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
@@ -1231,9 +1314,9 @@ export default function MiniGameCipher() {
                                             <span style={{ fontSize: 11, color: '#64748b' }}>หลุดรอดได้</span>
                                         </div>
                                         <div style={{ fontSize: 28, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>
-                                            {mcResults.survived} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>/ 1,000</span>
+                                            {monteCarloResult.survived} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>/ 1,000</span>
                                         </div>
-                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b' }}>{(mcResults.survived / 10).toFixed(1)}% หลุดรอด</div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b' }}>{(monteCarloResult.survived / 10).toFixed(1)}% หลุดรอด</div>
                                     </div>
                                     <div style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 12, padding: '14px 16px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
@@ -1241,9 +1324,9 @@ export default function MiniGameCipher() {
                                             <span style={{ fontSize: 11, color: '#64748b' }}>เทียบกับทฤษฎี</span>
                                         </div>
                                         <div style={{ fontSize: 28, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>
-                                            {mcResults.theoretical}%
+                                            {monteCarloResult.theoretical}%
                                         </div>
-                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#7c3aed' }}>ค่าเบี่ยงเบน: {mcResults.deviation}%</div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#7c3aed' }}>ค่าเบี่ยงเบน: {monteCarloResult.deviation}%</div>
                                     </div>
                                 </div>
 
@@ -1257,13 +1340,13 @@ export default function MiniGameCipher() {
                                         <span style={{ fontSize: 11, color: '#94a3b8' }}>รวม 1000 คน</span>
                                     </div>
 
-                                    {mcResults.caughtPerRound.map((cnt, i) => (
-                                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '70px 1fr 80px', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                                            <span style={{ fontSize: 12, color: '#475569' }}>รอบที่ {i + 1}:</span>
+                                    {monteCarloResult.caughtCounts.map((count, index) => (
+                                        <div key={index} style={{ display: 'grid', gridTemplateColumns: '70px 1fr 80px', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+                                            <span style={{ fontSize: 12, color: '#475569' }}>รอบที่ {index + 1}:</span>
                                             <div style={{ height: 18, background: 'rgba(0,0,0,0.04)', borderRadius: 999, overflow: 'hidden' }}>
-                                                <div style={{ height: '100%', borderRadius: 999, width: `${(cnt / 1000) * 100}%`, background: i === mcResults.n - 1 ? 'transparent' : 'linear-gradient(to right, #7c3aed, #a78bfa)', transition: 'width 1s ease' }} />
+                                                <div style={{ height: '100%', borderRadius: 999, width: `${(count / 1000) * 100}%`, background: index === monteCarloResult.totalRounds - 1 ? 'transparent' : 'linear-gradient(to right, #7c3aed, #a78bfa)', transition: 'width 1s ease' }} />
                                             </div>
-                                            <span style={{ fontSize: 12, color: '#334155', textAlign: 'right', fontFamily: 'monospace' }}>{cnt} คน ({(cnt / 10).toFixed(1)}%)</span>
+                                            <span style={{ fontSize: 12, color: '#334155', textAlign: 'right', fontFamily: 'monospace' }}>{count} คน ({(count / 10).toFixed(1)}%)</span>
                                         </div>
                                     ))}
 
@@ -1271,9 +1354,9 @@ export default function MiniGameCipher() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr 80px', gap: 10, alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                                         <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700 }}>รอดครบ:</span>
                                         <div style={{ height: 18, background: 'rgba(0,0,0,0.04)', borderRadius: 999, overflow: 'hidden' }}>
-                                            <div style={{ height: '100%', borderRadius: 999, width: `${(mcResults.survived / 1000) * 100}%`, background: 'linear-gradient(to right, #f59e0b, #fbbf24)', transition: 'width 1s ease' }} />
+                                            <div style={{ height: '100%', borderRadius: 999, width: `${(monteCarloResult.survived / 1000) * 100}%`, background: 'linear-gradient(to right, #f59e0b, #fbbf24)', transition: 'width 1s ease' }} />
                                         </div>
-                                        <span style={{ fontSize: 12, color: '#f59e0b', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>{mcResults.survived} คน ({(mcResults.survived / 10).toFixed(1)}%)</span>
+                                        <span style={{ fontSize: 12, color: '#f59e0b', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>{monteCarloResult.survived} คน ({(monteCarloResult.survived / 10).toFixed(1)}%)</span>
                                     </div>
                                 </div>
                             </>
@@ -1282,7 +1365,7 @@ export default function MiniGameCipher() {
                 )}
 
                 {/* ─── Scene 5: Takeaways ─── */}
-                {started && (
+                {hasStarted && (
                     <section className="lab3-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
@@ -1338,8 +1421,8 @@ export default function MiniGameCipher() {
                                     bg: 'rgba(255,255,255,0.5)',
                                     border: 'rgba(0,0,0,0.07)',
                                 },
-                            ].map((pillar, i) => (
-                                <div key={i} style={{ display: 'flex', gap: 14, padding: '16px 18px', borderRadius: 14, background: pillar.bg, border: `1px solid ${pillar.border}`, alignItems: 'flex-start' }}>
+                            ].map((pillar, index) => (
+                                <div key={index} style={{ display: 'flex', gap: 14, padding: '16px 18px', borderRadius: 14, background: pillar.bg, border: `1px solid ${pillar.border}`, alignItems: 'flex-start' }}>
                                     <div style={{ width: 40, height: 40, borderRadius: 10, background: pillar.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                         {pillar.icon}
                                     </div>

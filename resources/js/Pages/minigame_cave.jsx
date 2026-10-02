@@ -33,6 +33,14 @@ const DOOR_CENTER_POS = { x: 300, y: 168 };
 // ──────────────────────────────────────────────────────
 // Custom Hook: เอฟเฟกต์พิมพ์ดีด (Typewriter)
 // ──────────────────────────────────────────────────────
+/**
+ * Hook แสดงข้อความทีละตัวอักษรเหมือนพิมพ์ดีด
+ *
+ * @param {string} text ข้อความเต็มที่ต้องการแสดง
+ * @param {number} speed ช่วงเวลาระหว่างตัวอักษร (มิลลิวินาที) ค่าเริ่มต้น 22
+ * @return {string} ข้อความที่แสดงถึงตัวอักษรปัจจุบัน
+ * @author StealthTrade Team
+ */
 function useTypewriter(text, speed = 22) {
     const [displayed, setDisplayed] = useState('');
     const idxRef = useRef(0);
@@ -40,15 +48,15 @@ function useTypewriter(text, speed = 22) {
     useEffect(() => {
         setDisplayed('');
         idxRef.current = 0;
-        const iv = setInterval(() => {
+        const intervalId = setInterval(() => {
             if (idxRef.current < text.length) {
                 setDisplayed(text.slice(0, idxRef.current + 1));
                 idxRef.current++;
             } else {
-                clearInterval(iv);
+                clearInterval(intervalId);
             }
         }, speed);
-        return () => clearInterval(iv);
+        return () => clearInterval(intervalId);
     }, [text]);
 
     return displayed;
@@ -69,23 +77,33 @@ const MSG = {
 
     victorChoose: 'Peggy อยู่ในถ้ำแล้ว!\nVictor กำลังจะสั่งว่า "ออกทาง A!" หรือ "ออกทาง B!"\nเลือกทางออกที่ Victor จะสั่งให้ Peggy ออกมาครับ',
 
-    success: (r, totalRounds) => `รอบที่ ${r} — สำเร็จ! ✅\nPeggy ออกมาถูกทาง Victor เริ่มเชื่อมากขึ้น\nแต่ต้องพิสูจน์ให้ครบ ${totalRounds} รอบเพื่อยืนยัน`,
+    success: (roundNumber, totalRounds) => `รอบที่ ${roundNumber} — สำเร็จ! ✅\nPeggy ออกมาถูกทาง Victor เริ่มเชื่อมากขึ้น\nแต่ต้องพิสูจน์ให้ครบ ${totalRounds} รอบเพื่อยืนยัน`,
 
-    maybe: (r) => `รอบที่ ${r} — ล้มเหลว! ❌\nPeggy ออกมาไม่ถูกทาง คุณอาจถูก Victor สงสัยว่ารู้คำวิเศษจริงหรือไม่ \nคุณต้องไปต่อเพื่อพิสูจน์ความบริสุทธิ์ของคุณ`,
+    maybe: (roundNumber) => `รอบที่ ${roundNumber} — ล้มเหลว! ❌\nPeggy ออกมาไม่ถูกทาง คุณอาจถูก Victor สงสัยว่ารู้คำวิเศษจริงหรือไม่ \nคุณต้องไปต่อเพื่อพิสูจน์ความบริสุทธิ์ของคุณ`,
 
-    fail: (r) => `รอบที่ ${r} — ล้มเหลว! ❌\nPeggy ออกมาไม่ถูกทาง ถูก Victor จับได้ว่าไม่รู้คำวิเศษจริง\nระบบ ZKP ตรวจจับคนโกหกได้ นี่คือ "Soundness"`,
+    fail: (roundNumber) => `รอบที่ ${roundNumber} — ล้มเหลว! ❌\nPeggy ออกมาไม่ถูกทาง ถูก Victor จับได้ว่าไม่รู้คำวิเศษจริง\nระบบ ZKP ตรวจจับคนโกหกได้ นี่คือ "Soundness"`,
 
-    win: (pct, totalRounds) => `ยอดเยี่ยม! ครบ ${totalRounds} รอบติดต่อกันแล้ว!\nVictor มั่นใจว่า Peggy รู้คำวิเศษจริง ด้วยความมั่นใจ ${pct}\n— โดยไม่เคยรู้เลยว่า "คำวิเศษคืออะไร"\nนี่คือหัวใจของ Zero-Knowledge Proof!`,
+    win: (percent, totalRounds) => `ยอดเยี่ยม! ครบ ${totalRounds} รอบติดต่อกันแล้ว!\nVictor มั่นใจว่า Peggy รู้คำวิเศษจริง ด้วยความมั่นใจ ${percent}\n— โดยไม่เคยรู้เลยว่า "คำวิเศษคืออะไร"\nนี่คือหัวใจของ Zero-Knowledge Proof!`,
 };
 
 
 // ──────────────────────────────────────────────────────
 // Confidence Engine (เหมือนใน minigame_ball)
 // ──────────────────────────────────────────────────────
+/**
+ * แสดงแถบความเชื่อมั่น (Confidence Engine) ตามจำนวนรอบที่พิสูจน์ผ่าน
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {number} props.round หมายเลขรอบปัจจุบัน
+ * @param {number} props.confidenceRounds จำนวนรอบที่เพิ่มความเชื่อมั่นแล้ว
+ * @param {number} props.total จำนวนรอบทั้งหมดที่ต้องพิสูจน์
+ * @return {JSX.Element} แถบความเชื่อมั่นและสถิติ
+ * @author StealthTrade Team
+ */
 function ConfidenceBar({ round, confidenceRounds, total }) {
-    const cRounds = confidenceRounds !== undefined ? confidenceRounds : 0;
-    const pct = (1 - Math.pow(0.5, cRounds)) * 100;
-    const guessProb = cRounds === 0 ? 50 : (Math.pow(0.5, cRounds) * 100);
+    const confidenceRoundCount = confidenceRounds !== undefined ? confidenceRounds : 0;
+    const percent = (1 - Math.pow(0.5, confidenceRoundCount)) * 100;
+    const guessProbability = confidenceRoundCount === 0 ? 50 : (Math.pow(0.5, confidenceRoundCount) * 100);
 
     return (
         <div className="mgconf">
@@ -96,11 +114,11 @@ function ConfidenceBar({ round, confidenceRounds, total }) {
                     </svg>
                     Confidence Engine
                 </span>
-                <span className="mgconf-formula">1 − (0.5)<sup>n</sup> · n = {cRounds}</span>
+                <span className="mgconf-formula">1 − (0.5)<sup>n</sup> · n = {confidenceRoundCount}</span>
             </div>
-            <div className="mgconf-pct">{pct.toFixed(2)}%</div>
-            <div className="mgconf-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-                <div className="mgconf-fill" style={{ width: `${pct}%` }} />
+            <div className="mgconf-pct">{percent.toFixed(2)}%</div>
+            <div className="mgconf-track" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+                <div className="mgconf-fill" style={{ width: `${percent}%` }} />
             </div>
             <div className="mgconf-stats">
                 <div className="mgstat">
@@ -109,7 +127,7 @@ function ConfidenceBar({ round, confidenceRounds, total }) {
                 </div>
                 <div className="mgstat">
                     <dt className="mgstat-label">โอกาสเดาสุ่ม</dt>
-                    <dd className="mgstat-val">{guessProb.toFixed(2)}%</dd>
+                    <dd className="mgstat-val">{guessProbability.toFixed(2)}%</dd>
                 </div>
             </div>
             <div className="mgmev">
@@ -117,7 +135,7 @@ function ConfidenceBar({ round, confidenceRounds, total }) {
                     <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
                     <path d="m9 12 2 2 4-4" />
                 </svg>
-                <span>MEV / Front-Running Protection · {cRounds === 0 ? 'STANDBY' : cRounds >= total ? 'VERIFIED ✓' : 'ACTIVE'}</span>
+                <span>MEV / Front-Running Protection · {confidenceRoundCount === 0 ? 'STANDBY' : confidenceRoundCount >= total ? 'VERIFIED ✓' : 'ACTIVE'}</span>
             </div>
             <p className="mgconf-desc">
                 แต่ละรอบที่ผ่านลดความน่าจะเป็นของการเดาสุ่มลงครึ่งหนึ่ง เมื่อครบ {total} รอบ ระดับความเชื่อมั่นจะสูงกว่า {total === 5 ? '96.8%' : '87.5%'}
@@ -130,7 +148,15 @@ function ConfidenceBar({ round, confidenceRounds, total }) {
 // ──────────────────────────────────────────────────────
 // บันทึกผลการทดสอบ (Round Log)
 // ──────────────────────────────────────────────────────
-function RoundLog({ log }) {
+/**
+ * แสดงบันทึกผลการพิสูจน์แต่ละรอบ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {Array} props.logEntries รายการผลการพิสูจน์ (ใหม่สุดอยู่หน้าสุด)
+ * @return {JSX.Element} กล่องบันทึกรอบการพิสูจน์
+ * @author StealthTrade Team
+ */
+function RoundLog({ logEntries }) {
     return (
         <div className="mglog">
             <div className="mglog-title">
@@ -140,15 +166,15 @@ function RoundLog({ log }) {
                 </svg>
                 บันทึกรอบการพิสูจน์
             </div>
-            {log.length === 0 ? (
+            {logEntries.length === 0 ? (
                 <p className="mglog-empty">ยังไม่มีรอบที่บันทึก — กดเลือกทางเข้าเพื่อเริ่ม</p>
             ) : (
                 <ul className="mglog-list">
-                    {log.map((e, i) => (
-                        <li key={i} className={`mglog-entry ${e.result === 'success' ? 'mglog-ok' : 'mglog-fail'}`}>
-                            <span className="mglog-round">รอบ {e.round}</span>
-                            <span className="mglog-action">เข้า {e.entrance} → ออก {e.victorRequest}</span>
-                            <span className="mglog-result">{e.result === 'success' ? '✓ ผ่าน' : '✗ ไม่ผ่าน'}</span>
+                    {logEntries.map((entry, index) => (
+                        <li key={index} className={`mglog-entry ${entry.result === 'success' ? 'mglog-ok' : 'mglog-fail'}`}>
+                            <span className="mglog-round">รอบ {entry.round}</span>
+                            <span className="mglog-action">เข้า {entry.entrance} → ออก {entry.victorRequest}</span>
+                            <span className="mglog-result">{entry.result === 'success' ? '✓ ผ่าน' : '✗ ไม่ผ่าน'}</span>
                         </li>
                     ))}
                 </ul>
@@ -161,7 +187,21 @@ function RoundLog({ log }) {
 // ──────────────────────────────────────────────────────
 // Component วาดรูปถ้ำ (Cave SVG)
 // ──────────────────────────────────────────────────────
-function CaveSVG({ peggyPos, victorVisible, doorOpen, highlightPath, exitPath, pathARef, pathBRef }) {
+/**
+ * วาดรูปถ้ำ Ali Baba พร้อมตัวละคร Peggy, Victor และประตูลับ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {Object} props.peggyPos ตำแหน่งและสถานะการเดินของ Peggy
+ * @param {boolean} props.isVictorVisible แสดง Victor หรือไม่
+ * @param {boolean} props.isDoorOpen ประตูลับเปิดอยู่หรือไม่
+ * @param {string|null} props.highlightPath ทางเดินที่ไฮไลต์ (A หรือ B)
+ * @param {string|null} props.exitPath ทางออกที่ Victor สั่ง
+ * @param {Object} props.pathARef Ref ของเส้นทาง A
+ * @param {Object} props.pathBRef Ref ของเส้นทาง B
+ * @return {JSX.Element} รูป SVG ของถ้ำ
+ * @author StealthTrade Team
+ */
+function CaveSVG({ peggyPos, isVictorVisible, isDoorOpen, highlightPath, exitPath, pathARef, pathBRef }) {
     return (
         <svg viewBox="0 100 600 500" role="img" aria-label="ถ้ำ Ali Baba">
             <path
@@ -189,19 +229,19 @@ function CaveSVG({ peggyPos, victorVisible, doorOpen, highlightPath, exitPath, p
             <text x="300" y="140" textAnchor="middle" className="cave-label-door">SECRET DOOR</text>
             <g>
                 <rect x="268" y="160" width="30" height="16" rx="4"
-                    className={`cave-door-panel ${doorOpen ? 'cave-door-open' : 'cave-door-closed'}`}
-                    style={{ transform: doorOpen ? 'translateX(-22px)' : 'translateX(0px)', transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                    className={`cave-door-panel ${isDoorOpen ? 'cave-door-open' : 'cave-door-closed'}`}
+                    style={{ transform: isDoorOpen ? 'translateX(-22px)' : 'translateX(0px)', transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
                 />
             </g>
             <g>
                 <rect x="302" y="160" width="30" height="16" rx="4"
-                    className={`cave-door-panel ${doorOpen ? 'cave-door-open' : 'cave-door-closed'}`}
-                    style={{ transform: doorOpen ? 'translateX(22px)' : 'translateX(0px)', transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                    className={`cave-door-panel ${isDoorOpen ? 'cave-door-open' : 'cave-door-closed'}`}
+                    style={{ transform: isDoorOpen ? 'translateX(22px)' : 'translateX(0px)', transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
                 />
             </g>
             <line x1="72" y1="528" x2="528" y2="528" className="cave-dashed-line" />
             <text x="528" y="550" textAnchor="end" className="cave-dashed-label">ข้างในถ้ำ = มองไม่เห็น</text>
-            {victorVisible && (
+            {isVictorVisible && (
                 <g>
                     <circle cx="150" cy="556" r="17" className="cave-victor-circle" />
                     <circle cx="150" cy="551" r="4.5" className="cave-victor-head" />
@@ -210,7 +250,7 @@ function CaveSVG({ peggyPos, victorVisible, doorOpen, highlightPath, exitPath, p
                 </g>
             )}
             <g className="cave-peggy" style={{ transform: `translate(${peggyPos.x}px, ${peggyPos.y}px)` }}>
-                <g className={`cave-peggy-inner ${peggyPos.walking ? 'walking' : ''}`}>
+                <g className={`cave-peggy-inner ${peggyPos.isWalking ? 'walking' : ''}`}>
                     <circle r="16" className="cave-peggy-body" />
                     <text y="6" textAnchor="middle" className="cave-peggy-text">P</text>
                 </g>
@@ -229,32 +269,38 @@ function CaveSVG({ peggyPos, victorVisible, doorOpen, highlightPath, exitPath, p
 // ══════════════════════════════════════════════════════
 // คอมโพเนนต์หลัก: หน้ามินิเกมถ้ำ ZKP
 // ══════════════════════════════════════════════════════
-export default function Cave() {
+/**
+ * หน้ามินิเกมถ้ำ Ali Baba สำหรับสอนหลักการ Zero-Knowledge Proof
+ *
+ * @return {JSX.Element} หน้าจอมินิเกมทั้งหมด
+ * @author StealthTrade Team
+ */
+export default function MiniGameCave() {
     // === State ของเกม ===
-    const [knowsSecret, setKnowsSecret] = useState(true);
-    const totalRounds = knowsSecret ? 5 : 3;
+    const [hasSecretKnowledge, setHasSecretKnowledge] = useState(true);
+    const totalRounds = hasSecretKnowledge ? 5 : 3;
 
     const [step, setStep] = useState(STEPS.CHOOSE_KNOWLEDGE);
     const [chosenEntrance, setChosenEntrance] = useState(null);
     const [victorRequest, setVictorRequest] = useState(null);
-    const [doorOpen, setDoorOpen] = useState(false);
+    const [isDoorOpen, setIsDoorOpen] = useState(false);
     const [result, setResult] = useState(null);
     const [statusMsg, setStatusMsg] = useState('พร้อมเริ่มรอบใหม่ — เลือกทางเข้าถ้ำ');
-    const [history, setHistory] = useState([]);
+    const [historyEntries, setHistoryEntries] = useState([]);
     const [round, setRound] = useState(1);
     const [successCount, setSuccessCount] = useState(0);
     const [confidenceCount, setConfidenceCount] = useState(0);
-    const [gameWon, setGameWon] = useState(false);
+    const [isGameWon, setIsGameWon] = useState(false);
 
     // === State สำหรับแอนิเมชัน ===
-    const [peggyPos, setPeggyPos] = useState({ ...OUTSIDE_POS, walking: false });
+    const [peggyPos, setPeggyPos] = useState({ ...OUTSIDE_POS, isWalking: false });
     const [isAnimating, setIsAnimating] = useState(false);
     const [highlightPath, setHighlightPath] = useState(null);
     const [exitPath, setExitPath] = useState(null);
 
     // === Narrator ===
     const [narratorText, setNarratorText] = useState(MSG.intro);
-    const typed = useTypewriter(narratorText, 25);
+    const typedText = useTypewriter(narratorText, 25);
 
     // === Refs ===
     const autoPlayRef = useRef(null);
@@ -266,27 +312,37 @@ export default function Cave() {
     // ข้อความเริ่มต้นจะพิมพ์ยาวไปเลย ไม่ต้อง setTimeout เปลี่ยนข้อความแล้ว
 
     // === ฟังก์ชันแอนิเมชัน ===
+    /**
+     * เคลื่อน Peggy ไปตามเส้นทางในถ้ำ (SVG path) ด้วยแอนิเมชัน
+     *
+     * @param {Object} pathRef Ref ของ SVG path ที่จะเดินตาม
+     * @param {number} fromProgress ตำแหน่งเริ่มต้นบนเส้นทาง (0 ถึง 1)
+     * @param {number} toProgress ตำแหน่งปลายทางบนเส้นทาง (0 ถึง 1)
+     * @param {number} duration ระยะเวลาแอนิเมชัน (มิลลิวินาที) ค่าเริ่มต้น 800
+     * @return {Promise<void>} resolve เมื่อเดินถึงปลายทาง
+     * @author StealthTrade Team
+     */
     const moveAlongPath = useCallback((pathRef, fromProgress, toProgress, duration = 800) => {
         return new Promise(resolve => {
-            const pathEl = pathRef.current;
-            if (!pathEl) { resolve(); return; }
-            const totalLength = pathEl.getTotalLength();
+            const pathElement = pathRef.current;
+            if (!pathElement) { resolve(); return; }
+            const totalLength = pathElement.getTotalLength();
             const startLength = fromProgress * totalLength;
             const endLength = toProgress * totalLength;
             const startTime = performance.now();
 
             const animate = (now) => {
                 const elapsed = now - startTime;
-                const t = Math.min(elapsed / duration, 1);
-                const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-                const len = startLength + (endLength - startLength) * eased;
-                const pt = pathEl.getPointAtLength(Math.max(0, Math.min(totalLength, len)));
-                peggyPosRef.current = { x: pt.x, y: pt.y };
-                setPeggyPos({ x: pt.x, y: pt.y, walking: true });
-                if (t < 1) {
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+                const currentLength = startLength + (endLength - startLength) * eased;
+                const point = pathElement.getPointAtLength(Math.max(0, Math.min(totalLength, currentLength)));
+                peggyPosRef.current = { x: point.x, y: point.y };
+                setPeggyPos({ x: point.x, y: point.y, isWalking: true });
+                if (progress < 1) {
                     rafRef.current = requestAnimationFrame(animate);
                 } else {
-                    setPeggyPos(prev => ({ ...prev, walking: false }));
+                    setPeggyPos(prev => ({ ...prev, isWalking: false }));
                     resolve();
                 }
             };
@@ -294,23 +350,31 @@ export default function Cave() {
         });
     }, []);
 
+    /**
+     * เลื่อน Peggy ไปยังตำแหน่งที่กำหนดแบบเส้นตรงด้วยแอนิเมชัน
+     *
+     * @param {{x: number, y: number}} targetPos ตำแหน่งปลายทาง
+     * @param {number} duration ระยะเวลาแอนิเมชัน (มิลลิวินาที) ค่าเริ่มต้น 300
+     * @return {Promise<void>} resolve เมื่อถึงตำแหน่งปลายทาง
+     * @author StealthTrade Team
+     */
     const movePeggy = useCallback((targetPos, duration = 300) => {
         return new Promise(resolve => {
             const startPos = { ...peggyPosRef.current };
             const startTime = performance.now();
             const animate = (now) => {
                 const elapsed = now - startTime;
-                const t = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - t, 3);
-                const x = startPos.x + (targetPos.x - startPos.x) * eased;
-                const y = startPos.y + (targetPos.y - startPos.y) * eased;
-                peggyPosRef.current = { x, y };
-                setPeggyPos({ x, y, walking: true });
-                if (t < 1) {
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const currentX = startPos.x + (targetPos.x - startPos.x) * eased;
+                const currentY = startPos.y + (targetPos.y - startPos.y) * eased;
+                peggyPosRef.current = { x: currentX, y: currentY };
+                setPeggyPos({ x: currentX, y: currentY, isWalking: true });
+                if (progress < 1) {
                     rafRef.current = requestAnimationFrame(animate);
                 } else {
                     peggyPosRef.current = { x: targetPos.x, y: targetPos.y };
-                    setPeggyPos({ x: targetPos.x, y: targetPos.y, walking: false });
+                    setPeggyPos({ x: targetPos.x, y: targetPos.y, isWalking: false });
                     resolve();
                 }
             };
@@ -319,13 +383,27 @@ export default function Cave() {
     }, []);
 
     // === เกมเพลย์ ===
-    const handleChooseKnowledge = useCallback((knows) => {
-        setKnowsSecret(knows);
+    /**
+     * เลือกบทบาทของผู้เล่น (รู้คำวิเศษจริง หรือแกล้งทำ) แล้วเข้าสู่ขั้นเลือกทางเข้า
+     *
+     * @param {boolean} hasKnowledge true ถ้าผู้เล่นรู้คำวิเศษจริง
+     * @return {void} ไม่มีค่าส่งกลับ
+     * @author StealthTrade Team
+     */
+    const handleChooseKnowledge = useCallback((hasKnowledge) => {
+        setHasSecretKnowledge(hasKnowledge);
         setStep(STEPS.CHOOSE_ENTRANCE);
         setNarratorText(MSG.waiting);
         setStatusMsg('พร้อมเริ่มรอบใหม่ — เลือกทางเข้าถ้ำ');
     }, []);
 
+    /**
+     * เลือกทางเข้าถ้ำ A หรือ B แล้วให้ Peggy เดินเข้าไปจนถึงจุดที่ Victor สั่งทางออก
+     *
+     * @param {string} path ทางเข้าที่เลือก (A หรือ B)
+     * @return {Promise<void>} resolve เมื่อ Peggy เข้าถ้ำแล้ว
+     * @author StealthTrade Team
+     */
     const handleChooseEntrance = useCallback(async (path) => {
         if (isAnimating) return;
         setIsAnimating(true);
@@ -346,6 +424,13 @@ export default function Cave() {
         setIsAnimating(false);
     }, [isAnimating, moveAlongPath, pathARef, pathBRef]);
 
+    /**
+     * จัดการเมื่อ Victor สั่งทางออก: เล่นแอนิเมชัน ตัดสินผล และอัปเดตสถิติของรอบ
+     *
+     * @param {string} requestedPath ทางออกที่ Victor สั่ง (A หรือ B)
+     * @return {Promise<void>} resolve เมื่อจบรอบ
+     * @author StealthTrade Team
+     */
     const handleVictorRequest = useCallback(async (requestedPath) => {
         if (isAnimating) return;
         setIsAnimating(true);
@@ -353,55 +438,55 @@ export default function Cave() {
         setExitPath(requestedPath);
         setStep(STEPS.PEGGY_EXITING);
 
-        const sameWay = chosenEntrance === requestedPath;
+        const isSameWay = chosenEntrance === requestedPath;
         const enteredPathRef = chosenEntrance === 'A' ? pathARef : pathBRef;
         const exitPathRef = requestedPath === 'A' ? pathARef : pathBRef;
-        let success;
-        let maybe = false;
+        let isSuccess;
+        let isMaybe = false;
 
-        if (sameWay) {
-            maybe = true;
-            success = false;
+        if (isSameWay) {
+            isMaybe = true;
+            isSuccess = false;
             setStatusMsg(`Peggy ออกทาง ${requestedPath} ทางเดิมที่เข้า — Victor สงสัย...`);
             await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 0, 1100);
         } else {
-            if (knowsSecret) {
-                success = true;
+            if (hasSecretKnowledge) {
+                isSuccess = true;
                 setStatusMsg(`Peggy รู้คำวิเศษ! เปิดประตูลับและออกทาง ${requestedPath} ✨`);
                 
                 await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 1.0, 700);
                 
                 setHighlightPath(requestedPath);
-                setDoorOpen(true);
+                setIsDoorOpen(true);
                 
                 await movePeggy(DOOR_CENTER_POS, 250);
-                setDoorOpen(false);
+                setIsDoorOpen(false);
                 await moveAlongPath(exitPathRef, 1.0, 0, 1100);
             } else {
-                success = false;
+                isSuccess = false;
                 setStatusMsg(`Peggy ไม่รู้คำวิเศษ! เปิดประตูไม่ได้ ❌`);
                 
                 // เดินไปถึงประตูแล้วติด
                 await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 1.0, 700);
                 
-                const curPos = peggyPosRef.current;
+                const currentPosition = peggyPosRef.current;
                 for (let i = 0; i < 2; i++) {
-                    await movePeggy({ x: curPos.x - 4, y: curPos.y }, 60);
-                    await movePeggy({ x: curPos.x + 4, y: curPos.y }, 60);
+                    await movePeggy({ x: currentPosition.x - 4, y: currentPosition.y }, 60);
+                    await movePeggy({ x: currentPosition.x + 4, y: currentPosition.y }, 60);
                 }
-                await movePeggy(curPos, 60);
+                await movePeggy(currentPosition, 60);
             }
         }
 
-        setResult(success ? 'success' : maybe ? 'maybe' : 'fail');
+        setResult(isSuccess ? 'success' : isMaybe ? 'maybe' : 'fail');
         setStep(STEPS.RESULT);
 
         let newSuccessCount;
         let newConfidenceCount;
-        if (success) {
+        if (isSuccess) {
             newSuccessCount = successCount + 1;
             newConfidenceCount = confidenceCount + 1;
-        } else if (maybe) {
+        } else if (isMaybe) {
             // maybe: counts as passed round, but confidence doesn't increase
             newSuccessCount = successCount + 1;
             newConfidenceCount = confidenceCount;
@@ -413,12 +498,12 @@ export default function Cave() {
         setConfidenceCount(newConfidenceCount);
 
         if (newSuccessCount >= totalRounds) {
-            setGameWon(true);
-            const finalPct = ((1 - Math.pow(0.5, newConfidenceCount)) * 100).toFixed(2) + '%';
-            setNarratorText(MSG.win(finalPct, totalRounds));
-        } else if (maybe) {
+            setIsGameWon(true);
+            const finalPercent = ((1 - Math.pow(0.5, newConfidenceCount)) * 100).toFixed(2) + '%';
+            setNarratorText(MSG.win(finalPercent, totalRounds));
+        } else if (isMaybe) {
             setNarratorText(MSG.maybe(round));
-        } else if (success) {
+        } else if (isSuccess) {
             setNarratorText(MSG.success(round, totalRounds));
         } else {
             setNarratorText(MSG.fail(round));
@@ -430,46 +515,58 @@ export default function Cave() {
             round,
             entrance: chosenEntrance,
             victorRequest: requestedPath,
-            knowsSecret,
-            result: success ? 'success' : maybe ? 'maybe' : 'fail',
+            hasSecretKnowledge,
+            result: isSuccess ? 'success' : isMaybe ? 'maybe' : 'fail',
         };
-        setHistory(prev => [historyEntry, ...prev]);
-        setRound(r => r + 1);
+        setHistoryEntries(prev => [historyEntry, ...prev]);
+        setRound(previousRound => previousRound + 1);
         setIsAnimating(false);
-    }, [isAnimating, chosenEntrance, knowsSecret, round, successCount, movePeggy, moveAlongPath, pathARef, pathBRef]);
+    }, [isAnimating, chosenEntrance, hasSecretKnowledge, round, successCount, movePeggy, moveAlongPath, pathARef, pathBRef]);
 
+    /**
+     * ล้างสถานะของรอบปัจจุบันและเตรียมเริ่มรอบถัดไป (คงสถิติสะสมไว้)
+     *
+     * @return {void} ไม่มีค่าส่งกลับ
+     * @author StealthTrade Team
+     */
     const handleNextRound = useCallback(() => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         setStep(STEPS.CHOOSE_ENTRANCE);
         setChosenEntrance(null);
         setVictorRequest(null);
-        setDoorOpen(false);
+        setIsDoorOpen(false);
         setResult(null);
         setExitPath(null);
         setHighlightPath(null);
         peggyPosRef.current = { ...OUTSIDE_POS };
-        setPeggyPos({ ...OUTSIDE_POS, walking: false });
+        setPeggyPos({ ...OUTSIDE_POS, isWalking: false });
         setStatusMsg('พร้อมเริ่มรอบใหม่ — เลือกทางเข้าถ้ำ');
         setNarratorText(MSG.waiting);
     }, []);
 
+    /**
+     * รีเซ็ตเกมทั้งหมดกลับสู่หน้าเลือกบทบาท
+     *
+     * @return {void} ไม่มีค่าส่งกลับ
+     * @author StealthTrade Team
+     */
     const reset = useCallback(() => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         setRound(1);
         setSuccessCount(0);
         setConfidenceCount(0);
-        setHistory([]);
-        setKnowsSecret(true);
+        setHistoryEntries([]);
+        setHasSecretKnowledge(true);
         setStep(STEPS.CHOOSE_KNOWLEDGE);
         setChosenEntrance(null);
         setVictorRequest(null);
-        setDoorOpen(false);
+        setIsDoorOpen(false);
         setResult(null);
         setExitPath(null);
         setHighlightPath(null);
-        setGameWon(false);
+        setIsGameWon(false);
         peggyPosRef.current = { ...OUTSIDE_POS };
-        setPeggyPos({ ...OUTSIDE_POS, walking: false });
+        setPeggyPos({ ...OUTSIDE_POS, isWalking: false });
         setStatusMsg('พร้อมเริ่มรอบใหม่ — เลือกบทบาทของคุณ');
         setNarratorText(MSG.intro);
         if (autoPlayRef.current) {
@@ -478,48 +575,60 @@ export default function Cave() {
         }
     }, []);
 
+    /**
+     * เล่นหนึ่งรอบอัตโนมัติโดยสุ่มทางเข้าและทางออกของ Victor
+     *
+     * @return {Promise<void>} resolve เมื่อจบรอบ
+     * @author StealthTrade Team
+     */
     const autoPlayRound = useCallback(async () => {
         if (isAnimating) return;
         const entrance = Math.random() < 0.5 ? 'A' : 'B';
         await handleChooseEntrance(entrance);
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(resolve => setTimeout(resolve, 800));
         const requested = Math.random() < 0.5 ? 'A' : 'B';
         await handleVictorRequest(requested);
     }, [isAnimating, handleChooseEntrance, handleVictorRequest]);
 
+    /**
+     * จำลองการเล่น 20 รอบทันทีโดยสุ่มทางเข้า/ทางออก แล้วอัปเดตสถิติและบันทึก
+     *
+     * @return {Promise<void>} resolve เมื่อจำลองเสร็จ
+     * @author StealthTrade Team
+     */
     const handleSimulate20 = useCallback(async () => {
         if (isAnimating) return;
-        const newHistory = [];
+        const newHistoryEntries = [];
         let currentRound = round;
-        let sc = successCount;
-        let cc = confidenceCount;
+        let successStreak = successCount;
+        let confidenceStreak = confidenceCount;
 
         for (let i = 0; i < 20; i++) {
             const entrance = Math.random() < 0.5 ? 'A' : 'B';
-            const victorReq = Math.random() < 0.5 ? 'A' : 'B';
-            const sameWay = entrance === victorReq;
-            const success = sameWay || knowsSecret;
-            if (success) { sc++; cc++; } else { sc = 0; cc = 0; }
+            const requestedPath = Math.random() < 0.5 ? 'A' : 'B';
+            const isSameWay = entrance === requestedPath;
+            const isSuccess = isSameWay || hasSecretKnowledge;
+            if (isSuccess) { successStreak++; confidenceStreak++; } else { successStreak = 0; confidenceStreak = 0; }
 
-            newHistory.push({
+            newHistoryEntries.push({
                 round: currentRound + i,
                 entrance,
-                victorRequest: victorReq,
-                knowsSecret,
-                result: success ? 'success' : 'fail',
+                victorRequest: requestedPath,
+                hasSecretKnowledge,
+                result: isSuccess ? 'success' : 'fail',
             });
         }
 
-        setHistory(prev => [...newHistory.reverse(), ...prev]);
-        setRound(r => r + 20);
-        setSuccessCount(sc);
-        setConfidenceCount(cc);
-        if (cc >= totalRounds) setGameWon(true);
+        setHistoryEntries(prev => [...newHistoryEntries.reverse(), ...prev]);
+        setRound(previousRound => previousRound + 20);
+        setSuccessCount(successStreak);
+        setConfidenceCount(confidenceStreak);
+        if (confidenceStreak >= totalRounds) setIsGameWon(true);
         setStep(STEPS.RESULT);
         setResult(null);
         setStatusMsg(`จำลองเสร็จ 20 รอบ — ดูผลลัพธ์ด้านล่าง`);
-        setNarratorText(`จำลองเสร็จ 20 รอบแล้ว!\nรอบสำเร็จติดกันล่าสุด: ${sc} รอบ\nดูผลลัพธ์ที่ Confidence Engine ด้านขวาครับ`);
-    }, [isAnimating, round, knowsSecret, successCount, confidenceCount]);
+        setNarratorText(`จำลองเสร็จ 20 รอบแล้ว!\nรอบสำเร็จติดกันล่าสุด: ${successStreak} รอบ\nดูผลลัพธ์ที่ Confidence Engine ด้านขวาครับ`);
+    }, [isAnimating, round, hasSecretKnowledge, successCount, confidenceCount]);
 
     useEffect(() => {
         return () => {
@@ -527,7 +636,7 @@ export default function Cave() {
         };
     }, []);
 
-    const lastEntry = history.length > 0 ? history[0] : null;
+    const lastEntry = historyEntries.length > 0 ? historyEntries[0] : null;
 
     // ====================================================
     // UI — ใช้ Layout เดียวกับ minigame_ball
@@ -591,7 +700,7 @@ export default function Cave() {
                         </div>
                         <div className="mgcard mg-bubble">
                             <p className="mg-narrator-text">
-                                {typed}<span className="mg-caret" />
+                                {typedText}<span className="mg-caret" />
                             </p>
                         </div>
                     </div>
@@ -606,8 +715,8 @@ export default function Cave() {
                         <div className="mg-cave-wrapper">
                             <CaveSVG
                                 peggyPos={peggyPos}
-                                victorVisible={true}
-                                doorOpen={doorOpen}
+                                isVictorVisible={true}
+                                isDoorOpen={isDoorOpen}
                                 highlightPath={highlightPath}
                                 exitPath={exitPath}
                                 pathARef={pathARef}
@@ -663,7 +772,7 @@ export default function Cave() {
                                     )}
 
                                     <div className="mg-action-row">
-                                        <button className="mg-btn-primary-action" onClick={handleNextRound} disabled={step === STEPS.CHOOSE_ENTRANCE && history.length === 0}>
+                                        <button className="mg-btn-primary-action" onClick={handleNextRound} disabled={step === STEPS.CHOOSE_ENTRANCE && historyEntries.length === 0}>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
                                             รอบต่อไป
                                         </button>
@@ -704,13 +813,13 @@ export default function Cave() {
                                 <h4 className="mg-cave-section-title">เลือกบทบาทของคุณ</h4>
                                 <div className="mg-action-row">
                                     <button
-                                        className={`mg-btn-keep ${knowsSecret ? 'mg-selected' : ''}`}
+                                        className={`mg-btn-keep ${hasSecretKnowledge ? 'mg-selected' : ''}`}
                                         onClick={() => handleChooseKnowledge(true)}
                                     >
                                         🔑 ฉันรู้คำวิเศษจริง
                                     </button>
                                     <button
-                                        className={`mg-btn-swap ${!knowsSecret ? 'mg-selected' : ''}`}
+                                        className={`mg-btn-swap ${!hasSecretKnowledge ? 'mg-selected' : ''}`}
                                         onClick={() => handleChooseKnowledge(false)}
                                     >
                                         🎭 ฉันไม่รู้ แต่จะแกล้งทำ
@@ -721,18 +830,18 @@ export default function Cave() {
 
                         {/* จุดแสดงรอบ */}
                         <div className="mg-dots">
-                            {Array.from({ length: totalRounds }).map((_, i) => (
+                            {Array.from({ length: totalRounds }).map((_, index) => (
                                 <div
-                                    key={i}
-                                    className={`mg-dot ${i < confidenceCount ? 'mg-dot-done'
-                                        : i === confidenceCount && !gameWon ? 'mg-dot-active'
+                                    key={index}
+                                    className={`mg-dot ${index < confidenceCount ? 'mg-dot-done'
+                                        : index === confidenceCount && !isGameWon ? 'mg-dot-active'
                                             : ''
                                         }`}
                                 />
                             ))}
                         </div>
 
-                        {gameWon && (
+                        {isGameWon && (
                             <div className="mg-status-win">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
@@ -746,14 +855,14 @@ export default function Cave() {
                     {/* ══════ ฝั่งขวา: Sidebar ══════ */}
                     <aside className="mg-sidebar">
                         <ConfidenceBar round={round} confidenceRounds={confidenceCount} total={totalRounds} />
-                        <RoundLog log={history} />
+                        <RoundLog logEntries={historyEntries} />
                         <div className="mg-flow-cards">
                             {[
                                 { step: '01 · Enter Cave', title: 'เดินเข้าถ้ำแบบลับ ๆ', desc: 'เลือกทางเข้าเอง — Victor หันหลังอยู่ เขาไม่รู้ว่าคุณเข้าทางไหน' },
                                 { step: '02 · Challenge', title: 'Victor สุ่มขอทางออก', desc: 'เขาตะโกนบอกให้คุณออกมาทางใดทางหนึ่ง โดยสุ่มแบบเดาไม่ได้' },
                                 { step: '03 · Prove', title: 'พิสูจน์ตัวเอง', desc: 'ถ้าคุณรู้คำวิเศษ ประตูลับจะเปิด และคุณออกมาถูกทางได้เสมอ' },
-                            ].map((card, i) => (
-                                <div key={i} className="mg-flow-card mgcard">
+                            ].map((card, index) => (
+                                <div key={index} className="mg-flow-card mgcard">
                                     <div className="mg-flow-step">{card.step}</div>
                                     <div className="mg-flow-title">{card.title}</div>
                                     <p className="mg-flow-desc">{card.desc}</p>
