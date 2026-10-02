@@ -41,9 +41,15 @@ import {
 } from "lucide-react"
 import "../../css/lab5.css"
 
-/** รวมชื่อคลาสแบบมีเงื่อนไข (เทียบเท่า clsx/cn แบบง่าย) */
-function cx(...args) {
-  return args.filter(Boolean).join(" ")
+/**
+ * รวมชื่อคลาสแบบมีเงื่อนไข (เทียบเท่า clsx/cn แบบง่าย)
+ *
+ * @param {...(string|boolean|null|undefined)} classNames ชื่อคลาสหรือค่าเงื่อนไข
+ * @return {string} ชื่อคลาสที่ผ่านเงื่อนไขแล้ว คั่นด้วยช่องว่าง
+ * @author StealthTrade Team
+ */
+function JoinClassNames(...classNames) {
+  return classNames.filter(Boolean).join(" ")
 }
 
 /* ==========================================================================
@@ -57,25 +63,37 @@ export const orders = [
   { id: "D", label: "Order D", value: "SELL 0.05 BTC @ 69,100" },
 ]
 
-/** SHA-256 จริงผ่าน Web Crypto API, คืนค่าเป็น hex ตัวพิมพ์เล็ก */
-async function sha256Hex(message) {
+/**
+ * SHA-256 จริงผ่าน Web Crypto API
+ *
+ * @param {string} message ข้อความที่ต้องการแฮช
+ * @return {Promise<string>} ค่า hash เป็น hex ตัวพิมพ์เล็ก
+ * @author StealthTrade Team
+ */
+async function Sha256Hex(message) {
   const data = new TextEncoder().encode(message)
   const digest = await crypto.subtle.digest("SHA-256", data)
   return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("")
 }
 
-const MID_LABELS = ["H(A+B)", "H(C+D)"]
+const midLabels = ["H(A+B)", "H(C+D)"]
 
-/** สร้าง Merkle tree แบบ 4 ใบด้วย SHA-256 จริง */
-async function buildMerkleTree(values) {
-  const leafHashes = await Promise.all(values.map((v) => sha256Hex(v)))
+/**
+ * สร้าง Merkle tree แบบ 4 ใบด้วย SHA-256 จริง
+ *
+ * @param {string[]} values ข้อมูลของแต่ละใบ (ต้องมี 4 รายการ)
+ * @return {Promise<{values: string[], leafHashes: string[], midHashes: string[], root: string, layers: string[][]}>} ต้นไม้ที่สร้างเสร็จแล้ว
+ * @author StealthTrade Team
+ */
+async function BuildMerkleTree(values) {
+  const leafHashes = await Promise.all(values.map((value) => Sha256Hex(value)))
   const midHashes = [
-    await sha256Hex(leafHashes[0] + leafHashes[1]),
-    await sha256Hex(leafHashes[2] + leafHashes[3]),
+    await Sha256Hex(leafHashes[0] + leafHashes[1]),
+    await Sha256Hex(leafHashes[2] + leafHashes[3]),
   ]
-  const root = await sha256Hex(midHashes[0] + midHashes[1])
+  const root = await Sha256Hex(midHashes[0] + midHashes[1])
   return {
     values,
     leafHashes,
@@ -85,57 +103,104 @@ async function buildMerkleTree(values) {
   }
 }
 
-/** Hash ของข้าง ๆ ที่ต้องใช้เพื่อเดินจากใบไปหา root */
-function getAuthenticationPath(tree, leafIndex) {
+/**
+ * Hash ของข้าง ๆ ที่ต้องใช้เพื่อเดินจากใบไปหา root
+ *
+ * @param {Object} tree ต้นไม้ที่ได้จาก BuildMerkleTree
+ * @param {number} leafIndex ตำแหน่งของใบที่ต้องการพิสูจน์ (0-3)
+ * @return {Array<{nodeId: string, label: string, hash: string, position: string}>} เส้นทางหลักฐานเรียงจากชั้นล่างขึ้นบน
+ * @author StealthTrade Team
+ */
+function GetAuthenticationPath(tree, leafIndex) {
   const leafSiblingIndex = leafIndex ^ 1
   const parentIndex = leafIndex >> 1
   const midSiblingIndex = parentIndex ^ 1
-  const leafId = ["A", "B", "C", "D"]
+  const leafIds = ["A", "B", "C", "D"]
 
   return [
     {
       nodeId: `leaf-${leafSiblingIndex}`,
-      label: `H(${leafId[leafSiblingIndex]})`,
+      label: `H(${leafIds[leafSiblingIndex]})`,
       hash: tree.leafHashes[leafSiblingIndex],
       position: leafIndex % 2 === 0 ? "right" : "left",
     },
     {
       nodeId: `mid-${midSiblingIndex}`,
-      label: MID_LABELS[midSiblingIndex],
+      label: midLabels[midSiblingIndex],
       hash: tree.midHashes[midSiblingIndex],
       position: parentIndex % 2 === 0 ? "right" : "left",
     },
   ]
 }
 
-async function combine(a, b, position) {
+/**
+ * รวม hash สองค่าเป็น hash ใหม่ตามตำแหน่งของ sibling
+ *
+ * @param {string} currentHash hash ที่เราถืออยู่
+ * @param {string} siblingHash hash ของ sibling
+ * @param {string} position ตำแหน่งของ sibling ("left" หรือ "right")
+ * @return {Promise<string>} hash ของค่าที่รวมกันแล้ว
+ * @author StealthTrade Team
+ */
+async function CombineHashes(currentHash, siblingHash, position) {
   // `position` บอกว่า sibling อยู่ฝั่งไหน ค่าที่เราถืออยู่จึงไปอยู่อีกฝั่ง
-  return position === "left" ? sha256Hex(b + a) : sha256Hex(a + b)
+  return position === "left"
+    ? Sha256Hex(siblingHash + currentHash)
+    : Sha256Hex(currentHash + siblingHash)
 }
 
-/** คำนวณ root ใหม่จาก hash ของใบ + sibling hash ที่เรียงลำดับแล้ว */
-async function computeRootFromProof(leafHash, siblings) {
+/**
+ * คำนวณ root ใหม่จาก hash ของใบ + sibling hash ที่เรียงลำดับแล้ว
+ *
+ * @param {string} leafHash hash ของใบที่ต้องการพิสูจน์
+ * @param {Array<{hash: string, position: string}>} siblings sibling hash เรียงจากชั้นล่างขึ้นบน
+ * @return {Promise<{steps: string[], root: string}>} hash ของแต่ละชั้น และ root ที่คำนวณได้
+ * @author StealthTrade Team
+ */
+async function ComputeRootFromProof(leafHash, siblings) {
   const steps = []
   let current = leafHash
-  for (const sib of siblings) {
-    current = await combine(current, sib.hash, sib.position)
+  for (const sibling of siblings) {
+    current = await CombineHashes(current, sibling.hash, sibling.position)
     steps.push(current)
   }
   return { steps, root: current }
 }
 
-function verifyInclusion(computedRoot, expectedRoot) {
+/**
+ * ตรวจว่า root ที่คำนวณได้ตรงกับ root ที่คาดหวังหรือไม่
+ *
+ * @param {string} computedRoot root ที่คำนวณได้
+ * @param {string} expectedRoot root ที่บันทึกไว้
+ * @return {boolean} true ถ้าตรงกัน
+ * @author StealthTrade Team
+ */
+function IsInclusionValid(computedRoot, expectedRoot) {
   return computedRoot === expectedRoot
 }
 
-/** สลับตัวอักษร hex ตัวแรก เพื่อจำลองว่าข้อมูลถูกปลอมแปลง (แต่ยังเป็น hex ที่ถูกต้อง) */
-function tamperHash(hash) {
-  const first = hash[0]
-  const replacement = first === "0" ? "1" : "0"
+/**
+ * สลับตัวอักษร hex ตัวแรก เพื่อจำลองว่าข้อมูลถูกปลอมแปลง (แต่ยังเป็น hex ที่ถูกต้อง)
+ *
+ * @param {string} hash ค่า hash เดิม
+ * @return {string} hash ที่ถูกสลับตัวอักษรแรกแล้ว
+ * @author StealthTrade Team
+ */
+function TamperHash(hash) {
+  const firstCharacter = hash[0]
+  const replacement = firstCharacter === "0" ? "1" : "0"
   return replacement + hash.slice(1)
 }
 
-function truncateHash(hash, head = 8) {
+/**
+ * ตัด hash ให้สั้นลงเพื่อแสดงผล
+ *
+ * @param {string} hash ค่า hash เต็ม
+ * @param {number} [head=8] จำนวนตัวอักษรที่เก็บไว้ด้านหน้า
+ * @return {string} hash ที่ตัดแล้วต่อท้ายด้วย "..." (สตริงว่างถ้าไม่มี hash)
+ * @author StealthTrade Team
+ */
+function TruncateHash(hash, head = 8) {
   if (!hash) return ""
   return `${hash.slice(0, head)}...`
 }
@@ -158,17 +223,17 @@ export const STEP_META = [
     index: 1,
     topic: "ปัญหาที่เราจะแก้",
     mentor:
-      "เราได้ส่งคำสั่งซื้อของเราไปแล้ว! แต่เอ๊ะ? เราจะแน่ในได้ยังไงว่าคำสั่งซื้อของเราหมุนเวียนอยู่ในระบบหรือเปล่า?",
+      "ก่อนสร้างต้นไม้ เรามาดูปัญหากันก่อนครับ เราจะพิสูจน์ได้ยังไงว่า Order อยู่ในข้อมูลจริง โดยไม่ต้องเปิดเผยทุก Order?",
   },
   {
     index: 2,
     topic: "สร้างรอยประทับ",
-    mentor: "ทบทวนการสั่งซื้อแบบปลอดภัยของเรากันเถอะครับ! เรามาสร้างรอยประทับ (Hash) เพื่อปกป้องข้อมูลคำสั่งซื้อ (Order) ของเรากัน",
+    mentor: "ก่อนเอาข้อมูลมาจับคู่กัน เราทำให้แต่ละ Order กลายเป็นรอยประทับดิจิทัลก่อนครับ",
   },
   {
     index: 3,
     topic: "ประกอบต้นไม้",
-    mentor: "เอาล่ะครับ! เรามาดูวิธีการที่ผู้ตวจสอบ (ระบบ) ตรวจหา Order ของเรากันครับ",
+    mentor: "ลองจับ Hash สองตัวมารวมกันครับ เราจะได้รอยประทับของ “คู่นี้”",
   },
   {
     index: 4,
@@ -202,171 +267,314 @@ const initialState = {
   completedSteps: [],
   // step 1
   step1Answer: null,
-  step1Correct: false,
+  isStep1Correct: false,
   // step 2
   hashedLeaves: [false, false, false, false],
   // step 3
   builtPairs: [false, false],
-  builtRoot: false,
+  isRootBuilt: false,
   // step 4
   selectedLeaf: null,
   // step 5
   foundSiblings: [],
   // step 6
-  computedInterim: false,
-  computedRoot: false,
+  isInterimComputed: false,
+  isRootComputed: false,
   // step 7
-  tamperMode: false,
+  isTamperMode: false,
 }
 
-const Ctx = createContext(null)
+const Lab05Context = createContext(null)
 
+/**
+ * Provider เก็บสถานะรวมของบทเรียน และสร้าง Merkle tree ตอนเริ่มต้น
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {React.ReactNode} props.children คอมโพเนนต์ลูกที่จะได้ใช้สถานะของบทเรียน
+ * @return {JSX.Element} Provider ที่ครอบคอมโพเนนต์ลูก
+ * @author StealthTrade Team
+ */
 export function Lab05Provider({ children }) {
-  const [state, setState] = useState(initialState)
+  const [lessonState, setLessonState] = useState(initialState)
   const [tree, setTree] = useState(null)
 
   useEffect(() => {
-    let active = true
-    buildMerkleTree(orders.map((o) => o.value)).then((t) => {
-      if (active) setTree(t)
+    let isActive = true
+    BuildMerkleTree(orders.map((order) => order.value)).then((builtTree) => {
+      if (isActive) setTree(builtTree)
     })
     return () => {
-      active = false
+      isActive = false
     }
   }, [])
 
-  const authPath = useMemo(() => {
-    if (!tree || state.selectedLeaf === null) return []
-    return getAuthenticationPath(tree, state.selectedLeaf)
-  }, [tree, state.selectedLeaf])
+  const authPathSteps = useMemo(() => {
+    if (!tree || lessonState.selectedLeaf === null) return []
+    return GetAuthenticationPath(tree, lessonState.selectedLeaf)
+  }, [tree, lessonState.selectedLeaf])
 
+  /**
+   * ตรวจว่าขั้นที่ระบุทำเสร็จแล้วหรือยัง
+   *
+   * @param {number} step หมายเลขขั้น (0-8)
+   * @return {boolean} true ถ้าขั้นนั้นทำเสร็จแล้ว
+   * @author StealthTrade Team
+   */
   const isStepComplete = useCallback(
     (step) => {
       switch (step) {
         case 0:
           return true
         case 1:
-          return state.step1Correct
+          return lessonState.isStep1Correct
         case 2:
-          return state.hashedLeaves.every(Boolean)
+          return lessonState.hashedLeaves.every(Boolean)
         case 3:
-          return state.builtPairs.every(Boolean) && state.builtRoot
+          return lessonState.builtPairs.every(Boolean) && lessonState.isRootBuilt
         case 4:
-          return state.selectedLeaf !== null
+          return lessonState.selectedLeaf !== null
         case 5:
-          return authPath.length > 0 && authPath.every((s) => state.foundSiblings.includes(s.nodeId))
+          return (
+            authPathSteps.length > 0 &&
+            authPathSteps.every((pathStep) => lessonState.foundSiblings.includes(pathStep.nodeId))
+          )
         case 6:
-          return state.computedRoot
+          return lessonState.isRootComputed
         case 7:
-          return state.completedSteps.includes(7) || state.currentStep > 7
+          return lessonState.completedSteps.includes(7) || lessonState.currentStep > 7
         case 8:
           return true
         default:
           return false
       }
     },
-    [state, authPath],
+    [lessonState, authPathSteps],
   )
 
-  const canProceed = isStepComplete(state.currentStep)
+  const canProceed = isStepComplete(lessonState.currentStep)
 
+  /**
+   * บันทึกว่าขั้นที่ระบุทำเสร็จแล้ว
+   *
+   * @param {number} step หมายเลขขั้น
+   * @return {void}
+   * @author StealthTrade Team
+   */
   const markComplete = useCallback((step) => {
-    setState((s) =>
-      s.completedSteps.includes(step) ? s : { ...s, completedSteps: [...s.completedSteps, step] },
+    setLessonState((previousState) =>
+      previousState.completedSteps.includes(step)
+        ? previousState
+        : { ...previousState, completedSteps: [...previousState.completedSteps, step] },
     )
   }, [])
 
+  /**
+   * ไปขั้นถัดไป และบันทึกขั้นปัจจุบันว่าทำเสร็จแล้ว
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
   const goNext = useCallback(() => {
-    setState((s) => {
-      if (s.currentStep >= TOTAL_STEPS) return s
-      const completed = s.completedSteps.includes(s.currentStep)
-        ? s.completedSteps
-        : [...s.completedSteps, s.currentStep]
-      return { ...s, currentStep: s.currentStep + 1, completedSteps: completed }
-    })
-  }, [])
-
-  const goPrev = useCallback(() => {
-    setState((s) => (s.currentStep <= 0 ? s : { ...s, currentStep: s.currentStep - 1 }))
-  }, [])
-
-  const goToStep = useCallback((step) => {
-    setState((s) => {
-      // ไปยังบทนำ, ขั้นที่ทำเสร็จแล้ว, หรือขั้นปัจจุบันได้เท่านั้น
-      if (step === s.currentStep) return s
-      if (step !== 0 && step !== s.currentStep && !s.completedSteps.includes(step)) return s
-      return { ...s, currentStep: step }
-    })
-  }, [])
-
-  const reset = useCallback(() => setState(initialState), [])
-
-  const answerStep1 = useCallback((choice) => {
-    const correct = choice === 1
-    setState((s) => ({ ...s, step1Answer: choice, step1Correct: correct }))
-    if (correct) markComplete(1)
-  }, [markComplete])
-
-  const revealHash = useCallback((index) => {
-    setState((s) => {
-      const hashedLeaves = [...s.hashedLeaves]
-      hashedLeaves[index] = true
-      return { ...s, hashedLeaves }
-    })
-  }, [])
-
-  const buildPair = useCallback((pair) => {
-    setState((s) => {
-      const builtPairs = [...s.builtPairs]
-      builtPairs[pair] = true
-      return { ...s, builtPairs }
-    })
-  }, [])
-
-  const buildRoot = useCallback(() => setState((s) => ({ ...s, builtRoot: true })), [])
-
-  const selectLeaf = useCallback((index) => {
-    setState((s) => {
-      // เปลี่ยนเป้าหมายแล้วต้องล้างสถานะขั้นถัดไปทั้งหมด
-      if (s.selectedLeaf === index) return s
+    setLessonState((previousState) => {
+      if (previousState.currentStep >= TOTAL_STEPS) return previousState
+      const nextCompletedSteps = previousState.completedSteps.includes(previousState.currentStep)
+        ? previousState.completedSteps
+        : [...previousState.completedSteps, previousState.currentStep]
       return {
-        ...s,
-        selectedLeaf: index,
-        foundSiblings: [],
-        computedInterim: false,
-        computedRoot: false,
-        tamperMode: false,
+        ...previousState,
+        currentStep: previousState.currentStep + 1,
+        completedSteps: nextCompletedSteps,
       }
     })
   }, [])
 
-  const findSibling = useCallback(
-    (nodeId) => {
-      const isOnPath = authPath.some((s) => s.nodeId === nodeId)
-      if (!isOnPath) return "wrong"
-      if (state.foundSiblings.includes(nodeId)) return "already"
-      setState((s) => ({ ...s, foundSiblings: [...s.foundSiblings, nodeId] }))
-      return "correct"
+  /**
+   * ย้อนกลับไปขั้นก่อนหน้า
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const goPrev = useCallback(() => {
+    setLessonState((previousState) =>
+      previousState.currentStep <= 0
+        ? previousState
+        : { ...previousState, currentStep: previousState.currentStep - 1 },
+    )
+  }, [])
+
+  /**
+   * ไปยังขั้นที่ระบุ (ได้เฉพาะบทนำ ขั้นที่ทำเสร็จแล้ว หรือขั้นปัจจุบัน)
+   *
+   * @param {number} step หมายเลขขั้นปลายทาง
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const goToStep = useCallback((step) => {
+    setLessonState((previousState) => {
+      // ไปยังบทนำ, ขั้นที่ทำเสร็จแล้ว, หรือขั้นปัจจุบันได้เท่านั้น
+      if (step === previousState.currentStep) return previousState
+      if (
+        step !== 0 &&
+        step !== previousState.currentStep &&
+        !previousState.completedSteps.includes(step)
+      )
+        return previousState
+      return { ...previousState, currentStep: step }
+    })
+  }, [])
+
+  /**
+   * รีเซ็ตบทเรียนกลับสู่สถานะเริ่มต้น
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const reset = useCallback(() => setLessonState(initialState), [])
+
+  /**
+   * บันทึกคำตอบของขั้นที่ 1 (ตัวเลือกที่ 1 คือคำตอบที่ถูก)
+   *
+   * @param {number} choice ลำดับตัวเลือกที่ผู้เรียนเลือก
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const answerStep1 = useCallback(
+    (choice) => {
+      const isCorrect = choice === 1
+      setLessonState((previousState) => ({
+        ...previousState,
+        step1Answer: choice,
+        isStep1Correct: isCorrect,
+      }))
+      if (isCorrect) markComplete(1)
     },
-    [authPath, state.foundSiblings],
+    [markComplete],
   )
 
-  const computeInterim = useCallback(() => setState((s) => ({ ...s, computedInterim: true })), [])
+  /**
+   * เปิดเผย hash ของใบที่ระบุ
+   *
+   * @param {number} index ตำแหน่งของใบ (0-3)
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const revealHash = useCallback((index) => {
+    setLessonState((previousState) => {
+      const nextHashedLeaves = [...previousState.hashedLeaves]
+      nextHashedLeaves[index] = true
+      return { ...previousState, hashedLeaves: nextHashedLeaves }
+    })
+  }, [])
 
+  /**
+   * จับคู่ hash ของคู่ที่ระบุ
+   *
+   * @param {number} pair ลำดับคู่ (0 = A+B, 1 = C+D)
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const buildPair = useCallback((pair) => {
+    setLessonState((previousState) => {
+      const nextBuiltPairs = [...previousState.builtPairs]
+      nextBuiltPairs[pair] = true
+      return { ...previousState, builtPairs: nextBuiltPairs }
+    })
+  }, [])
+
+  /**
+   * รวมสองคู่เป็น root
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const buildRoot = useCallback(
+    () => setLessonState((previousState) => ({ ...previousState, isRootBuilt: true })),
+    [],
+  )
+
+  /**
+   * เลือกใบที่ต้องการพิสูจน์ และล้างสถานะของขั้นถัดไปทั้งหมด
+   *
+   * @param {number} index ตำแหน่งของใบ (0-3)
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const selectLeaf = useCallback((index) => {
+    setLessonState((previousState) => {
+      // เปลี่ยนเป้าหมายแล้วต้องล้างสถานะขั้นถัดไปทั้งหมด
+      if (previousState.selectedLeaf === index) return previousState
+      return {
+        ...previousState,
+        selectedLeaf: index,
+        foundSiblings: [],
+        isInterimComputed: false,
+        isRootComputed: false,
+        isTamperMode: false,
+      }
+    })
+  }, [])
+
+  /**
+   * ตรวจว่าโหนดที่คลิกเป็น sibling ที่อยู่บนเส้นทางหลักฐานหรือไม่ และบันทึกถ้าใช่
+   *
+   * @param {string} nodeId รหัสโหนดที่ผู้เรียนคลิก
+   * @return {string} "wrong" ถ้าไม่ใช่ sibling บนเส้นทาง, "already" ถ้าเลือกไปแล้ว, "correct" ถ้าถูกต้อง
+   * @author StealthTrade Team
+   */
+  const findSibling = useCallback(
+    (nodeId) => {
+      const isOnPath = authPathSteps.some((pathStep) => pathStep.nodeId === nodeId)
+      if (!isOnPath) return "wrong"
+      if (lessonState.foundSiblings.includes(nodeId)) return "already"
+      setLessonState((previousState) => ({
+        ...previousState,
+        foundSiblings: [...previousState.foundSiblings, nodeId],
+      }))
+      return "correct"
+    },
+    [authPathSteps, lessonState.foundSiblings],
+  )
+
+  /**
+   * คำนวณ hash ของคู่ (ขั้นแรกของการเดินกลับไปหา root)
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const computeInterim = useCallback(
+    () => setLessonState((previousState) => ({ ...previousState, isInterimComputed: true })),
+    [],
+  )
+
+  /**
+   * คำนวณ root และบันทึกว่าขั้นที่ 6 ทำเสร็จแล้ว
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
   const computeRootStep = useCallback(() => {
-    setState((s) => ({ ...s, computedRoot: true }))
+    setLessonState((previousState) => ({ ...previousState, isRootComputed: true }))
     markComplete(6)
   }, [markComplete])
 
+  /**
+   * เปิด/ปิดโหมดจำลองการปลอมแปลง และบันทึกว่าขั้นที่ 7 ทำเสร็จแล้ว
+   *
+   * @return {void}
+   * @author StealthTrade Team
+   */
   const toggleTamper = useCallback(() => {
-    setState((s) => ({ ...s, tamperMode: !s.tamperMode }))
+    setLessonState((previousState) => ({
+      ...previousState,
+      isTamperMode: !previousState.isTamperMode,
+    }))
     markComplete(7)
   }, [markComplete])
 
-  const value = {
-    ...state,
+  const contextValue = {
+    ...lessonState,
     tree,
-    authPath,
+    authPathSteps,
     goNext,
     goPrev,
     goToStep,
@@ -384,31 +592,50 @@ export function Lab05Provider({ children }) {
     toggleTamper,
   }
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+  return <Lab05Context.Provider value={contextValue}>{children}</Lab05Context.Provider>
 }
 
+/**
+ * Hook สำหรับอ่านสถานะและการกระทำของบทเรียน (ต้องใช้ภายใน Lab05Provider)
+ *
+ * @return {Object} สถานะรวมและฟังก์ชันของบทเรียน
+ * @author StealthTrade Team
+ */
 export function useLab05() {
-  const ctx = useContext(Ctx)
-  if (!ctx) throw new Error("useLab05 must be used within Lab05Provider")
-  return ctx
+  const context = useContext(Lab05Context)
+  if (!context) throw new Error("useLab05 must be used within Lab05Provider")
+  return context
 }
 
 /* ==========================================================================
    components — ชิ้นส่วน UI ย่อย
    ========================================================================== */
 
-function ChoiceCard({ selected, state = "default", disabled, onClick, children, className }) {
+/**
+ * การ์ดตัวเลือกคำตอบ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {boolean} props.isSelected ตัวเลือกนี้ถูกเลือกอยู่หรือไม่
+ * @param {string} [props.choiceState="default"] สถานะการตรวจคำตอบ ("default", "correct", "incorrect")
+ * @param {boolean} props.isDisabled ปิดการกดปุ่มหรือไม่
+ * @param {Function} props.onClick ฟังก์ชันที่เรียกเมื่อกด
+ * @param {React.ReactNode} props.children เนื้อหาภายในการ์ด
+ * @param {string} props.className ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} ปุ่มตัวเลือก
+ * @author StealthTrade Team
+ */
+function ChoiceCard({ isSelected, choiceState = "default", isDisabled, onClick, children, className }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
-      aria-pressed={selected}
-      className={cx(
+      disabled={isDisabled}
+      aria-pressed={isSelected}
+      className={JoinClassNames(
         "lab5-choice",
-        selected && state === "default" && "lab5-choice--selected",
-        state === "correct" && "lab5-choice--correct",
-        state === "incorrect" && "lab5-choice--incorrect",
+        isSelected && choiceState === "default" && "lab5-choice--selected",
+        choiceState === "correct" && "lab5-choice--correct",
+        choiceState === "incorrect" && "lab5-choice--incorrect",
         className,
       )}
     >
@@ -424,21 +651,32 @@ const feedbackConfig = {
   failed: { icon: XCircle, tone: "danger" },
 }
 
+/**
+ * การ์ดแสดงผลตอบรับหลังผู้เรียนตอบหรือทำขั้นตอนต่าง ๆ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} props.variant ชนิดของผลตอบรับ ("correct", "success", "incorrect", "failed")
+ * @param {string} props.title หัวข้อของการ์ด
+ * @param {React.ReactNode} props.children คำอธิบายใต้หัวข้อ
+ * @param {string} props.className ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} การ์ดผลตอบรับ
+ * @author StealthTrade Team
+ */
 function FeedbackCard({ variant, title, children, className }) {
-  const c = feedbackConfig[variant]
-  const Icon = c.icon
+  const config = feedbackConfig[variant]
+  const Icon = config.icon
   return (
     <div
       role="status"
-      className={cx(
+      className={JoinClassNames(
         "lab5-animate-merge-up lab5-feedback",
-        c.tone === "success" ? "lab5-feedback--success" : "lab5-feedback--danger",
+        config.tone === "success" ? "lab5-feedback--success" : "lab5-feedback--danger",
         className,
       )}
     >
-      <Icon className={cx("lab5-feedback-icon", c.tone === "success" ? "lab5-feedback-icon--success" : "lab5-feedback-icon--danger")} />
+      <Icon className={JoinClassNames("lab5-feedback-icon", config.tone === "success" ? "lab5-feedback-icon--success" : "lab5-feedback-icon--danger")} />
       <div className="lab5-space-y-1">
-        <p className={cx("lab5-feedback-title", c.tone === "success" ? "lab5-feedback-title--success" : "lab5-feedback-title--danger")}>
+        <p className={JoinClassNames("lab5-feedback-title", config.tone === "success" ? "lab5-feedback-title--success" : "lab5-feedback-title--danger")}>
           {title}
         </p>
         {children && <div className="lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80">{children}</div>}
@@ -447,7 +685,7 @@ function FeedbackCard({ variant, title, children, className }) {
   )
 }
 
-const GLOSSARY_ENTRIES = [
+const glossaryEntries = [
   { term: "Hash", def: "รอยประทับดิจิทัลของข้อมูล" },
   { term: "Leaf", def: "ข้อมูลที่อยู่ปลายสุดของต้นไม้ เช่น Order A" },
   { term: "Sibling Hash", def: "Hash ของข้อมูลที่อยู่ข้าง ๆ บนเส้นทางที่เรากำลังพิสูจน์" },
@@ -459,26 +697,29 @@ const GLOSSARY_ENTRIES = [
 /**
  * คำศัพท์แบบยุบไว้ก่อน (ปิดโดยดีฟอลต์) อยู่ในหัว เพื่อไม่ให้ขัดจังหวะการเรียน
  * ผู้เรียนเปิดดูเองเมื่อต้องการเช็คคำศัพท์
+ *
+ * @return {JSX.Element} ปุ่มเปิด/ปิดพร้อมรายการคำศัพท์
+ * @author StealthTrade Team
  */
 function Glossary() {
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <div className="lab5-mx-auto lab5-w-full lab5-max-w-3xl">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
+        onClick={() => setIsOpen((previousIsOpen) => !previousIsOpen)}
+        aria-expanded={isOpen}
         className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-3 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface"
       >
         <BookOpen className="lab5-size-3.5" />
         คำศัพท์ที่เพิ่งเจอ
-        <ChevronDown className={cx("lab5-size-3.5 lab5-transition-transform", open && "lab5-rotate-180")} />
+        <ChevronDown className={JoinClassNames("lab5-size-3.5 lab5-transition-transform", isOpen && "lab5-rotate-180")} />
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="lab5-animate-merge-up lab5-mt-2 lab5-grid lab5-gap-2 lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface lab5-p-3 lab5-sm:grid-cols-2">
-          {GLOSSARY_ENTRIES.map((entry) => (
+          {glossaryEntries.map((entry) => (
             <div key={entry.term} className="lab5-rounded-lg lab5-bg-surface-soft lab5-p-2.5">
               <p className="lab5-text-xs lab5-font-bold lab5-text-primary">{entry.term}</p>
               <p className="lab5-mt-0.5 lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground">{entry.def}</p>
@@ -497,42 +738,59 @@ const hashToneClass = {
   danger: "lab5-hash-toggle--danger",
 }
 
+/**
+ * แสดงค่า hash แบบย่อ กดเพื่อดูค่าเต็ม และคัดลอกได้
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} props.hash ค่า hash เต็ม
+ * @param {string} [props.label] ข้อความนำหน้า hash
+ * @param {string} [props.tone="neutral"] โทนสี ("neutral", "primary", "success", "danger")
+ * @param {string} [props.className] ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} ปุ่มแสดง hash และกล่องแสดงค่าเต็มเมื่อขยาย
+ * @author StealthTrade Team
+ */
 function HashValue({ hash, label, tone = "neutral", className }) {
-  const [expanded, setExpanded] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
-  const copy = async () => {
+  /**
+   * คัดลอกค่า hash เต็มลงคลิปบอร์ด และแสดงสถานะ "คัดลอกแล้ว" ชั่วครู่
+   *
+   * @return {Promise<void>}
+   * @author StealthTrade Team
+   */
+  const copyHash = async () => {
     try {
       await navigator.clipboard.writeText(hash)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      setIsCopied(true)
+      setTimeout(() => setIsCopied(false), 1500)
     } catch {
       /* clipboard unavailable */
     }
   }
 
   return (
-    <div className={cx("lab5-inline-flex lab5-flex-col lab5-gap-1", className)}>
+    <div className={JoinClassNames("lab5-inline-flex lab5-flex-col lab5-gap-1", className)}>
       <button
         type="button"
-        onClick={() => setExpanded((e) => !e)}
-        className={cx("lab5-hash-toggle", hashToneClass[tone])}
-        aria-expanded={expanded}
+        onClick={() => setIsExpanded((previousIsExpanded) => !previousIsExpanded)}
+        className={JoinClassNames("lab5-hash-toggle", hashToneClass[tone])}
+        aria-expanded={isExpanded}
       >
         {label && <span className="lab5-font-sans lab5-font-semibold lab5-not-italic">{label}</span>}
-        <span>{expanded ? "ซ่อน" : truncateHash(hash)}</span>
+        <span>{isExpanded ? "ซ่อน" : TruncateHash(hash)}</span>
       </button>
 
-      {expanded && (
+      {isExpanded && (
         <div className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-2 lab5-rounded-lg lab5-border lab5-border-border lab5-bg-surface lab5-p-2">
           <code className="lab5-break-all lab5-font-mono lab5-text-11 lab5-leading-relaxed lab5-text-foreground">{hash}</code>
           <button
             type="button"
-            onClick={copy}
+            onClick={copyHash}
             className="lab5-shrink-0 lab5-rounded-md lab5-p-1 lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface-soft lab5-hover-text-primary"
             aria-label="คัดลอก hash"
           >
-            {copied ? <Check className="lab5-size-3.5 lab5-text-success" /> : <Copy className="lab5-size-3.5" />}
+            {isCopied ? <Check className="lab5-size-3.5 lab5-text-success" /> : <Copy className="lab5-size-3.5" />}
           </button>
         </div>
       )}
@@ -540,20 +798,30 @@ function HashValue({ hash, label, tone = "neutral", className }) {
   )
 }
 
+/**
+ * ปุ่มคำใบ้ กดเพื่อเปิด/ปิดคำอธิบาย
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} [props.label="ทำไม?"] ข้อความบนปุ่ม
+ * @param {React.ReactNode} props.children เนื้อหาคำใบ้
+ * @param {string} [props.className] ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} ปุ่มและกล่องคำใบ้
+ * @author StealthTrade Team
+ */
 function HintButton({ label = "ทำไม?", children, className }) {
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   return (
-    <div className={cx("lab5-space-y-2", className)}>
+    <div className={JoinClassNames("lab5-space-y-2", className)}>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
+        onClick={() => setIsOpen((previousIsOpen) => !previousIsOpen)}
+        aria-expanded={isOpen}
         className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-3 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-text-primary lab5-transition-colors lab5-hover-primary-10"
       >
         <HelpCircle className="lab5-size-3.5" />
         {label}
       </button>
-      {open && (
+      {isOpen && (
         <div className="lab5-animate-merge-up lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-3 lab5-text-sm lab5-leading-relaxed lab5-text-muted-foreground">
           {children}
         </div>
@@ -562,6 +830,16 @@ function HintButton({ label = "ทำไม?", children, className }) {
   )
 }
 
+/**
+ * หัวข้อของแต่ละขั้นในบทเรียน
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} props.sectionLabel ป้ายชื่อส่วนด้านบนหัวข้อ
+ * @param {string} props.title หัวข้อหลัก
+ * @param {string} [props.description] คำอธิบายใต้หัวข้อ
+ * @return {JSX.Element} ส่วนหัวของบทเรียน
+ * @author StealthTrade Team
+ */
 function LessonHeading({ sectionLabel, title, description }) {
   return (
     <div className="lab5-space-y-2">
@@ -580,6 +858,14 @@ function LessonHeading({ sectionLabel, title, description }) {
   )
 }
 
+/**
+ * กล่องข้อความของผู้สอน
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} props.message ข้อความที่ผู้สอนพูด
+ * @return {JSX.Element} กล่องข้อความพร้อมไอคอนผู้สอน
+ * @author StealthTrade Team
+ */
 function MentorMessage({ message }) {
   return (
     <div className="lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-shadow-sm">
@@ -588,7 +874,7 @@ function MentorMessage({ message }) {
       </div>
       <div className="lab5-min-w-0">
         <div className="lab5-flex lab5-items-baseline lab5-gap-2">
-          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร.ซีโร่</span>
+          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">อ.มิน</span>
           <span className="lab5-text-xs lab5-text-muted-foreground">ผู้สอน</span>
         </div>
         <p className="lab5-mt-0.5 lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80 lab5-text-pretty">{message}</p>
@@ -597,17 +883,17 @@ function MentorMessage({ message }) {
   )
 }
 
-const NODE_LAYOUT = [
-  { id: "root", label: "ROOT", cx: 50, cy: 12 },
-  { id: "mid-0", label: "H(A+B)", cx: 26, cy: 44 },
-  { id: "mid-1", label: "H(C+D)", cx: 74, cy: 44 },
-  { id: "leaf-0", label: "H(A)", cx: 12, cy: 80 },
-  { id: "leaf-1", label: "H(B)", cx: 38, cy: 80 },
-  { id: "leaf-2", label: "H(C)", cx: 62, cy: 80 },
-  { id: "leaf-3", label: "H(D)", cx: 88, cy: 80 },
+const nodeLayouts = [
+  { id: "root", label: "ROOT", centerX: 50, centerY: 12 },
+  { id: "mid-0", label: "H(A+B)", centerX: 26, centerY: 44 },
+  { id: "mid-1", label: "H(C+D)", centerX: 74, centerY: 44 },
+  { id: "leaf-0", label: "H(A)", centerX: 12, centerY: 80 },
+  { id: "leaf-1", label: "H(B)", centerX: 38, centerY: 80 },
+  { id: "leaf-2", label: "H(C)", centerX: 62, centerY: 80 },
+  { id: "leaf-3", label: "H(D)", centerX: 88, centerY: 80 },
 ]
 
-const EDGES = [
+const edges = [
   ["root", "mid-0"],
   ["root", "mid-1"],
   ["mid-0", "leaf-0"],
@@ -624,89 +910,138 @@ const nodeStateClass = {
   error: "lab5-node--error",
 }
 
-function MerkleTreeDiagram({ states = {}, visible, hashesFor = [], clickable = [], onNodeClick, className }) {
+/**
+ * แผนภาพ Merkle tree พร้อมสถานะของแต่ละโหนด
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {Object<string, string>} [props.nodeStateMap={}] สถานะของแต่ละโหนด (key คือรหัสโหนด)
+ * @param {Object<string, boolean>} [props.visibilityMap] การแสดง/ซ่อนของแต่ละโหนด (ไม่ระบุ = แสดงทั้งหมด)
+ * @param {string[]} [props.hashNodeIds=[]] รหัสโหนดที่ต้องแสดงค่า hash
+ * @param {string[]} [props.clickableNodeIds=[]] รหัสโหนดที่กดได้
+ * @param {Function} [props.onNodeClick] ฟังก์ชันที่เรียกเมื่อกดโหนดที่กดได้
+ * @param {string} [props.className] ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} แผนภาพต้นไม้
+ * @author StealthTrade Team
+ */
+function MerkleTreeDiagram({ nodeStateMap = {}, visibilityMap, hashNodeIds = [], clickableNodeIds = [], onNodeClick, className }) {
   const { tree } = useLab05()
 
-  const hashFor = (id) => {
-    if (!tree || !hashesFor.includes(id)) return undefined
-    if (id === "root") return tree.root
-    if (id.startsWith("mid-")) return tree.midHashes[Number(id.slice(4))]
-    if (id.startsWith("leaf-")) return tree.leafHashes[Number(id.slice(5))]
+  /**
+   * หาค่า hash ของโหนดที่ระบุ (ถ้าโหนดนั้นต้องแสดง hash)
+   *
+   * @param {string} nodeId รหัสโหนด
+   * @return {string|undefined} ค่า hash หรือ undefined ถ้าไม่ต้องแสดง
+   * @author StealthTrade Team
+   */
+  const getHashByNodeId = (nodeId) => {
+    if (!tree || !hashNodeIds.includes(nodeId)) return undefined
+    if (nodeId === "root") return tree.root
+    if (nodeId.startsWith("mid-")) return tree.midHashes[Number(nodeId.slice(4))]
+    if (nodeId.startsWith("leaf-")) return tree.leafHashes[Number(nodeId.slice(5))]
     return undefined
   }
 
-  const isVisible = (id) => (visible ? visible[id] !== false : true)
-  const nodeState = (id) => states[id] ?? "neutral"
+  /**
+   * ตรวจว่าโหนดที่ระบุต้องแสดงหรือไม่
+   *
+   * @param {string} nodeId รหัสโหนด
+   * @return {boolean} true ถ้าต้องแสดง
+   * @author StealthTrade Team
+   */
+  const isVisible = (nodeId) => (visibilityMap ? visibilityMap[nodeId] !== false : true)
 
-  const edgeActive = (a, b) => {
-    if (!isVisible(a) || !isVisible(b)) return false
-    const sa = nodeState(a)
-    const sb = nodeState(b)
-    const lit = (s) => s === "path" || s === "target" || s === "success"
-    const err = (s) => s === "error"
-    if (err(sa) || err(sb)) return "error"
-    return lit(sa) && lit(sb) ? "active" : false
+  /**
+   * หาสถานะของโหนดที่ระบุ
+   *
+   * @param {string} nodeId รหัสโหนด
+   * @return {string} สถานะของโหนด (ค่าเริ่มต้นคือ "neutral")
+   * @author StealthTrade Team
+   */
+  const getNodeState = (nodeId) => nodeStateMap[nodeId] ?? "neutral"
+
+  /**
+   * หาสถานะของเส้นเชื่อมระหว่างสองโหนด
+   *
+   * @param {string} fromId รหัสโหนดต้นทาง
+   * @param {string} toId รหัสโหนดปลายทาง
+   * @return {string|boolean} "error", "active" หรือ false ถ้าเส้นไม่ต้องเน้น
+   * @author StealthTrade Team
+   */
+  const getEdgeState = (fromId, toId) => {
+    if (!isVisible(fromId) || !isVisible(toId)) return false
+    const fromState = getNodeState(fromId)
+    const toState = getNodeState(toId)
+    const isLit = (nodeStateName) => nodeStateName === "path" || nodeStateName === "target" || nodeStateName === "success"
+    const isError = (nodeStateName) => nodeStateName === "error"
+    if (isError(fromState) || isError(toState)) return "error"
+    return isLit(fromState) && isLit(toState) ? "active" : false
   }
 
   return (
-    <div className={cx("lab5-relative lab5-mx-auto lab5-h-64 lab5-w-full lab5-max-w-2xl lab5-sm:h-80", className)}>
+    <div className={JoinClassNames("lab5-relative lab5-mx-auto lab5-h-64 lab5-w-full lab5-max-w-2xl lab5-sm:h-80", className)}>
       <svg className="lab5-absolute lab5-inset-0 lab5-h-full lab5-w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        {EDGES.map(([a, b]) => {
-          const from = NODE_LAYOUT.find((n) => n.id === a)
-          const to = NODE_LAYOUT.find((n) => n.id === b)
-          if (!isVisible(a) || !isVisible(b)) return null
-          const active = edgeActive(a, b)
+        {edges.map(([fromId, toId]) => {
+          const from = nodeLayouts.find((layoutNode) => layoutNode.id === fromId)
+          const to = nodeLayouts.find((layoutNode) => layoutNode.id === toId)
+          if (!isVisible(fromId) || !isVisible(toId)) return null
+          const edgeState = getEdgeState(fromId, toId)
           return (
             <line
-              key={`${a}-${b}`}
-              x1={from.cx}
-              y1={from.cy}
-              x2={to.cx}
-              y2={to.cy}
+              key={`${fromId}-${toId}`}
+              x1={from.centerX}
+              y1={from.centerY}
+              x2={to.centerX}
+              y2={to.centerY}
               vectorEffect="non-scaling-stroke"
-              className={cx(
+              className={JoinClassNames(
                 "lab5-transition-colors lab5-duration-300",
-                active === "active" && "lab5-stroke-primary",
-                active === "error" && "lab5-stroke-danger",
-                !active && "lab5-stroke-border",
+                edgeState === "active" && "lab5-stroke-primary",
+                edgeState === "error" && "lab5-stroke-danger",
+                !edgeState && "lab5-stroke-border",
               )}
-              strokeWidth={active ? 2 : 1.25}
+              strokeWidth={edgeState ? 2 : 1.25}
             />
           )
         })}
       </svg>
 
-      {NODE_LAYOUT.map((node) => {
+      {nodeLayouts.map((node) => {
         if (!isVisible(node.id)) return null
-        const state = nodeState(node.id)
-        const hash = hashFor(node.id)
-        const isClickable = clickable.includes(node.id)
-        const Comp = isClickable ? "button" : "div"
+        const currentNodeState = getNodeState(node.id)
+        const hash = getHashByNodeId(node.id)
+        const isClickable = clickableNodeIds.includes(node.id)
+        const NodeElement = isClickable ? "button" : "div"
         return (
-          <Comp
+          <NodeElement
             key={node.id}
             {...(isClickable ? { type: "button", onClick: () => onNodeClick?.(node.id) } : {})}
-            style={{ left: `${node.cx}%`, top: `${node.cy}%` }}
-            className={cx(
+            style={{ left: `${node.centerX}%`, top: `${node.centerY}%` }}
+            className={JoinClassNames(
               "lab5-node",
-              nodeStateClass[state],
+              nodeStateClass[currentNodeState],
               isClickable && "lab5-node--clickable",
-              (state === "path" || state === "success" || state === "error") && "lab5-animate-merge-up",
+              (currentNodeState === "path" || currentNodeState === "success" || currentNodeState === "error") && "lab5-animate-merge-up",
             )}
           >
             <span className="lab5-node-label">{node.label}</span>
-            {hash && <span className="lab5-node-hash">{truncateHash(hash, 6)}</span>}
-          </Comp>
+            {hash && <span className="lab5-node-hash">{TruncateHash(hash, 6)}</span>}
+          </NodeElement>
         )
       })}
     </div>
   )
 }
 
+/**
+ * แถบจุดแสดงความคืบหน้าของขั้นที่ 1-8 (บทนำไม่มีจุด)
+ *
+ * @return {JSX.Element} แถบความคืบหน้าและชื่อขั้นปัจจุบัน
+ * @author StealthTrade Team
+ */
 function LabProgress() {
   const { currentStep, completedSteps, goToStep } = useLab05()
   // จุด progress แทนขั้นที่ 1..8 (บทนำไม่มีจุด)
-  const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1)
+  const steps = Array.from({ length: TOTAL_STEPS }, (unusedValue, index) => index + 1)
 
   return (
     <div className="lab5-flex lab5-flex-col lab5-items-center lab5-gap-2">
@@ -723,7 +1058,7 @@ function LabProgress() {
                 onClick={() => goToStep(step)}
                 aria-label={`ขั้นที่ ${step}: ${STEP_META[step].topic}`}
                 aria-current={isCurrent ? "step" : undefined}
-                className={cx(
+                className={JoinClassNames(
                   "lab5-dot",
                   isCurrent && "lab5-dot--current lab5-animate-soft-pulse",
                   isCompleted && !isCurrent && "lab5-dot--completed",
@@ -734,7 +1069,7 @@ function LabProgress() {
                 {isCompleted && !isCurrent ? <Check className="lab5-size-3.5" /> : step}
               </button>
               {step < TOTAL_STEPS && (
-                <span className={cx("lab5-progress-line lab5-sm:w-5", completedSteps.includes(step) && "lab5-progress-line--done")} />
+                <span className={JoinClassNames("lab5-progress-line lab5-sm:w-5", completedSteps.includes(step) && "lab5-progress-line--done")} />
               )}
             </div>
           )
@@ -747,6 +1082,12 @@ function LabProgress() {
   )
 }
 
+/**
+ * แถบปุ่มนำทางด้านล่าง (เริ่มใหม่ / ย้อนกลับ / ไปขั้นต่อ) ซ่อนในหน้าบทนำ
+ *
+ * @return {JSX.Element|null} แถบนำทาง หรือ null เมื่ออยู่หน้าบทนำ
+ * @author StealthTrade Team
+ */
 function LabNavigation() {
   const { currentStep, canProceed, goNext, goPrev, reset } = useLab05()
 
@@ -772,7 +1113,7 @@ function LabNavigation() {
               type="button"
               onClick={goNext}
               disabled={!canProceed}
-              className={cx("lab5-nav-next", canProceed ? "lab5-nav-next--enabled" : "lab5-nav-next--disabled")}
+              className={JoinClassNames("lab5-nav-next", canProceed ? "lab5-nav-next--enabled" : "lab5-nav-next--disabled")}
             >
               ไปขั้นต่อ
               <ArrowRight className="lab5-size-4" />
@@ -788,6 +1129,12 @@ function LabNavigation() {
    steps — เนื้อหาแต่ละขั้นของบทเรียน
    ========================================================================== */
 
+/**
+ * หน้าบทนำของบทเรียน (ขั้นที่ 0)
+ *
+ * @return {JSX.Element} หน้าบทนำพร้อมปุ่มเริ่มเรียน
+ * @author StealthTrade Team
+ */
 function StepIntro() {
   const { goNext } = useLab05()
 
@@ -801,8 +1148,8 @@ function StepIntro() {
           Merkle Trees
         </h1>
         <p className="lab5-mx-auto lab5-max-w-md lab5-text-pretty lab5-text-base lab5-leading-relaxed lab5-text-muted-foreground">
-          ถ้าเราอยากจะเช็คว่าคำสั่งซื้อของเราอยู่ในระบบรึเปล่า?
-          <p> <strong> จะต้องทำยังไง? </strong></p>
+          วันนี้เราจะเรียนรู้ส่วนหนึ่งของระบบที่ใช้พิสูจน์ข้อมูล: เราจะพิสูจน์ว่า Order หนึ่งรายการ
+          อยู่ในชุดข้อมูลจริง โดยไม่ต้องเปิดเผย Order อื่นทั้งหมด
         </p>
       </div>
 
@@ -816,7 +1163,7 @@ function StepIntro() {
 
       <div className="lab5-mx-auto lab5-max-w-md lab5-space-y-2">
         <p className="lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-foreground-70">
-          เรามาเรียนรู้กระบวนการตรวจสอบคำสั่งซื้อที่เราส่งกันไปเมื่อแล็บ 4 กันครับ
+          วันนี้คุณจะลองสร้างต้นไม้เอง แล้วพิสูจน์ Order หนึ่งรายการด้วย hash เพียงบางส่วน
         </p>
         <p className="lab5-text-pretty lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground">
           หมายเหตุ: นี่ไม่ใช่ ZKP ทั้งระบบ แต่เป็นกลไกพื้นฐานที่ช่วยสร้างหลักฐานการมีอยู่ของข้อมูล
@@ -835,6 +1182,15 @@ function StepIntro() {
   )
 }
 
+/**
+ * ไอคอนพร้อมป้ายชื่อในหน้าบทนำ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {React.ReactNode} props.icon ไอคอนที่จะแสดง
+ * @param {string} props.label ข้อความใต้ไอคอน
+ * @return {JSX.Element} กล่องไอคอนพร้อมป้ายชื่อ
+ * @author StealthTrade Team
+ */
 function IntroPill({ icon, label }) {
   return (
     <div className="lab5-flex lab5-flex-col lab5-items-center lab5-gap-2">
@@ -846,25 +1202,31 @@ function IntroPill({ icon, label }) {
   )
 }
 
-const STEP1_CHOICES = ["ต้องส่งทั้งหมด", "ไม่จำเป็น ถ้าเรามีหลักฐานที่ตรวจสอบได้"]
+const step1Choices = ["ต้องส่งทั้งหมด", "ไม่จำเป็น ถ้าเรามีหลักฐานที่ตรวจสอบได้"]
 
+/**
+ * ขั้นที่ 1: ตั้งโจทย์ปัญหาและให้ผู้เรียนเลือกคำตอบ
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 1
+ * @author StealthTrade Team
+ */
 function Step1WhyMerkle() {
-  const { step1Answer, step1Correct, answerStep1 } = useLab05()
+  const { step1Answer, isStep1Correct, answerStep1 } = useLab05()
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ปัญหาที่เราจะแก้"
-        title="เราจะพิสูจน์ได้อย่างไรว่า “คำสั่งซื้อ” อยู่ในชุดข้อมูลของระบบ?"
-        description="สมมติคุณต้องการพิสูจน์ว่า Order B ของคุณอยู่ในชุดข้อมูลจริง แต่ข้อมูลคำสั่งซื้อมีปริมาณมหาศาล หาทั้งวันก็ไม่เจอแน่ และเราไม่ต้องการให้ข้อมูลอื่นๆที่เราส่งไปก่อนหน้าถูกเปิดเผย"
+        title="เราจะพิสูจน์ได้อย่างไรว่า Order อยู่ในชุดข้อมูล?"
+        description="สมมติคุณต้องการพิสูจน์ว่า Order B อยู่ในข้อมูลจริง แต่คุณไม่อยากเปิดเผย Order A, C และ D ทั้งหมด เราจะทำยังไงดี?"
       />
 
       <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
-        {orders.map((o) => (
-          <div key={o.id} className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-3 lab5-text-center">
-            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">{o.label}</p>
-            <p className="lab5-mt-1 lab5-font-mono lab5-text-11 lab5-leading-tight lab5-text-muted-foreground">{o.value}</p>
-            {o.id === "B" && <p className="lab5-mt-1 lab5-text-11 lab5-font-semibold lab5-text-primary">← เราต้องการพิสูจน์</p>}
+        {orders.map((order) => (
+          <div key={order.id} className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-3 lab5-text-center">
+            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</p>
+            <p className="lab5-mt-1 lab5-font-mono lab5-text-11 lab5-leading-tight lab5-text-muted-foreground">{order.value}</p>
+            {order.id === "B" && <p className="lab5-mt-1 lab5-text-11 lab5-font-semibold lab5-text-primary">← เราต้องการพิสูจน์</p>}
           </div>
         ))}
       </div>
@@ -872,11 +1234,11 @@ function Step1WhyMerkle() {
       <p className="lab5-text-sm lab5-font-semibold lab5-text-foreground">คุณคิดว่าเราต้องส่ง Order ทั้ง 4 รายการให้คนตรวจสอบไหม?</p>
 
       <div className="lab5-space-y-3">
-        {STEP1_CHOICES.map((choice, i) => {
-          const isSelected = step1Answer === i
-          const state = step1Answer === i ? (i === 1 ? "correct" : "incorrect") : "default"
+        {step1Choices.map((choice, index) => {
+          const isSelected = step1Answer === index
+          const choiceState = step1Answer === index ? (index === 1 ? "correct" : "incorrect") : "default"
           return (
-            <ChoiceCard key={i} selected={isSelected} state={state} onClick={() => answerStep1(i)}>
+            <ChoiceCard key={index} isSelected={isSelected} choiceState={choiceState} onClick={() => answerStep1(index)}>
               <span className="lab5-text-sm lab5-font-semibold lab5-text-foreground">{choice}</span>
             </ChoiceCard>
           )
@@ -885,39 +1247,46 @@ function Step1WhyMerkle() {
 
       <HintButton>ลองคิดดูว่า ถ้าเราไม่อยากเปิดเผยข้อมูลทั้งหมด เราจะพิสูจน์ได้อย่างไรโดยใช้ข้อมูลบางส่วน?</HintButton>
 
-      {step1Answer !== null && !step1Correct && (
+      {step1Answer !== null && !isStep1Correct && (
         <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
           ลองคิดใหม่ครับ — เราอยากเปิดเผยข้อมูลให้น้อยที่สุดเท่าที่จะทำได้
         </FeedbackCard>
       )}
 
-      {step1Correct && (
+      {isStep1Correct && (
         <FeedbackCard variant="correct" title="ถูกต้อง">
-          เราไม่จำเป็นต้องเปิดเผยทุก “คำสั่งซื้อ” ของเรา เราสามารถส่ง ”คำสั่งซื้อที” ต้องการพิสูจน์ + หลักฐานบางส่วน แล้วให้คนตรวจสอบคำนวณกลับไปหาคำสั่งซื้อได้
+          เราไม่จำเป็นต้องเปิดเผยทุก Order เราสามารถส่ง Order ที่ต้องการพิสูจน์ + หลักฐานบางส่วน
+          แล้วให้คนตรวจสอบคำนวณกลับไปหา Root ได้
         </FeedbackCard>
       )}
     </div>
   )
 }
 
+/**
+ * ขั้นที่ 2: สร้างรอยประทับ (hash) ให้แต่ละ Order
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 2
+ * @author StealthTrade Team
+ */
 function Step2HashOrders() {
   const { tree, hashedLeaves, revealHash } = useLab05()
   const hashedCount = hashedLeaves.filter(Boolean).length
-  const allHashed = hashedLeaves.every(Boolean)
+  const isAllHashed = hashedLeaves.every(Boolean)
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="สร้างรอยประทับ"
-        title="ก่อนยืนยันคำสั่งซื้อว่ามีจริงหรือเปล่า? เราต้องทำให้แต่ละ คำสั่งซื้อ เป็น “Hash” ก่อน"
-        description="เรามี Order A, B, C และ D เราจะเอาข้อมูลมาเป็นสร้างต้นไม้ เพื่อค้นหาข้อมูลของเรา เราต้องเปลี่ยนแต่ละ “คำสั่งซื้อ” ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
+        title="ก่อนสร้างต้นไม้ เราต้องทำให้แต่ละ Order เป็น “รอยประทับ” ก่อน"
+        description="เรามี Order A, B, C และ D — ก่อนจะเอาข้อมูลมาสร้างต้นไม้ เราต้องเปลี่ยนแต่ละ Order ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
       />
 
       <MentorMessage message="ทำไปทำไม? เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้างต้นไม้" />
 
       <div className="lab5-space-y-3">
-        {orders.map((order, i) => {
-          const hashed = hashedLeaves[i]
+        {orders.map((order, index) => {
+          const isHashed = hashedLeaves[index]
           return (
             <div key={order.id} className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
               <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-between lab5-gap-3">
@@ -926,10 +1295,10 @@ function Step2HashOrders() {
                   <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">{order.value}</p>
                 </div>
 
-                {!hashed ? (
+                {!isHashed ? (
                   <button
                     type="button"
-                    onClick={() => revealHash(i)}
+                    onClick={() => revealHash(index)}
                     className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-bg-primary lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
                   >
                     <Sparkles className="lab5-size-4" />
@@ -943,9 +1312,9 @@ function Step2HashOrders() {
                 )}
               </div>
 
-              {hashed && tree && (
+              {isHashed && tree && (
                 <div className="lab5-animate-merge-up lab5-mt-3 lab5-border-t lab5-border-border lab5-pt-3">
-                  <HashValue hash={tree.leafHashes[i]} label={`รอยประทับของ ${order.label} =`} tone="primary" />
+                  <HashValue hash={tree.leafHashes[index]} label={`รอยประทับของ ${order.label} =`} tone="primary" />
                 </div>
               )}
             </div>
@@ -953,14 +1322,15 @@ function Step2HashOrders() {
         })}
       </div>
 
-      {hashedCount === 1 && !allHashed && (
+      {hashedCount === 1 && !isAllHashed && (
         <FeedbackCard variant="correct" title="รอยประทับแรกเสร็จแล้ว">
-         Order แต่ละใบถูกเปลี่ยนเป็นรอยประทับดิจิทัล (Hash) ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ของ Order A, B, C และ D
-          พร้อมนำไปประกอบเป็นต้นไม้แล้ว
+          Order นี้ถูกเปลี่ยนเป็น Hash แล้ว ถ้าข้อมูลเดิมเหมือนเดิม Hash ก็จะได้ค่าเดิม
+          จุดสำคัญคือ ถ้าข้อมูลเปลี่ยนแม้เพียงเล็กน้อย Hash ที่ได้ก็จะเปลี่ยนตาม —
+          ลองสร้างรอยประทับให้ Order ที่เหลือ →
         </FeedbackCard>
       )}
 
-      {allHashed && (
+      {isAllHashed && (
         <FeedbackCard variant="correct" title="ครบทั้ง 4 ใบแล้ว">
           Order แต่ละใบถูกเปลี่ยนเป็นรอยประทับดิจิทัล (Hash) ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ของ
           Order A, B, C และ D พร้อมนำไปประกอบเป็นต้นไม้แล้ว
@@ -970,75 +1340,91 @@ function Step2HashOrders() {
   )
 }
 
-function PairButton({ label, done, onClick }) {
+/**
+ * ปุ่มสำหรับจับคู่ hash ในขั้นที่ 3
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} props.label ข้อความบนปุ่มก่อนจับคู่
+ * @param {boolean} props.isDone จับคู่แล้วหรือยัง
+ * @param {Function} props.onClick ฟังก์ชันที่เรียกเมื่อกด
+ * @return {JSX.Element} ปุ่มจับคู่
+ * @author StealthTrade Team
+ */
+function PairButton({ label, isDone, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={done}
+      disabled={isDone}
       className={
-        done
+        isDone
           ? "lab5-flex lab5-items-center lab5-justify-center lab5-gap-2 lab5-rounded-xl lab5-border-2 lab5-border-success lab5-bg-success-soft lab5-px-4 lab5-py-3 lab5-text-sm lab5-font-bold lab5-text-success"
           : "lab5-flex lab5-items-center lab5-justify-center lab5-gap-2 lab5-rounded-xl lab5-border-2 lab5-border-primary lab5-bg-surface lab5-px-4 lab5-py-3 lab5-text-sm lab5-font-bold lab5-text-primary lab5-transition-all lab5-hover-primary-soft"
       }
     >
       <Link2 className="lab5-size-4" />
-      {done ? "รวมแล้ว" : label}
+      {isDone ? "รวมแล้ว" : label}
     </button>
   )
 }
 
+/**
+ * ขั้นที่ 3: ประกอบต้นไม้โดยจับคู่ hash จนได้ root
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 3
+ * @author StealthTrade Team
+ */
 function Step3BuildTree() {
-  const { builtPairs, builtRoot, buildPair, buildRoot } = useLab05()
-  const firstPairDone = builtPairs[0] && !builtPairs[1]
-  const bothPairs = builtPairs.every(Boolean)
+  const { builtPairs, isRootBuilt, buildPair, buildRoot } = useLab05()
+  const isFirstPairDone = builtPairs[0] && !builtPairs[1]
+  const hasBothPairs = builtPairs.every(Boolean)
 
-  const states = {
+  const nodeStateMap = {
     "leaf-0": "neutral",
     "leaf-1": "neutral",
     "leaf-2": "neutral",
     "leaf-3": "neutral",
     "mid-0": builtPairs[0] ? "path" : "neutral",
     "mid-1": builtPairs[1] ? "path" : "neutral",
-    root: builtRoot ? "success" : "neutral",
+    root: isRootBuilt ? "success" : "neutral",
   }
 
-  const visible = {
+  const visibilityMap = {
     "mid-0": builtPairs[0],
     "mid-1": builtPairs[1],
-    root: builtRoot,
+    root: isRootBuilt,
   }
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ประกอบต้นไม้"
-        title="นำค่า Hash มาจับคู่กันเพื่อสร้างโครงสร้าง Merkle Tree"
-        description="สร้างค่า Hash A, B, C, D เรียบร้อยแล้ว ขั้นถัดไปคือจับคู่ Hash เพื่อหาค่า Root Hash เพื่อยืนยันว่าเรามีคำสั่งซื้อนี้จริงๆ"
+        title="เอา Hash มาจับคู่กัน เพื่อสร้างต้นไม้"
+        description="ตอนนี้เรามีรอยประทับของ Order A, B, C และ D แล้ว ขั้นต่อไป เราจะเอา Hash ทีละ 2 ตัวมารวมกัน"
       />
 
       <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-        <MerkleTreeDiagram states={states} visible={visible} hashesFor={["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1", "root"]} />
+        <MerkleTreeDiagram nodeStateMap={nodeStateMap} visibilityMap={visibilityMap} hashNodeIds={["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1", "root"]} />
       </div>
 
-      {!bothPairs && (
+      {!hasBothPairs && (
         <div className="lab5-space-y-3">
           <p className="lab5-text-center lab5-text-sm lab5-font-medium lab5-text-foreground">คุณคิดว่า คู่แรกควรเป็นคู่ไหน?</p>
           <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
-            <PairButton label="จับคู่ H(A) + H(B)" done={builtPairs[0]} onClick={() => buildPair(0)} />
-            <PairButton label="จับคู่ H(C) + H(D)" done={builtPairs[1]} onClick={() => buildPair(1)} />
+            <PairButton label="จับคู่ H(A) + H(B)" isDone={builtPairs[0]} onClick={() => buildPair(0)} />
+            <PairButton label="จับคู่ H(C) + H(D)" isDone={builtPairs[1]} onClick={() => buildPair(1)} />
           </div>
         </div>
       )}
 
-      {firstPairDone && (
+      {isFirstPairDone && (
         <FeedbackCard variant="correct" title="ได้ Hash ของคู่แรกแล้ว">
           เราเอา Hash ของ A และ B มารวมกัน แล้วสร้าง Hash ใหม่ที่แทน “คู่ A+B” — ทำแบบเดียวกันกับ C
           และ D ต่อได้เลย
         </FeedbackCard>
       )}
 
-      {bothPairs && !builtRoot && (
+      {hasBothPairs && !isRootBuilt && (
         <div className="lab5-animate-merge-up lab5-space-y-3">
           <FeedbackCard variant="correct" title="ครบทั้งสองคู่แล้ว">ตอนนี้เรามี Hash ที่แทนข้อมูลเป็นคู่แล้ว</FeedbackCard>
           <MentorMessage message="ตอนนี้เรายังมี 2 Hash — ถ้าอยากได้ Hash เดียวที่สรุปข้อมูลทั้ง 4 Order เราต้องรวม 2 คู่นี้อีกครั้ง" />
@@ -1058,7 +1444,7 @@ function Step3BuildTree() {
         ๆ จนเหลือ Hash เดียว นั่นคือ Root
       </HintButton>
 
-      {builtRoot && (
+      {isRootBuilt && (
         <FeedbackCard variant="correct" title="ต้นไม้สมบูรณ์แล้ว">
           <p>
             Root คือ Hash เดียวที่สรุปข้อมูลทั้งหมดในต้นไม้ — เราเรียกมันว่า{" "}
@@ -1074,10 +1460,16 @@ function Step3BuildTree() {
   )
 }
 
+/**
+ * ขั้นที่ 4: เลือก Order ที่ต้องการพิสูจน์
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 4
+ * @author StealthTrade Team
+ */
 function Step4SelectTarget() {
   const { selectedLeaf, selectLeaf } = useLab05()
 
-  const states = selectedLeaf !== null ? { [`leaf-${selectedLeaf}`]: "target" } : {}
+  const nodeStateMap = selectedLeaf !== null ? { [`leaf-${selectedLeaf}`]: "target" } : {}
 
   return (
     <div className="lab5-space-y-6">
@@ -1088,10 +1480,10 @@ function Step4SelectTarget() {
       />
 
       <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
-        {orders.map((order, i) => (
-          <ChoiceCard key={order.id} selected={selectedLeaf === i} onClick={() => selectLeaf(i)} className="lab5-text-center">
+        {orders.map((order, index) => (
+          <ChoiceCard key={order.id} isSelected={selectedLeaf === index} onClick={() => selectLeaf(index)} className="lab5-text-center">
             <div className="lab5-flex lab5-flex-col lab5-items-center lab5-gap-1">
-              <Target className={cx("lab5-size-5", selectedLeaf === i ? "lab5-text-primary" : "lab5-text-muted-foreground")} />
+              <Target className={JoinClassNames("lab5-size-5", selectedLeaf === index ? "lab5-text-primary" : "lab5-text-muted-foreground")} />
               <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</span>
               <span className="lab5-font-mono lab5-text-10 lab5-leading-tight lab5-text-muted-foreground">{order.value}</span>
             </div>
@@ -1113,46 +1505,61 @@ function Step4SelectTarget() {
       )}
 
       <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-        <MerkleTreeDiagram states={states} />
+        <MerkleTreeDiagram nodeStateMap={nodeStateMap} />
       </div>
     </div>
   )
 }
 
+/**
+ * ขั้นที่ 5: หา sibling hash ที่อยู่บนเส้นทางหลักฐาน (Authentication Path)
+ *
+ * @return {JSX.Element|null} เนื้อหาขั้นที่ 5 หรือ null ถ้ายังไม่ได้เลือก Order
+ * @author StealthTrade Team
+ */
 function Step5AuthPath() {
-  const { selectedLeaf, authPath, foundSiblings, findSibling } = useLab05()
-  const [wrongNode, setWrongNode] = useState(null)
+  const { selectedLeaf, authPathSteps, foundSiblings, findSibling } = useLab05()
+  const [wrongNodeId, setWrongNodeId] = useState(null)
   const [flash, setFlash] = useState("idle")
 
   if (selectedLeaf === null) return null
 
-  const complete = authPath.length > 0 && authPath.every((s) => foundSiblings.includes(s.nodeId))
-  // เรียงตามลำดับที่คลิกจริง (ไม่ใช่ลำดับใน authPath) เพื่อให้คำอธิบายตรงกับสิ่งที่ผู้เรียนทำ
-  const orderedFound = foundSiblings.map((id) => authPath.find((s) => s.nodeId === id)).filter(Boolean)
+  const isComplete = authPathSteps.length > 0 && authPathSteps.every((pathStep) => foundSiblings.includes(pathStep.nodeId))
+  // เรียงตามลำดับที่คลิกจริง (ไม่ใช่ลำดับใน authPathSteps) เพื่อให้คำอธิบายตรงกับสิ่งที่ผู้เรียนทำ
+  const orderedFoundSiblings = foundSiblings
+    .map((nodeId) => authPathSteps.find((pathStep) => pathStep.nodeId === nodeId))
+    .filter(Boolean)
 
   const parentIndex = selectedLeaf >> 1
   const parentLabel = parentIndex === 0 ? "H(A+B)" : "H(C+D)"
   const targetLabel = orders[selectedLeaf].label
 
-  const states = {
+  const nodeStateMap = {
     [`leaf-${selectedLeaf}`]: "target",
   }
-  for (const id of foundSiblings) states[id] = "path"
+  for (const nodeId of foundSiblings) nodeStateMap[nodeId] = "path"
   // ให้เส้นทางไปหา parent สว่างขึ้นเมื่อเจอ sibling แล้ว เพื่อให้เห็นการเดินขึ้น
-  if (foundSiblings.length >= 1) states[`mid-${selectedLeaf >> 1}`] = "path"
-  if (complete) states.root = "path"
-  if (wrongNode) states[wrongNode] = "error"
+  if (foundSiblings.length >= 1) nodeStateMap[`mid-${selectedLeaf >> 1}`] = "path"
+  if (isComplete) nodeStateMap.root = "path"
+  if (wrongNodeId) nodeStateMap[wrongNodeId] = "error"
 
-  const clickable = ["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1"].filter(
-    (id) => id !== `leaf-${selectedLeaf}` && !foundSiblings.includes(id),
+  const clickableNodeIds = ["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1"].filter(
+    (nodeId) => nodeId !== `leaf-${selectedLeaf}` && !foundSiblings.includes(nodeId),
   )
 
-  const handleClick = (id) => {
-    const result = findSibling(id)
+  /**
+   * จัดการเมื่อผู้เรียนคลิกโหนด: แสดงผลตอบรับว่าถูกหรือผิด
+   *
+   * @param {string} nodeId รหัสโหนดที่ถูกคลิก
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const handleClick = (nodeId) => {
+    const result = findSibling(nodeId)
     if (result === "wrong") {
-      setWrongNode(id)
+      setWrongNodeId(nodeId)
       setFlash("wrong")
-      setTimeout(() => setWrongNode(null), 700)
+      setTimeout(() => setWrongNodeId(null), 700)
     } else if (result === "correct") {
       setFlash("correct")
     }
@@ -1167,25 +1574,25 @@ function Step5AuthPath() {
       />
 
       <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-        <MerkleTreeDiagram states={states} clickable={clickable} onNodeClick={handleClick} />
+        <MerkleTreeDiagram nodeStateMap={nodeStateMap} clickableNodeIds={clickableNodeIds} onNodeClick={handleClick} />
       </div>
 
       <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
         <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">
-          {complete ? "เส้นทางหลักฐาน (Authentication Path)" : "หลักฐานที่ต้องหา"}
+          {isComplete ? "เส้นทางหลักฐาน (Authentication Path)" : "หลักฐานที่ต้องหา"}
         </p>
-        {orderedFound.length === 0 ? (
+        {orderedFoundSiblings.length === 0 ? (
           <p className="lab5-mt-2 lab5-text-sm lab5-text-muted-foreground">
             ยังไม่ได้เลือก — ลองคลิก Hash ที่อยู่ข้าง ๆ {targetLabel} บนต้นไม้ด้านบน
           </p>
         ) : (
           <ol className="lab5-mt-2 lab5-space-y-2">
-            {orderedFound.map((s, i) => (
-              <li key={s.nodeId} className="lab5-flex lab5-items-center lab5-gap-2">
+            {orderedFoundSiblings.map((sibling, index) => (
+              <li key={sibling.nodeId} className="lab5-flex lab5-items-center lab5-gap-2">
                 <span className="lab5-flex lab5-size-5 lab5-items-center lab5-justify-center lab5-rounded-full lab5-bg-primary lab5-text-11 lab5-font-bold lab5-text-primary-foreground">
-                  {i + 1}
+                  {index + 1}
                 </span>
-                <HashValue hash={s.hash} label={`${s.label} =`} tone="primary" />
+                <HashValue hash={sibling.hash} label={`${sibling.label} =`} tone="primary" />
               </li>
             ))}
           </ol>
@@ -1197,22 +1604,22 @@ function Step5AuthPath() {
         ในต้นไม้
       </HintButton>
 
-      {flash === "wrong" && !complete && (
+      {flash === "wrong" && !isComplete && (
         <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
           ลองดูตำแหน่งของ Order ที่เรากำลังพิสูจน์อีกครั้ง เราต้องหา Hash ที่อยู่ “ข้าง ๆ เส้นทาง”
           ของมัน
         </FeedbackCard>
       )}
 
-      {orderedFound.length === 1 && !complete && (
+      {orderedFoundSiblings.length === 1 && !isComplete && (
         <FeedbackCard variant="correct" title="ถูกต้อง">
-          {orderedFound[0].label} คือ Hash ของข้อมูลที่อยู่ข้าง ๆ {targetLabel} เราเรียกสิ่งนี้ว่า{" "}
+          {orderedFoundSiblings[0].label} คือ Hash ของข้อมูลที่อยู่ข้าง ๆ {targetLabel} เราเรียกสิ่งนี้ว่า{" "}
           <span className="lab5-font-semibold lab5-text-primary">Sibling Hash</span> — เมื่อได้ {parentLabel}{" "}
           แล้ว เรายังต้องใช้ Hash ของคู่ไหนเพื่อไปถึง Root?
         </FeedbackCard>
       )}
 
-      {complete && (
+      {isComplete && (
         <FeedbackCard variant="correct" title="ครบเส้นทางแล้ว">
           ตอนนี้เรามี Hash ที่จำเป็นครบแล้ว Hash เหล่านี้รวมกันเป็น{" "}
           <span className="lab5-font-semibold lab5-text-primary">เส้นทางหลักฐาน (Authentication Path)</span>{" "}
@@ -1223,15 +1630,21 @@ function Step5AuthPath() {
   )
 }
 
+/**
+ * ขั้นที่ 6: คำนวณจาก Order กลับไปหา Root ทีละขั้น
+ *
+ * @return {JSX.Element|null} เนื้อหาขั้นที่ 6 หรือ null ถ้ายังไม่พร้อมแสดง
+ * @author StealthTrade Team
+ */
 function Step6RebuildRoot() {
-  const { tree, selectedLeaf, authPath, computedInterim, computedRoot, computeInterim, computeRootStep } = useLab05()
+  const { tree, selectedLeaf, authPathSteps, isInterimComputed, isRootComputed, computeInterim, computeRootStep } = useLab05()
 
-  if (selectedLeaf === null || !tree || authPath.length < 2) return null
+  if (selectedLeaf === null || !tree || authPathSteps.length < 2) return null
 
   const parentIndex = selectedLeaf >> 1
   const interimHash = tree.midHashes[parentIndex]
-  const leafSibling = authPath[0]
-  const midSibling = authPath[1]
+  const leafSibling = authPathSteps[0]
+  const midSibling = authPathSteps[1]
   const targetId = orders[selectedLeaf].id
   const targetLabel = orders[selectedLeaf].label
   const pairLabel = parentIndex === 0 ? "A+B" : "C+D"
@@ -1265,7 +1678,7 @@ function Step6RebuildRoot() {
             <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">
               {leafSibling.position === "left" ? `${leafSibling.label} + H(${targetId})` : `H(${targetId}) + ${leafSibling.label}`}
             </p>
-            {!computedInterim ? (
+            {!isInterimComputed ? (
               <button
                 type="button"
                 onClick={computeInterim}
@@ -1283,7 +1696,7 @@ function Step6RebuildRoot() {
             )}
           </div>
 
-          {computedInterim && (
+          {isInterimComputed && (
             <div className="lab5-animate-merge-up lab5-space-y-2 lab5-border-t lab5-border-border lab5-pt-3">
               <p className="lab5-text-sm lab5-font-semibold lab5-text-foreground">
                 ขั้นต่อไป: เอา Hash ของคู่ {pairLabel} มารวมกับ {midSibling.label} เพื่อสร้าง Root
@@ -1293,7 +1706,7 @@ function Step6RebuildRoot() {
                   ? `${midSibling.label} + ${parentIndex === 0 ? "H(A+B)" : "H(C+D)"}`
                   : `${parentIndex === 0 ? "H(A+B)" : "H(C+D)"} + ${midSibling.label}`}
               </p>
-              {!computedRoot ? (
+              {!isRootComputed ? (
                 <button
                   type="button"
                   onClick={computeRootStep}
@@ -1317,12 +1730,12 @@ function Step6RebuildRoot() {
           <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">Root ที่บันทึกไว้</p>
           <p className="lab5-text-10 lab5-font-medium lab5-text-muted-foreground-70">(Committed Root)</p>
           <div className="lab5-mt-2">
-            <HashValue hash={tree.root} tone={computedRoot ? "success" : "neutral"} />
+            <HashValue hash={tree.root} tone={isRootComputed ? "success" : "neutral"} />
           </div>
         </div>
       </div>
 
-      {computedRoot && (
+      {isRootComputed && (
         <FeedbackCard variant="success" title="✓ Root ทั้งสองค่าเหมือนกัน">
           <p>
             แปลว่าเราสามารถใช้หลักฐานที่มีคำนวณกลับไปยัง Root เดิมได้ จึงยืนยันได้ว่า{" "}
@@ -1338,28 +1751,34 @@ function Step6RebuildRoot() {
   )
 }
 
+/**
+ * ขั้นที่ 7: ทดสอบการปลอมแปลงข้อมูลแล้วดูว่า root เปลี่ยนตามหรือไม่
+ *
+ * @return {JSX.Element|null} เนื้อหาขั้นที่ 7 หรือ null ถ้ายังไม่พร้อมแสดง
+ * @author StealthTrade Team
+ */
 function Step7Tamper() {
-  const { tree, selectedLeaf, authPath, tamperMode, toggleTamper } = useLab05()
+  const { tree, selectedLeaf, authPathSteps, isTamperMode, toggleTamper } = useLab05()
   const [tamperedRoot, setTamperedRoot] = useState(null)
 
-  const midSibling = authPath[1]
+  const midSibling = authPathSteps[1]
 
   useEffect(() => {
-    let active = true
-    if (!tree || selectedLeaf === null || authPath.length < 2) return
-    const tamperedSiblings = [authPath[0], { ...midSibling, hash: tamperHash(midSibling.hash) }]
-    computeRootFromProof(tree.leafHashes[selectedLeaf], tamperedSiblings).then((res) => {
-      if (active) setTamperedRoot(res.root)
+    let isActive = true
+    if (!tree || selectedLeaf === null || authPathSteps.length < 2) return
+    const tamperedSiblings = [authPathSteps[0], { ...midSibling, hash: TamperHash(midSibling.hash) }]
+    ComputeRootFromProof(tree.leafHashes[selectedLeaf], tamperedSiblings).then((proofResult) => {
+      if (isActive) setTamperedRoot(proofResult.root)
     })
     return () => {
-      active = false
+      isActive = false
     }
-  }, [tree, selectedLeaf, authPath, midSibling])
+  }, [tree, selectedLeaf, authPathSteps, midSibling])
 
   if (selectedLeaf === null || !tree) return null
 
-  const shownRoot = tamperMode && tamperedRoot ? tamperedRoot : tree.root
-  const matches = !tamperMode
+  const shownRoot = isTamperMode && tamperedRoot ? tamperedRoot : tree.root
+  const isMatching = !isTamperMode
   const targetLabel = orders[selectedLeaf].label
 
   return (
@@ -1375,12 +1794,12 @@ function Step7Tamper() {
           <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดัดแปลงข้อมูลฝั่ง {midSibling?.label}</p>
           <p className="lab5-text-xs lab5-text-muted-foreground">ลองสวิตช์เพื่อจำลองว่ามีคนแก้ไขข้อมูลเพียงเล็กน้อยฝั่งนี้</p>
         </div>
-        <button type="button" role="switch" aria-checked={tamperMode} onClick={toggleTamper} className={cx("lab5-switch", tamperMode && "lab5-switch--on")}>
+        <button type="button" role="switch" aria-checked={isTamperMode} onClick={toggleTamper} className={JoinClassNames("lab5-switch", isTamperMode && "lab5-switch--on")}>
           <span className="lab5-switch-knob" />
         </button>
       </div>
 
-      {tamperMode && (
+      {isTamperMode && (
         <div className="lab5-animate-merge-up lab5-rounded-2xl lab5-border lab5-border-danger-30 lab5-bg-danger-soft-40 lab5-p-4">
           <p className="lab5-text-center lab5-text-xs lab5-font-semibold lab5-uppercase lab5-tracking-wide lab5-text-danger">สิ่งที่เกิดขึ้น</p>
           <div className="lab5-mt-2 lab5-flex lab5-flex-col lab5-items-center lab5-gap-1 lab5-text-sm lab5-text-foreground">
@@ -1400,7 +1819,7 @@ function Step7Tamper() {
           <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">Root ที่คำนวณใหม่</p>
           <p className="lab5-text-10 lab5-font-medium lab5-text-muted-foreground-70">(Computed Root)</p>
           <div className="lab5-mt-2">
-            <HashValue hash={shownRoot} tone={matches ? "success" : "danger"} />
+            <HashValue hash={shownRoot} tone={isMatching ? "success" : "danger"} />
           </div>
         </div>
         <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
@@ -1412,7 +1831,7 @@ function Step7Tamper() {
         </div>
       </div>
 
-      {matches ? (
+      {isMatching ? (
         <FeedbackCard variant="success" title="✓ ตรงกัน">
           ตอนนี้ Hash ทุกตัวถูกต้อง Root ที่คำนวณใหม่จึงเท่ากับ Root ที่บันทึกไว้ตั้งแต่ต้น —{" "}
           {targetLabel} ได้รับการพิสูจน์แล้ว
@@ -1431,11 +1850,17 @@ function Step7Tamper() {
   )
 }
 
+/**
+ * ขั้นที่ 8: สรุปประโยชน์ของ Merkle Tree
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 8
+ * @author StealthTrade Team
+ */
 function Step8Efficiency() {
-  const { selectedLeaf, authPath, reset, goToStep } = useLab05()
+  const { selectedLeaf, authPathSteps, reset, goToStep } = useLab05()
 
   const targetLabel = selectedLeaf !== null ? orders[selectedLeaf].label : "Order A"
-  const proofItems = selectedLeaf !== null ? [targetLabel, ...authPath.map((s) => `Hash ของ ${s.label}`)] : [targetLabel]
+  const proofItems = selectedLeaf !== null ? [targetLabel, ...authPathSteps.map((pathStep) => `Hash ของ ${pathStep.label}`)] : [targetLabel]
 
   return (
     <div className="lab5-space-y-6">
@@ -1445,9 +1870,9 @@ function Step8Efficiency() {
         <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
           <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">ต้องเปิดเผยทุกอย่าง</p>
           <ul className="lab5-mt-2 lab5-space-y-1.5">
-            {orders.map((o) => (
-              <li key={o.id} className="lab5-rounded-lg lab5-bg-surface lab5-px-3 lab5-py-1.5 lab5-text-sm lab5-text-foreground">
-                {o.label}
+            {orders.map((order) => (
+              <li key={order.id} className="lab5-rounded-lg lab5-bg-surface lab5-px-3 lab5-py-1.5 lab5-text-sm lab5-text-foreground">
+                {order.label}
               </li>
             ))}
           </ul>
@@ -1514,6 +1939,14 @@ function Step8Efficiency() {
    lab-container — ประกอบทุกอย่างเข้าด้วยกัน
    ========================================================================== */
 
+/**
+ * เลือกเนื้อหาของขั้นตามหมายเลขขั้น
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {number} props.step หมายเลขขั้น (0-8)
+ * @return {JSX.Element|null} เนื้อหาของขั้นนั้น หรือ null ถ้าหมายเลขไม่ถูกต้อง
+ * @author StealthTrade Team
+ */
 function StepContent({ step }) {
   switch (step) {
     case 0:
@@ -1539,6 +1972,12 @@ function StepContent({ step }) {
   }
 }
 
+/**
+ * โครงหน้าของบทเรียน: ส่วนหัว (ความคืบหน้า + คำศัพท์) เนื้อหา และแถบนำทาง
+ *
+ * @return {JSX.Element} โครงหน้าของบทเรียน
+ * @author StealthTrade Team
+ */
 function LabContainer() {
   const { currentStep } = useLab05()
   const isIntro = currentStep === 0
@@ -1573,6 +2012,12 @@ function LabContainer() {
    Lab5 — คอมโพเนนต์หลักที่ export ออกไปใช้งาน
    ========================================================================== */
 
+/**
+ * คอมโพเนนต์หลักของ Lab 05 (Merkle Trees)
+ *
+ * @return {JSX.Element} หน้าบทเรียนทั้งหมดพร้อม Provider
+ * @author StealthTrade Team
+ */
 export default function Lab5() {
   return (
     <div className="lab5">
