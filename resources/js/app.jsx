@@ -8,6 +8,10 @@ import { createRoot } from 'react-dom/client';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+window.onerror = function(message, source, lineno, colno, error) {
+    document.body.innerHTML = '<div style="color:red; padding:20px; font-family:monospace;"><h3>Runtime Error</h3><p>' + message + '</p><pre>' + (error ? error.stack : '') + '</pre></div>';
+};
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
@@ -24,3 +28,5 @@ createInertiaApp({
         color: '#e91e90',
     },
 });
+
+

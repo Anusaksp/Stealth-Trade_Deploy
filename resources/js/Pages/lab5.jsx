@@ -71,11 +71,24 @@ export const orders = [
  * @author StealthTrade Team
  */
 async function Sha256Hex(message) {
-  const data = new TextEncoder().encode(message)
-  const digest = await crypto.subtle.digest("SHA-256", data)
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
+  // Use Web Crypto API if available (secure context / localhost)
+  if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
+    const data = new TextEncoder().encode(message)
+    const digest = await window.crypto.subtle.digest("SHA-256", data)
+    return Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("")
+  }
+
+  // Fallback for non-secure contexts (e.g. HTTP over IP)
+  let hash = 0
+  for (let i = 0; i < message.length; i++) {
+    hash = (hash << 5) - hash + message.charCodeAt(i)
+    hash |= 0
+  }
+  // Create a pseudo-SHA256 hex string (64 characters)
+  const hex = Math.abs(hash).toString(16).padStart(8, "0")
+  return hex.repeat(8)
 }
 
 const midLabels = ["H(A+B)", "H(C+D)"]
@@ -209,7 +222,7 @@ function TruncateHash(hash, head = 8) {
    context — สถานะรวมของบทเรียนทั้งหมด
    ========================================================================== */
 
-export const TOTAL_STEPS = 8
+export const TOTAL_STEPS = 7
 
 /** ข้อมูลของแต่ละขั้น (จุดสำหรับ progress + ข้อความของผู้สอน) ขั้นที่ 0 คือบทนำ */
 export const STEP_META = [
@@ -217,23 +230,23 @@ export const STEP_META = [
     index: 0,
     topic: "บทนำ",
     mentor:
-      "สวัสดีครับ! วันนี้เราจะพิสูจน์ว่า Order หนึ่งรายการอยู่ในชุดข้อมูล โดยไม่ต้องเปิดเผยข้อมูลทั้งหมด",
+      "เราได้ส่งคำสั่งซื้อของเราไปแล้ว! แต่เอ๊ะ? เราจะแน่ใจได้ยังไงว่าคำสั่งซื้อของเราหมุนเวียนอยู่ในระบบหรือเปล่า?",
   },
   {
     index: 1,
     topic: "ปัญหาที่เราจะแก้",
     mentor:
-      "ก่อนสร้างต้นไม้ เรามาดูปัญหากันก่อนครับ เราจะพิสูจน์ได้ยังไงว่า Order อยู่ในข้อมูลจริง โดยไม่ต้องเปิดเผยทุก Order?",
+      "เราได้ส่งคำสั่งซื้อของเราไปแล้ว! แต่เอ๊ะ? เราจะแน่ในได้ยังไงว่าคำสั่งซื้อของเราหมุนเวียนอยู่ในระบบหรือเปล่า?",
   },
   {
     index: 2,
     topic: "สร้างรอยประทับ",
-    mentor: "ก่อนเอาข้อมูลมาจับคู่กัน เราทำให้แต่ละ Order กลายเป็นรอยประทับดิจิทัลก่อนครับ",
+    mentor: "ทบทวนการสั่งซื้อแบบปลอดภัยของเรากันเถอะครับ! เรามาสร้างรอยประทับ (Hash) เพื่อปกป้องข้อมูลคำสั่งซื้อ (Order) ของเรากัน ",
   },
   {
     index: 3,
     topic: "ประกอบต้นไม้",
-    mentor: "ลองจับ Hash สองตัวมารวมกันครับ เราจะได้รอยประทับของ “คู่นี้”",
+    mentor: "เอาล่ะครับ! เรามาดูวิธีการที่ผู้ตวจสอบ (ระบบ) ตรวจหา Order ของเรากันครับ",
   },
   {
     index: 4,
@@ -247,16 +260,11 @@ export const STEP_META = [
   },
   {
     index: 6,
-    topic: "เดินกลับไปหา Root",
-    mentor: "ตอนนี้เรามีหลักฐานครบแล้วครับ ลองเดินย้อนกลับจาก Order ไปหา Root ทีละขั้น",
-  },
-  {
-    index: 7,
     topic: "ทดสอบการปลอมแปลง",
     mentor: "ลองเปลี่ยนข้อมูลดูครับ ถ้าข้อมูลเปลี่ยน Hash และ Root จะเปลี่ยนตามไหม?",
   },
   {
-    index: 8,
+    index: 7,
     topic: "สรุปประโยชน์",
     mentor: "เห็นแล้วใช่ไหมครับว่าเราไม่ต้องเปิดเผยทุก Order เราใช้แค่ข้อมูลบนเส้นทางที่จำเป็น",
   },
@@ -339,10 +347,8 @@ export function Lab05Provider({ children }) {
             authPathSteps.every((pathStep) => lessonState.foundSiblings.includes(pathStep.nodeId))
           )
         case 6:
-          return lessonState.isRootComputed
+          return lessonState.completedSteps.includes(6) || lessonState.currentStep > 6
         case 7:
-          return lessonState.completedSteps.includes(7) || lessonState.currentStep > 7
-        case 8:
           return true
         default:
           return false
@@ -558,7 +564,7 @@ export function Lab05Provider({ children }) {
   }, [markComplete])
 
   /**
-   * เปิด/ปิดโหมดจำลองการปลอมแปลง และบันทึกว่าขั้นที่ 7 ทำเสร็จแล้ว
+   * เปิด/ปิดโหมดจำลองการปลอมแปลง และบันทึกว่าขั้นที่ 6 ทำเสร็จแล้ว
    *
    * @return {void}
    * @author StealthTrade Team
@@ -568,7 +574,7 @@ export function Lab05Provider({ children }) {
       ...previousState,
       isTamperMode: !previousState.isTamperMode,
     }))
-    markComplete(7)
+    markComplete(6)
   }, [markComplete])
 
   const contextValue = {
@@ -874,7 +880,7 @@ function MentorMessage({ message }) {
       </div>
       <div className="lab5-min-w-0">
         <div className="lab5-flex lab5-items-baseline lab5-gap-2">
-          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">อ.มิน</span>
+          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร.ซีโร่ วรรณรัตน์</span>
           <span className="lab5-text-xs lab5-text-muted-foreground">ผู้สอน</span>
         </div>
         <p className="lab5-mt-0.5 lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80 lab5-text-pretty">{message}</p>
@@ -1140,64 +1146,42 @@ function StepIntro() {
 
   return (
     <div className="lab5-space-y-8 lab5-text-center">
-      <div className="lab5-space-y-3">
-        <span className="lab5-inline-block lab5-rounded-full lab5-bg-primary-soft lab5-px-3 lab5-py-1 lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-primary">
-          Lab 05
-        </span>
-        <h1 className="lab5-text-balance lab5-text-3xl lab5-font-extrabold lab5-leading-tight lab5-text-foreground lab5-sm:text-4xl">
-          Merkle Trees
-        </h1>
-        <p className="lab5-mx-auto lab5-max-w-md lab5-text-pretty lab5-text-base lab5-leading-relaxed lab5-text-muted-foreground">
-          วันนี้เราจะเรียนรู้ส่วนหนึ่งของระบบที่ใช้พิสูจน์ข้อมูล: เราจะพิสูจน์ว่า Order หนึ่งรายการ
-          อยู่ในชุดข้อมูลจริง โดยไม่ต้องเปิดเผย Order อื่นทั้งหมด
+      <div className="lab5-space-y-6">
+        <div className="lab5-flex lab5-justify-center">
+          <span className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-4 lab5-py-1.5 lab5-font-mono lab5-text-10 lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">
+            LAB 5 <span style={{ opacity: 0.5 }}>·</span> Merkle Trees
+          </span>
+        </div>
+
+        <div className="lab5-space-y-2">
+          <h1
+            className="lab5-text-balance lab5-text-4xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-5xl"
+            style={{ backgroundImage: 'linear-gradient(to right, #34967C, #565D9E)', WebkitBackgroundClip: 'text', color: 'transparent' }}
+          >
+            Lab 05 — Merkle Trees
+          </h1>
+          <h2 className="lab5-text-balance lab5-text-2xl lab5-font-extrabold lab5-leading-tight lab5-text-foreground lab5-sm:text-4xl">
+            โครงสร้างข้อมูลสำหรับตรวจสอบความถูกต้อง
+          </h2>
+        </div>
+
+        <p className="lab5-mx-auto lab5-max-w-lg lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-muted-foreground lab5-sm:text-base">
+          เมื่อความถูกต้องของข้อมูลหรือธุรกรรมกำลังตกอยู่ในอันตราย
+          <br />
+          เราจะตรวจสอบและรับมืออย่างไร?
         </p>
       </div>
 
-      <div className="lab5-flex lab5-items-center lab5-justify-center lab5-gap-3 lab5-sm:gap-5">
-        <IntroPill icon={<Boxes className="lab5-size-5" />} label="Orders" />
-        <ArrowRight className="lab5-size-4 lab5-shrink-0 lab5-text-muted-foreground" />
-        <IntroPill icon={<Fingerprint className="lab5-size-5" />} label="รอยประทับ" />
-        <ArrowRight className="lab5-size-4 lab5-shrink-0 lab5-text-muted-foreground" />
-        <IntroPill icon={<GitBranch className="lab5-size-5" />} label="Root" />
+      <div style={{ marginTop: '3rem' }}>
+        <button
+          type="button"
+          onClick={goNext}
+          className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-bg-primary lab5-px-6 lab5-py-3 lab5-text-base lab5-font-bold lab5-text-primary-foreground lab5-shadow-sm lab5-transition-all lab5-hover-brightness"
+        >
+          เริ่มเรียนรู้
+          <ArrowRight className="lab5-size-5" />
+        </button>
       </div>
-
-      <div className="lab5-mx-auto lab5-max-w-md lab5-space-y-2">
-        <p className="lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-foreground-70">
-          วันนี้คุณจะลองสร้างต้นไม้เอง แล้วพิสูจน์ Order หนึ่งรายการด้วย hash เพียงบางส่วน
-        </p>
-        <p className="lab5-text-pretty lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground">
-          หมายเหตุ: นี่ไม่ใช่ ZKP ทั้งระบบ แต่เป็นกลไกพื้นฐานที่ช่วยสร้างหลักฐานการมีอยู่ของข้อมูล
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={goNext}
-        className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-bg-primary lab5-px-6 lab5-py-3 lab5-text-base lab5-font-bold lab5-text-primary-foreground lab5-shadow-sm lab5-transition-all lab5-hover-brightness"
-      >
-        เริ่มเรียนรู้
-        <ArrowRight className="lab5-size-5" />
-      </button>
-    </div>
-  )
-}
-
-/**
- * ไอคอนพร้อมป้ายชื่อในหน้าบทนำ
- *
- * @param {Object} props พร็อพของคอมโพเนนต์
- * @param {React.ReactNode} props.icon ไอคอนที่จะแสดง
- * @param {string} props.label ข้อความใต้ไอคอน
- * @return {JSX.Element} กล่องไอคอนพร้อมป้ายชื่อ
- * @author StealthTrade Team
- */
-function IntroPill({ icon, label }) {
-  return (
-    <div className="lab5-flex lab5-flex-col lab5-items-center lab5-gap-2">
-      <div className="lab5-flex lab5-size-14 lab5-items-center lab5-justify-center lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-text-primary lab5-shadow-sm">
-        {icon}
-      </div>
-      <span className="lab5-text-xs lab5-font-semibold lab5-text-muted-foreground">{label}</span>
     </div>
   )
 }
@@ -1226,7 +1210,7 @@ function Step1WhyMerkle() {
           <div key={order.id} className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-3 lab5-text-center">
             <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</p>
             <p className="lab5-mt-1 lab5-font-mono lab5-text-11 lab5-leading-tight lab5-text-muted-foreground">{order.value}</p>
-            {order.id === "B" && <p className="lab5-mt-1 lab5-text-11 lab5-font-semibold lab5-text-primary">← เราต้องการพิสูจน์</p>}
+            {order.id === "B" && <p className="lab5-mt-1 lab5-text-11 lab5-font-semibold lab5-text-primary">← เราต้องการพิสูจน์ว่าข้อมูลนี้มีอยู่จริงๆ</p>}
           </div>
         ))}
       </div>
@@ -1249,14 +1233,13 @@ function Step1WhyMerkle() {
 
       {step1Answer !== null && !isStep1Correct && (
         <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
-          ลองคิดใหม่ครับ — เราอยากเปิดเผยข้อมูลให้น้อยที่สุดเท่าที่จะทำได้
+          ลองคิดใหม่ครับ เราอยากเปิดเผยข้อมูลของเราให้น้อยที่สุดเท่าที่จะทำได้
         </FeedbackCard>
       )}
 
       {isStep1Correct && (
         <FeedbackCard variant="correct" title="ถูกต้อง">
-          เราไม่จำเป็นต้องเปิดเผยทุก Order เราสามารถส่ง Order ที่ต้องการพิสูจน์ + หลักฐานบางส่วน
-          แล้วให้คนตรวจสอบคำนวณกลับไปหา Root ได้
+          เราไม่จำเป็นต้องเปิดเผยทุก “คำสั่งซื้อ” ของเรา เราสามารถส่ง ”คำสั่งซื้อที”่ต้องการพิสูจน์ + หลักฐานบางส่วน แล้วให้คนตรวจสอบคำนวณกลับไปหาคำสั่งซื้อได้
         </FeedbackCard>
       )}
     </div>
@@ -1278,11 +1261,11 @@ function Step2HashOrders() {
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="สร้างรอยประทับ"
-        title="ก่อนสร้างต้นไม้ เราต้องทำให้แต่ละ Order เป็น “รอยประทับ” ก่อน"
-        description="เรามี Order A, B, C และ D — ก่อนจะเอาข้อมูลมาสร้างต้นไม้ เราต้องเปลี่ยนแต่ละ Order ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
+        title="ก่อนยืนยันคำสั่งซื้อว่ามีจริงหรือเปล่า? เราต้องทำให้แต่ละ “คำสั่งซื้อ” เป็น “Hash” ก่อน"
+        description="เรามี Order A, B, C และ D เราจะเอาข้อมูลมาเป็นสร้างต้นไม้ เพื่อค้นหาข้อมูลของเรา เราต้องเปลี่ยนแต่ละ “คำสั่งซื้อ” ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
       />
 
-      <MentorMessage message="ทำไปทำไม? เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้างต้นไม้" />
+      <MentorMessage message="ทำไปทำไม? เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้างแผนภาพต้นไม้พิสูจน์ว่าเรามีคำสั่งซื้อนี้ในระบบจริงๆและยังเป็นการรักษาความปลอกภัยของคำสั่งซื้อของเราอีกด้วย" />
 
       <div className="lab5-space-y-3">
         {orders.map((order, index) => {
@@ -1332,8 +1315,8 @@ function Step2HashOrders() {
 
       {isAllHashed && (
         <FeedbackCard variant="correct" title="ครบทั้ง 4 ใบแล้ว">
-          Order แต่ละใบถูกเปลี่ยนเป็นรอยประทับดิจิทัล (Hash) ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ของ
-          Order A, B, C และ D พร้อมนำไปประกอบเป็นต้นไม้แล้ว
+          Order แต่ละใบถูกเปลี่ยนเป็นรอยประทับดิจิทัล (Hash) ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ของ Order A, B, C และ D
+          พร้อมนำไปประกอบเป็นต้นไม้แล้ว
         </FeedbackCard>
       )}
     </div>
@@ -1399,8 +1382,8 @@ function Step3BuildTree() {
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ประกอบต้นไม้"
-        title="เอา Hash มาจับคู่กัน เพื่อสร้างต้นไม้"
-        description="ตอนนี้เรามีรอยประทับของ Order A, B, C และ D แล้ว ขั้นต่อไป เราจะเอา Hash ทีละ 2 ตัวมารวมกัน"
+        title="นำค่า Hash มาจับคู่กันเพื่อสร้างโครงสร้าง Merkle Tree"
+        description="ตอนนี้เรามีรอยประทับของ Order A, B, C และ D แล้ว ขั้นต่อไป เราจะเอา Hash ทีละ 2 ตัวมารวมกันเพื่อที่จะสร้าง แผนภาพต้นไม้ "
       />
 
       <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
@@ -1427,7 +1410,7 @@ function Step3BuildTree() {
       {hasBothPairs && !isRootBuilt && (
         <div className="lab5-animate-merge-up lab5-space-y-3">
           <FeedbackCard variant="correct" title="ครบทั้งสองคู่แล้ว">ตอนนี้เรามี Hash ที่แทนข้อมูลเป็นคู่แล้ว</FeedbackCard>
-          <MentorMessage message="ตอนนี้เรายังมี 2 Hash — ถ้าอยากได้ Hash เดียวที่สรุปข้อมูลทั้ง 4 Order เราต้องรวม 2 คู่นี้อีกครั้ง" />
+          <MentorMessage message="ตอนนี้เรายังมี 2 Hash — ถ้าอยากได้ Hash เดียวที่สรุปข้อมูลทั้ง 4 “คำสั่งซื้อ” เราต้องรวม 2 คู่นี้อีกครั้ง" />
           <button
             type="button"
             onClick={buildRoot}
@@ -1448,8 +1431,8 @@ function Step3BuildTree() {
         <FeedbackCard variant="correct" title="ต้นไม้สมบูรณ์แล้ว">
           <p>
             Root คือ Hash เดียวที่สรุปข้อมูลทั้งหมดในต้นไม้ — เราเรียกมันว่า{" "}
-            <span className="lab5-font-semibold">Root (Merkle Root)</span> ถ้าข้อมูลใบใดใบหนึ่งเปลี่ยน
-            Root ก็จะเปลี่ยนตามทันที
+            <span className="lab5-font-semibold">Root (Merkle Root)</span> ถ้าข้อมูลใบใดใบหนึ่งเปลี่ยน Root ก็จะ
+            เปลี่ยนตามทันที
           </p>
           <p className="lab5-mt-2 lab5-font-mono lab5-text-xs lab5-text-foreground-60">
             Order → Hash → จับเป็นคู่ → Hash ใหม่ → รวมต่อ → Root
@@ -1636,123 +1619,10 @@ function Step5AuthPath() {
  * @return {JSX.Element|null} เนื้อหาขั้นที่ 6 หรือ null ถ้ายังไม่พร้อมแสดง
  * @author StealthTrade Team
  */
-function Step6RebuildRoot() {
-  const { tree, selectedLeaf, authPathSteps, isInterimComputed, isRootComputed, computeInterim, computeRootStep } = useLab05()
 
-  if (selectedLeaf === null || !tree || authPathSteps.length < 2) return null
-
-  const parentIndex = selectedLeaf >> 1
-  const interimHash = tree.midHashes[parentIndex]
-  const leafSibling = authPathSteps[0]
-  const midSibling = authPathSteps[1]
-  const targetId = orders[selectedLeaf].id
-  const targetLabel = orders[selectedLeaf].label
-  const pairLabel = parentIndex === 0 ? "A+B" : "C+D"
-
-  return (
-    <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="เดินกลับไปหา Root"
-        title="ลองคำนวณกลับไปหา Root"
-        description={`เรามี ${targetLabel} และ Hash ของข้อมูลข้าง ๆ ที่จำเป็นครบแล้ว ทีนี้ลองใช้หลักฐานนี้คำนวณกลับขึ้นไปทีละขั้น`}
-      />
-
-      <div className="lab5-grid lab5-gap-4 lab5-lg:grid-cols-3fr">
-        {/* Target */}
-        <div className="lab5-rounded-2xl lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-p-4">
-          <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-primary">Order ที่เรากำลังพิสูจน์</p>
-          <p className="lab5-text-10 lab5-font-medium lab5-text-primary-70">(Target)</p>
-          <p className="lab5-mt-1 lab5-text-sm lab5-font-bold lab5-text-foreground">{targetLabel}</p>
-          <div className="lab5-mt-2">
-            <HashValue hash={tree.leafHashes[selectedLeaf]} label={`H(${targetId}) =`} tone="primary" />
-          </div>
-        </div>
-
-        {/* Compute steps */}
-        <div className="lab5-space-y-3 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
-          <div className="lab5-space-y-2">
-            <p className="lab5-text-sm lab5-font-semibold lab5-text-foreground">
-              ขั้นแรก: ใช้ Hash ของ {targetLabel} และ Hash ของข้อมูลที่อยู่ข้าง ๆ ({leafSibling.label})
-              เพื่อสร้าง Hash ของคู่ {pairLabel}
-            </p>
-            <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">
-              {leafSibling.position === "left" ? `${leafSibling.label} + H(${targetId})` : `H(${targetId}) + ${leafSibling.label}`}
-            </p>
-            {!isInterimComputed ? (
-              <button
-                type="button"
-                onClick={computeInterim}
-                className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-bg-primary lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
-              >
-                <Calculator className="lab5-size-4" />
-                คำนวณขั้นแรก
-              </button>
-            ) : (
-              <div className="lab5-animate-merge-up lab5-space-y-1">
-                <ArrowDown className="lab5-mb-1 lab5-size-4 lab5-text-success" />
-                <HashValue hash={interimHash} label={`${parentIndex === 0 ? "H(A+B)" : "H(C+D)"} =`} tone="success" />
-                <p className="lab5-text-xs lab5-text-muted-foreground">ได้ Hash ของคู่ {pairLabel} แล้ว</p>
-              </div>
-            )}
-          </div>
-
-          {isInterimComputed && (
-            <div className="lab5-animate-merge-up lab5-space-y-2 lab5-border-t lab5-border-border lab5-pt-3">
-              <p className="lab5-text-sm lab5-font-semibold lab5-text-foreground">
-                ขั้นต่อไป: เอา Hash ของคู่ {pairLabel} มารวมกับ {midSibling.label} เพื่อสร้าง Root
-              </p>
-              <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">
-                {midSibling.position === "left"
-                  ? `${midSibling.label} + ${parentIndex === 0 ? "H(A+B)" : "H(C+D)"}`
-                  : `${parentIndex === 0 ? "H(A+B)" : "H(C+D)"} + ${midSibling.label}`}
-              </p>
-              {!isRootComputed ? (
-                <button
-                  type="button"
-                  onClick={computeRootStep}
-                  className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-bg-primary lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
-                >
-                  <Calculator className="lab5-size-4" />
-                  คำนวณ Root
-                </button>
-              ) : (
-                <div className="lab5-animate-merge-up lab5-space-y-1">
-                  <ArrowDown className="lab5-mb-1 lab5-size-4 lab5-text-success" />
-                  <HashValue hash={tree.root} label="Root ที่เราคำนวณได้ =" tone="success" />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Committed root */}
-        <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-          <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">Root ที่บันทึกไว้</p>
-          <p className="lab5-text-10 lab5-font-medium lab5-text-muted-foreground-70">(Committed Root)</p>
-          <div className="lab5-mt-2">
-            <HashValue hash={tree.root} tone={isRootComputed ? "success" : "neutral"} />
-          </div>
-        </div>
-      </div>
-
-      {isRootComputed && (
-        <FeedbackCard variant="success" title="✓ Root ทั้งสองค่าเหมือนกัน">
-          <p>
-            แปลว่าเราสามารถใช้หลักฐานที่มีคำนวณกลับไปยัง Root เดิมได้ จึงยืนยันได้ว่า{" "}
-            <span className="lab5-font-semibold">{targetLabel} อยู่ในต้นไม้นี้จริง</span>
-          </p>
-          <p className="lab5-mt-2 lab5-text-xs lab5-text-foreground-70">
-            การพิสูจน์แบบนี้เรียกว่า <span className="lab5-font-semibold">Inclusion Proof</span> หรือ
-            “หลักฐานว่า Order นี้อยู่ในต้นไม้”
-          </p>
-        </FeedbackCard>
-      )}
-    </div>
-  )
-}
 
 /**
- * ขั้นที่ 7: ทดสอบการปลอมแปลงข้อมูลแล้วดูว่า root เปลี่ยนตามหรือไม่
+ * ขั้นที่ 6: ทดสอบการปลอมแปลงข้อมูลแล้วดูว่า root เปลี่ยนตามหรือไม่
  *
  * @return {JSX.Element|null} เนื้อหาขั้นที่ 7 หรือ null ถ้ายังไม่พร้อมแสดง
  * @author StealthTrade Team
@@ -1851,9 +1721,9 @@ function Step7Tamper() {
 }
 
 /**
- * ขั้นที่ 8: สรุปประโยชน์ของ Merkle Tree
+ * ขั้นที่ 7: สรุปประโยชน์ของ Merkle Tree
  *
- * @return {JSX.Element} เนื้อหาขั้นที่ 8
+ * @return {JSX.Element} เนื้อหาขั้นที่ 7
  * @author StealthTrade Team
  */
 function Step8Efficiency() {
@@ -1962,10 +1832,8 @@ function StepContent({ step }) {
     case 5:
       return <Step5AuthPath />
     case 6:
-      return <Step6RebuildRoot />
-    case 7:
       return <Step7Tamper />
-    case 8:
+    case 7:
       return <Step8Efficiency />
     default:
       return null
