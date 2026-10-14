@@ -14,6 +14,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 import {
@@ -22,21 +23,31 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  Boxes,
-  Calculator,
+  Contrast,
+  Cpu,
   Check,
   CheckCircle2,
   ChevronDown,
   Copy,
+  Eye,
+  EyeOff,
   Fingerprint,
-  GitBranch,
+  Globe,
   GraduationCap,
   HelpCircle,
+  Info,
+  Layers,
+  Lightbulb,
   Link2,
+  Lock,
   PartyPopper,
   RotateCcw,
+  Shield,
+  ShieldCheck,
   Sparkles,
   Target,
+  Users,
+  X,
   XCircle,
 } from "lucide-react"
 import "../../css/lab5.css"
@@ -57,10 +68,10 @@ function JoinClassNames(...classNames) {
    ========================================================================== */
 
 export const orders = [
-  { id: "A", label: "Order A", value: "BUY 0.2 BTC @ 68,420" },
-  { id: "B", label: "Order B", value: "SELL 1.5 ETH @ 3,220" },
-  { id: "C", label: "Order C", value: "BUY 500 USDT" },
-  { id: "D", label: "Order D", value: "SELL 0.05 BTC @ 69,100" },
+  { id: "A", label: "ออร์เดอร์ A", value: "secret-A-7f3k", tamperedValue: "secret-A-7f4r" },
+  { id: "B", label: "ออร์เดอร์ B", value: "secret-B-q92m", tamperedValue: "secret-B-q93n" },
+  { id: "C", label: "ออร์เดอร์ C", value: "secret-C-x41d", tamperedValue: "secret-C-x42e" },
+  { id: "D", label: "ออร์เดอร์ D", value: "secret-D-p80z", tamperedValue: "secret-D-p81a" },
 ]
 
 /**
@@ -193,16 +204,17 @@ function IsInclusionValid(computedRoot, expectedRoot) {
 }
 
 /**
- * สลับตัวอักษร hex ตัวแรก เพื่อจำลองว่าข้อมูลถูกปลอมแปลง (แต่ยังเป็น hex ที่ถูกต้อง)
+ * จำลองการแก้ไขข้อมูลของใบที่เลือก (เปลี่ยนตัวอักษรท้ายเล็กน้อย เช่น 7f3k → 7f4r) แล้วคำนวณ Leaf Hash และ Root ใหม่ด้วยเส้นทางหลักฐานเดิม
  *
- * @param {string} hash ค่า hash เดิม
- * @return {string} hash ที่ถูกสลับตัวอักษรแรกแล้ว
+ * @param {string} tamperedValue ข้อมูลของใบหลังถูกแก้ไข
+ * @param {Array<{hash: string, position: string}>} siblings sibling hash เรียงจากชั้นล่างขึ้นบน
+ * @return {Promise<{value: string, leafHash: string, steps: string[], root: string}>} ผลการคำนวณจากข้อมูลที่ถูกแก้ไข
  * @author StealthTrade Team
  */
-function TamperHash(hash) {
-  const firstCharacter = hash[0]
-  const replacement = firstCharacter === "0" ? "1" : "0"
-  return replacement + hash.slice(1)
+async function ComputeTamperedProof(tamperedValue, siblings) {
+  const leafHash = await Sha256Hex(tamperedValue)
+  const { steps, root } = await ComputeRootFromProof(leafHash, siblings)
+  return { value: tamperedValue, leafHash, steps, root }
 }
 
 /**
@@ -222,7 +234,7 @@ function TruncateHash(hash, head = 8) {
    context — สถานะรวมของบทเรียนทั้งหมด
    ========================================================================== */
 
-export const TOTAL_STEPS = 7
+export const TOTAL_STEPS = 9
 
 /** ข้อมูลของแต่ละขั้น (จุดสำหรับ progress + ข้อความของผู้สอน) ขั้นที่ 0 คือบทนำ */
 export const STEP_META = [
@@ -234,14 +246,16 @@ export const STEP_META = [
   },
   {
     index: 1,
-    topic: "ปัญหาที่เราจะแก้",
+    topic: "โจทย์ความเป็นส่วนตัว",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
     mentor:
-      "เราได้ส่งคำสั่งซื้อของเราไปแล้ว! แต่เอ๊ะ? เราจะแน่ในได้ยังไงว่าคำสั่งซื้อของเราหมุนเวียนอยู่ในระบบหรือเปล่า?",
+      "หากเราต้องการจะเช็คความถูกต้องของรายการออร์เดอร์ที่เราได้สั่งซื้อไป จะมีกระบวนการอย่างไร?\nจึงได้เกิดขั้นตอนของ merkle tree ขึ้นมาเพื่อแก้ปัญหานี้",
   },
   {
     index: 2,
-    topic: "สร้างรอยประทับ",
-    mentor: "ทบทวนการสั่งซื้อแบบปลอดภัยของเรากันเถอะครับ! เรามาสร้างรอยประทับ (Hash) เพื่อปกป้องข้อมูลคำสั่งซื้อ (Order) ของเรากัน ",
+    topic: "สร้าง Hash",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mentor: "มาทำการจำลองการสั่งซื้อเพื่อส่งคำสั่งซื้อเข้าไปให้กับระบบกันครับ",
   },
   {
     index: 3,
@@ -255,18 +269,33 @@ export const STEP_META = [
   },
   {
     index: 5,
-    topic: "หา Hash ข้าง ๆ",
-    mentor: "เราไม่จำเป็นต้องรู้ทุกข้อมูลแล้วครับ ลองมองหา Hash ของข้อมูลที่อยู่ข้าง ๆ Order ที่เราเลือก",
+    topic: "สร้างและตรวจ Proof",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mentor: "ต่อมาจะเป็นขั้นตอนการหาว่าข้อมูลของเรา อยู่ในชุดข้อมูลหรือเปล่าครับ",
   },
   {
     index: 6,
-    topic: "ทดสอบการปลอมแปลง",
-    mentor: "ลองเปลี่ยนข้อมูลดูครับ ถ้าข้อมูลเปลี่ยน Hash และ Root จะเปลี่ยนตามไหม?",
+    topic: "ทดสอบการแก้ไขข้อมูล",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mentor: "ลองเปลี่ยนข้อมูลดูอย่างเล็กน้อย แล้วดูว่า Hash กับ Root เปลี่ยนตามไหมครับ",
   },
   {
     index: 7,
-    topic: "สรุปประโยชน์",
-    mentor: "เห็นแล้วใช่ไหมครับว่าเราไม่ต้องเปิดเผยทุก Order เราใช้แค่ข้อมูลบนเส้นทางที่จำเป็น",
+    topic: "เวิร์กโฟลว์ ZKP (จำลอง)",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mentor: "มาดู 4 ขั้นตอนกันครับ: ประกาศ Root → ข้อมูลลับของผู้ใช้ → สร้าง Proof → แสดงหลักฐาน (จำลอง)",
+  },
+  {
+    index: 8,
+    topic: "Merkle กับ ZKP",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mentor: "ลองสลับดูครับว่าเมื่อใช้ ZKP ข้อมูลอะไรถูกซ่อน และผู้ตรวจยังตรวจอะไรได้บ้าง",
+  },
+  {
+    index: 9,
+    topic: "สรุปในบริบทการเทรด",
+    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mentor: "ปิดท้ายด้วยการดูว่า proof เดิมถูกใช้ซ้ำในบริบทเดิมได้ไหมครับ",
   },
 ]
 
@@ -282,14 +311,17 @@ const initialState = {
   builtPairs: [false, false],
   isRootBuilt: false,
   // step 4
-  selectedLeaf: null,
+  selectedLeaf: 0,
   // step 5
   foundSiblings: [],
   // step 6
   isInterimComputed: false,
   isRootComputed: false,
-  // step 7
+  // step 6
   isTamperMode: false,
+  // step 7 (เวิร์กโฟลว์ ZKP ขั้นย่อย 1..4)
+  zkpWorkflowStage: 1,
+  isZkpWorkflowDone: false,
 }
 
 const Lab05Context = createContext(null)
@@ -305,6 +337,7 @@ const Lab05Context = createContext(null)
 export function Lab05Provider({ children }) {
   const [lessonState, setLessonState] = useState(initialState)
   const [tree, setTree] = useState(null)
+  const [tamperedProof, setTamperedProof] = useState(null)
 
   useEffect(() => {
     let isActive = true
@@ -321,10 +354,21 @@ export function Lab05Provider({ children }) {
     return GetAuthenticationPath(tree, lessonState.selectedLeaf)
   }, [tree, lessonState.selectedLeaf])
 
+  useEffect(() => {
+    if (!tree || authPathSteps.length === 0) return
+    let isActive = true
+    ComputeTamperedProof(orders[lessonState.selectedLeaf ?? 0].tamperedValue, authPathSteps).then((proof) => {
+      if (isActive) setTamperedProof(proof)
+    })
+    return () => {
+      isActive = false
+    }
+  }, [tree, authPathSteps, lessonState.selectedLeaf])
+
   /**
    * ตรวจว่าขั้นที่ระบุทำเสร็จแล้วหรือยัง
    *
-   * @param {number} step หมายเลขขั้น (0-8)
+   * @param {number} step หมายเลขขั้น (0-9)
    * @return {boolean} true ถ้าขั้นนั้นทำเสร็จแล้ว
    * @author StealthTrade Team
    */
@@ -344,11 +388,16 @@ export function Lab05Provider({ children }) {
         case 5:
           return (
             authPathSteps.length > 0 &&
-            authPathSteps.every((pathStep) => lessonState.foundSiblings.includes(pathStep.nodeId))
+            authPathSteps.every((pathStep) => lessonState.foundSiblings.includes(pathStep.nodeId)) &&
+            lessonState.isRootComputed
           )
         case 6:
-          return lessonState.completedSteps.includes(6) || lessonState.currentStep > 6
+          return true
         case 7:
+          return lessonState.isZkpWorkflowDone
+        case 8:
+          return true
+        case 9:
           return true
         default:
           return false
@@ -446,7 +495,7 @@ export function Lab05Provider({ children }) {
    */
   const answerStep1 = useCallback(
     (choice) => {
-      const isCorrect = choice === 1
+      const isCorrect = choice === 2
       setLessonState((previousState) => ({
         ...previousState,
         step1Answer: choice,
@@ -560,8 +609,12 @@ export function Lab05Provider({ children }) {
    */
   const computeRootStep = useCallback(() => {
     setLessonState((previousState) => ({ ...previousState, isRootComputed: true }))
-    markComplete(6)
+    markComplete(5)
   }, [markComplete])
+
+  const resetRootStep = useCallback(() => {
+    setLessonState((previousState) => ({ ...previousState, isRootComputed: false }))
+  }, [])
 
   /**
    * เปิด/ปิดโหมดจำลองการปลอมแปลง และบันทึกว่าขั้นที่ 6 ทำเสร็จแล้ว
@@ -577,10 +630,27 @@ export function Lab05Provider({ children }) {
     markComplete(6)
   }, [markComplete])
 
+  /**
+   * ไปยังขั้นย่อยของเวิร์กโฟลว์ ZKP (ขั้นที่ 7) เมื่อถึงขั้นย่อยสุดท้ายถือว่าขั้นที่ 7 ทำเสร็จแล้ว
+   *
+   * @param {number} stage ขั้นย่อย (1-4)
+   * @return {void}
+   * @author StealthTrade Team
+   */
+  const goToZkpStage = useCallback((stage) => {
+    setLessonState((previousState) => ({
+      ...previousState,
+      zkpWorkflowStage: stage,
+      isZkpWorkflowDone: previousState.isZkpWorkflowDone || stage === 4,
+    }))
+  }, [])
+
   const contextValue = {
     ...lessonState,
     tree,
     authPathSteps,
+    tamperedProof,
+    goToZkpStage,
     goNext,
     goPrev,
     goToStep,
@@ -595,6 +665,7 @@ export function Lab05Provider({ children }) {
     findSibling,
     computeInterim,
     computeRootStep,
+    resetRootStep,
     toggleTamper,
   }
 
@@ -692,12 +763,15 @@ function FeedbackCard({ variant, title, children, className }) {
 }
 
 const glossaryEntries = [
-  { term: "Hash", def: "รอยประทับดิจิทัลของข้อมูล" },
-  { term: "Leaf", def: "ข้อมูลที่อยู่ปลายสุดของต้นไม้ เช่น Order A" },
+  { term: "Hash", def: "Hash ดิจิทัลของข้อมูล" },
+  { term: "Leaf", def: "ข้อมูลที่อยู่ปลายสุดของต้นไม้ เช่น ออร์เดอร์ A" },
   { term: "Sibling Hash", def: "Hash ของข้อมูลที่อยู่ข้าง ๆ บนเส้นทางที่เรากำลังพิสูจน์" },
   { term: "Root", def: "Hash เดียวที่สรุปต้นไม้ทั้งหมด" },
   { term: "Authentication Path", def: "ชุดของ Hash ที่เราต้องใช้เพื่อเดินจากข้อมูลที่เลือกกลับไปหา Root" },
-  { term: "Inclusion Proof", def: "หลักฐานที่แสดงว่า Order นี้อยู่ในต้นไม้" },
+  { term: "Inclusion Proof", def: "หลักฐานที่แสดงว่าออร์เดอร์นี้อยู่ในต้นไม้" },
+  { term: "ZKP", def: "พิสูจน์ว่าบางอย่างเป็นจริง โดยไม่เปิดเผยข้อมูลลับ" },
+  { term: "Nullifier", def: "ค่าผูกกับบริบทเพื่อป้องกันการใช้หลักฐานหรือเจตนาทำรายการเดิมซ้ำ" },
+  { term: "Proof", def: "หลักฐานที่ผู้ตรวจใช้ตรวจ ในแลปนี้เป็นภาพจำลอง" },
 ]
 
 /**
@@ -709,14 +783,26 @@ const glossaryEntries = [
  */
 function Glossary() {
   const [isOpen, setIsOpen] = useState(false)
+  const glossaryRef = useRef(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleClickOutside = (event) => {
+      if (glossaryRef.current && !glossaryRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isOpen])
 
   return (
-    <div className="lab5-mx-auto lab5-w-full lab5-max-w-3xl">
+    <div ref={glossaryRef} className="lab5-relative lab5-inline-block">
       <button
         type="button"
         onClick={() => setIsOpen((previousIsOpen) => !previousIsOpen)}
         aria-expanded={isOpen}
-        className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-3 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface"
+        className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface lab5-px-3 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface-soft"
       >
         <BookOpen className="lab5-size-3.5" />
         คำศัพท์ที่เพิ่งเจอ
@@ -724,7 +810,7 @@ function Glossary() {
       </button>
 
       {isOpen && (
-        <div className="lab5-animate-merge-up lab5-mt-2 lab5-grid lab5-gap-2 lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface lab5-p-3 lab5-sm:grid-cols-2">
+        <div className="lab5-animate-merge-up lab5-glossary-dropdown lab5-grid lab5-gap-2 lab5-sm:grid-cols-2">
           {glossaryEntries.map((entry) => (
             <div key={entry.term} className="lab5-rounded-lg lab5-bg-surface-soft lab5-p-2.5">
               <p className="lab5-text-xs lab5-font-bold lab5-text-primary">{entry.term}</p>
@@ -880,10 +966,10 @@ function MentorMessage({ message }) {
       </div>
       <div className="lab5-min-w-0">
         <div className="lab5-flex lab5-items-baseline lab5-gap-2">
-          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร.ซีโร่ วรรณรัตน์</span>
+          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร. ซีโร่</span>
           <span className="lab5-text-xs lab5-text-muted-foreground">ผู้สอน</span>
         </div>
-        <p className="lab5-mt-0.5 lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80 lab5-text-pretty">{message}</p>
+        <p className="lab5-mt-0.5 lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80 lab5-text-pretty" style={{ whiteSpace: "pre-line" }}>{message}</p>
       </div>
     </div>
   )
@@ -1039,14 +1125,14 @@ function MerkleTreeDiagram({ nodeStateMap = {}, visibilityMap, hashNodeIds = [],
 }
 
 /**
- * แถบจุดแสดงความคืบหน้าของขั้นที่ 1-8 (บทนำไม่มีจุด)
+ * แถบจุดแสดงความคืบหน้าของขั้นที่ 1-9 (บทนำไม่มีจุด)
  *
  * @return {JSX.Element} แถบความคืบหน้าและชื่อขั้นปัจจุบัน
  * @author StealthTrade Team
  */
 function LabProgress() {
   const { currentStep, completedSteps, goToStep } = useLab05()
-  // จุด progress แทนขั้นที่ 1..8 (บทนำไม่มีจุด)
+  // จุด progress แทนขั้นที่ 1..9 (บทนำไม่มีจุด)
   const steps = Array.from({ length: TOTAL_STEPS }, (unusedValue, index) => index + 1)
 
   return (
@@ -1072,7 +1158,11 @@ function LabProgress() {
                   isReachable && !isCurrent && "lab5-dot--reachable",
                 )}
               >
-                {isCompleted && !isCurrent ? <Check className="lab5-size-3.5" /> : step}
+                {isCompleted && !isCurrent ? (
+                  <Check className="lab5-size-3.5" />
+                ) : (
+                  step
+                )}
               </button>
               {step < TOTAL_STEPS && (
                 <span className={JoinClassNames("lab5-progress-line lab5-sm:w-5", completedSteps.includes(step) && "lab5-progress-line--done")} />
@@ -1082,7 +1172,7 @@ function LabProgress() {
         })}
       </div>
       <p className="lab5-text-center lab5-text-xs lab5-font-medium lab5-text-muted-foreground">
-        {currentStep === 0 ? "บทนำ" : `ขั้นที่ ${currentStep} · ${STEP_META[currentStep].topic}`}
+        {currentStep === 0 ? "บทนำ" : `ขั้นที่ ${currentStep} · ${STEP_META[currentStep]?.topic || ""}`}
       </p>
     </div>
   )
@@ -1102,7 +1192,7 @@ function LabNavigation() {
   const isLast = currentStep === TOTAL_STEPS
 
   return (
-    <div className="lab5-sticky lab5-bottom-0 lab5-z-10 lab5-border-t lab5-border-border lab5-bg-surface-85 lab5-backdrop-blur-sm">
+    <div className="lab5-sticky lab5-bottom-0 lab5-z-30 lab5-border-t lab5-border-border lab5-bg-surface-85 lab5-backdrop-blur-sm">
       <div className="lab5-mx-auto lab5-flex lab5-max-w-3xl lab5-items-center lab5-justify-between lab5-gap-3 lab5-px-4 lab5-py-3">
         <button type="button" onClick={reset} className="lab5-nav-reset">
           <RotateCcw className="lab5-size-4" />
@@ -1115,15 +1205,22 @@ function LabNavigation() {
             ย้อนกลับ
           </button>
           {!isLast && (
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={!canProceed}
-              className={JoinClassNames("lab5-nav-next", canProceed ? "lab5-nav-next--enabled" : "lab5-nav-next--disabled")}
-            >
-              ไปขั้นต่อ
-              <ArrowRight className="lab5-size-4" />
-            </button>
+            <div className="lab5-flex lab5-flex-col lab5-items-center">
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={!canProceed}
+                className={JoinClassNames("lab5-nav-next", canProceed ? "lab5-nav-next--enabled" : "lab5-nav-next--disabled")}
+              >
+                ไปขั้นต่อ
+                <ArrowRight className="lab5-size-4" />
+              </button>
+              {!canProceed && (
+                <span className="lab5-mt-1 lab5-text-10 lab5-text-muted-foreground">
+                  ทำขั้นนี้ให้เสร็จก่อนจึงไปต่อได้
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -1145,7 +1242,7 @@ function StepIntro() {
   const { goNext } = useLab05()
 
   return (
-    <div className="lab5-space-y-8 lab5-text-center">
+    <div className="lab5-space-y-8 lab5-text-center" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
       <div className="lab5-space-y-6">
         <div className="lab5-flex lab5-justify-center">
           <span className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-4 lab5-py-1.5 lab5-font-mono lab5-text-10 lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">
@@ -1156,19 +1253,19 @@ function StepIntro() {
         <div className="lab5-space-y-2">
           <h1
             className="lab5-text-balance lab5-text-4xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-5xl"
-            style={{ backgroundImage: 'linear-gradient(to right, #34967C, #565D9E)', WebkitBackgroundClip: 'text', color: 'transparent' }}
+            style={{ backgroundImage: 'linear-gradient(to right, #12a05a 15%, #5b3ff2 45%)', WebkitBackgroundClip: 'text', color: 'transparent' }}
           >
-            Lab 05 — Merkle Trees
+            Lab 05 — Merkle Trees แบบ ZKP
           </h1>
           <h2 className="lab5-text-balance lab5-text-2xl lab5-font-extrabold lab5-leading-tight lab5-text-foreground lab5-sm:text-4xl">
-            โครงสร้างข้อมูลสำหรับตรวจสอบความถูกต้อง
+            พิสูจน์ข้อมูลโดยไม่ต้องเปิดเผยข้อมูลลับ
           </h2>
         </div>
 
         <p className="lab5-mx-auto lab5-max-w-lg lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-muted-foreground lab5-sm:text-base">
-          เมื่อความถูกต้องของข้อมูลหรือธุรกรรมกำลังตกอยู่ในอันตราย
+          เว็บเทรดมี Order จำนวนมาก เราจะพิสูจน์ได้อย่างไรว่า Order ของเราอยู่ในชุดข้อมูล โดยไม่ต้องเปิดเผยข้อมูลทั้งหมดให้ผู้ตรวจสอบ?
           <br />
-          เราจะตรวจสอบและรับมืออย่างไร?
+          เรียนรู้ผ่านการสร้าง Merkle Tree และจำลองการพิสูจน์ด้วย ZKP
         </p>
       </div>
 
@@ -1186,7 +1283,123 @@ function StepIntro() {
   )
 }
 
-const step1Choices = ["ต้องส่งทั้งหมด", "ไม่จำเป็น ถ้าเรามีหลักฐานที่ตรวจสอบได้"]
+const step1Choices = [
+  {
+    title: "ส่งรายชื่อทั้งหมด + บอกว่าฉันคือใคร",
+    desc: "— ตรวจได้ แต่ไม่เป็นส่วนตัว",
+    feedbackTitle: "ตรวจได้ แต่ไม่เป็นส่วนตัวเลย",
+    feedbackDesc: "ผู้ตรวจเห็นรายชื่อทั้งหมดและรู้ว่าคุณคือใคร ซึ่งจะไม่ตรงกับหลักการของ ZKP",
+  },
+  {
+    title: "ส่ง Root อย่างเดียว",
+    desc: "— ยังพิสูจน์ไม่ได้",
+    feedbackTitle: "ยังพิสูจน์ไม่ได้",
+    feedbackDesc: "Root เป็นแค่ตัวแทนชุดข้อมูลใหญ่ ไม่มีอะไรบอกว่าคุณอยู่ในนั้น",
+  },
+  {
+    title: "ส่งหลักฐานแบบ Merkle + ZKP",
+    desc: "— เป้าหมายของแลปนี้",
+    feedbackTitle: "ถูกต้อง นี่คือเป้าหมายของแลป",
+    feedbackDesc: "เราจะเรียนทีละชั้น: Merkle Tree ในรูปแบบของ ZKP (ขั้น 2–7) แล้วใช้ ZKP ซ่อนตัวตน (ขั้น 8–9)",
+  },
+]
+
+/**
+ * แผนภาพตัวอย่าง Merkle Tree สำหรับขั้นที่ 1
+ *
+ * @return {JSX.Element} แผนภาพ Merkle Tree พร้อมสมการและคำอธิบาย
+ * @author StealthTrade Team
+ */
+function Step1MerklePreview() {
+  // โหนดของต้นไม้ตัวอย่าง: tone = "root" (เขียวเข้ม), "solid" (ม่วงทึบ), "target" (ม่วงอ่อน), "muted" (ขาว)
+  const previewNodes = [
+    { label: "ROOT", x: 260, y: 22, width: 64, tone: "root" },
+    { label: "H(A+B)", x: 130, y: 86, width: 64, tone: "root" },
+    { label: "H(C+D)", x: 390, y: 86, width: 64, tone: "solid" },
+    { label: "H(A)", x: 50, y: 158, width: 52, tone: "solid" },
+    { label: "H(B)", x: 190, y: 158, width: 52, tone: "target" },
+    { label: "H(C)", x: 320, y: 158, width: 52, tone: "muted" },
+    { label: "H(D)", x: 460, y: 158, width: 52, tone: "muted" },
+  ]
+  const previewEdges = [
+    { from: [260, 22], to: [130, 86], isPath: true },
+    { from: [260, 22], to: [390, 86], isPath: true },
+    { from: [130, 86], to: [50, 158], isPath: true },
+    { from: [130, 86], to: [190, 158], isPath: true },
+    { from: [390, 86], to: [320, 158], isPath: false },
+    { from: [390, 86], to: [460, 158], isPath: false },
+  ]
+  const nodeStyle = {
+    root: { fill: "#0d7a55", stroke: "#0d7a55", text: "#ffffff" },
+    solid: { fill: "#6d4bd8", stroke: "#6d4bd8", text: "#ffffff" },
+    target: { fill: "#f0ebff", stroke: "#6d4bd8", text: "#6d4bd8" },
+    muted: { fill: "#ffffff", stroke: "#d5d9e3", text: "#25304a" },
+  }
+
+  return (
+    <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4 lab5-space-y-4">
+      {/* สมการหลักฐาน */}
+      <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-2 lab5-text-xs">
+        <span className="lab5-zk-chip lab5-zk-chip--solid">ออร์เดอร์ B</span>
+        <span className="lab5-font-bold lab5-text-muted-foreground">+</span>
+        <span className="lab5-zk-chip lab5-zk-chip--primary" style={{ backgroundColor: "#ffffff" }}>H(A)</span>
+        <span className="lab5-font-bold lab5-text-muted-foreground">+</span>
+        <span className="lab5-zk-chip lab5-zk-chip--primary" style={{ backgroundColor: "#ffffff" }}>H(C+D)</span>
+        <ArrowRight className="lab5-size-3.5 lab5-text-muted-foreground" />
+        <span className="lab5-zk-chip lab5-zk-chip--success" style={{ borderColor: "transparent" }}>
+          Root
+        </span>
+      </div>
+
+      {/* แผนภาพโครงสร้างต้นไม้ Merkle */}
+      <svg className="lab5-w-full" viewBox="0 0 520 180" fill="none" style={{ display: "block", maxHeight: "210px" }}>
+        {previewEdges.map((edge, index) => (
+          <line
+            key={index}
+            x1={edge.from[0]}
+            y1={edge.from[1]}
+            x2={edge.to[0]}
+            y2={edge.to[1]}
+            stroke={edge.isPath ? "#6d4bd8" : "#d5d9e3"}
+            strokeWidth={edge.isPath ? 1.6 : 1.2}
+          />
+        ))}
+        {previewNodes.map((node) => {
+          const style = nodeStyle[node.tone]
+          return (
+            <g key={node.label}>
+              <rect
+                x={node.x - node.width / 2}
+                y={node.y - 12}
+                width={node.width}
+                height="24"
+                rx="12"
+                fill={style.fill}
+                stroke={style.stroke}
+                strokeWidth="1.5"
+              />
+              <text x={node.x} y={node.y} textAnchor="middle" dominantBaseline="central" fill={style.text} fontSize="11" fontWeight="700">
+                {node.label}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* คำอธิบายความสัมพันธ์ */}
+      <div className="lab5-space-y-1.5 lab5-text-xs lab5-text-muted-foreground">
+        <p>
+          <span className="lab5-font-mono lab5-text-primary">H(A)</span> — จับคู่กับ Hash ของ Order B เพื่อคำนวณ{" "}
+          <span className="lab5-font-mono">H(A+B)</span>
+        </p>
+        <p>
+          <span className="lab5-font-mono lab5-text-primary">H(C+D)</span> — จับคู่กับ <span className="lab5-font-mono">H(A+B)</span>{" "}
+          ที่คำนวณได้ เพื่อให้ได้ Root
+        </p>
+      </div>
+    </div>
+  )
+}
 
 /**
  * ขั้นที่ 1: ตั้งโจทย์ปัญหาและให้ผู้เรียนเลือกคำตอบ
@@ -1201,71 +1414,134 @@ function Step1WhyMerkle() {
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ปัญหาที่เราจะแก้"
-        title="เราจะพิสูจน์ได้อย่างไรว่า Order อยู่ในชุดข้อมูล?"
-        description="สมมติคุณต้องการพิสูจน์ว่า Order B อยู่ในข้อมูลจริง แต่คุณไม่อยากเปิดเผย Order A, C และ D ทั้งหมด เราจะทำยังไงดี?"
+        title="จะพิสูจน์ว่าออร์เดอร์ B ของเราที่สั่งซื้อไป อยู่ในชุดข้อมูลหรือเปล่า?"
       />
 
       <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
-        {orders.map((order) => (
-          <div key={order.id} className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-3 lab5-text-center">
-            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</p>
-            <p className="lab5-mt-1 lab5-font-mono lab5-text-11 lab5-leading-tight lab5-text-muted-foreground">{order.value}</p>
-            {order.id === "B" && <p className="lab5-mt-1 lab5-text-11 lab5-font-semibold lab5-text-primary">← เราต้องการพิสูจน์ว่าข้อมูลนี้มีอยู่จริงๆ</p>}
-          </div>
-        ))}
+        {orders.map((order) => {
+          const isTarget = order.id === "B"
+          return (
+            <div
+              key={order.id}
+              className={JoinClassNames(
+                "lab5-rounded-xl lab5-p-3.5 lab5-text-center lab5-transition-all",
+                isTarget
+                  ? "lab5-border-2 lab5-border-primary lab5-bg-primary-soft lab5-shadow-sm"
+                  : "lab5-border lab5-border-border lab5-bg-surface-soft",
+              )}
+            >
+              <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">
+                {order.label}
+              </p>
+              <p className="lab5-mt-1 lab5-font-mono lab5-text-11 lab5-leading-tight lab5-text-muted-foreground">{order.value}</p>
+              {isTarget && <p className="lab5-mt-1.5 lab5-text-11 lab5-font-semibold lab5-text-primary">← อยากพิสูจน์</p>}
+            </div>
+          )
+        })}
       </div>
 
-      <p className="lab5-text-sm lab5-font-semibold lab5-text-foreground">คุณคิดว่าเราต้องส่ง Order ทั้ง 4 รายการให้คนตรวจสอบไหม?</p>
+      <div className="lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
+        <Lightbulb className="lab5-size-5 lab5-shrink-0 lab5-text-primary lab5-mt-0.5" />
+        <div className="lab5-space-y-1 lab5-text-xs lab5-leading-relaxed lab5-text-foreground-80">
+          <p className="lab5-text-muted-foreground">
+            Merkle Tree สรุปชุดข้อมูลทั้งหมดให้เหลือค่าเดียว เรียกว่า Root
+          </p>
+          <p className="lab5-text-muted-foreground">
+            ถ้าอยากตรวจสอบ 1 รายการ ให้ทำการส่ง Order นั้น + Hash ของออร์เดอร์ที่เราซื้ออยู่ ที่จำเป็นต่อการคำนวณย้อนกลับไปหา Root หรือชุดข้อมูลที่ทำการเก็บ ออร์เดอร์ของเรา
+          </p>
+        </div>
+      </div>
+
+      <div className="lab5-space-y-1">
+        <p className="lab5-text-xs lab5-font-semibold lab5-text-foreground">
+          เป้าหมาย: พิสูจน์ว่าคุณเป็นออร์เดอร์ โดยไม่บอกว่าคุณเป็นใคร เลือกวิธีส่งข้อมูล 1 วิธี
+        </p>
+        <p className="lab5-text-xs lab5-text-muted-foreground">
+          ZKP = พิสูจน์ว่าบางอย่างเป็นจริง โดยไม่เปิดเผยข้อมูลลับ
+        </p>
+      </div>
 
       <div className="lab5-space-y-3">
         {step1Choices.map((choice, index) => {
           const isSelected = step1Answer === index
-          const choiceState = step1Answer === index ? (index === 1 ? "correct" : "incorrect") : "default"
+          const choiceState = isSelected ? (index === 2 ? "correct" : "incorrect") : "default"
           return (
-            <ChoiceCard key={index} isSelected={isSelected} choiceState={choiceState} onClick={() => answerStep1(index)}>
-              <span className="lab5-text-sm lab5-font-semibold lab5-text-foreground">{choice}</span>
+            <ChoiceCard
+              key={index}
+              isSelected={isSelected}
+              choiceState={choiceState}
+              onClick={() => answerStep1(index)}
+              className="lab5-flex lab5-flex-col lab5-items-start lab5-gap-0.5"
+            >
+              <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">{choice.title}</span>
+              <span
+                className={JoinClassNames(
+                  "lab5-text-xs",
+                  choiceState === "incorrect"
+                    ? "lab5-text-danger"
+                    : choiceState === "correct"
+                    ? "lab5-text-success"
+                    : "lab5-text-muted-foreground",
+                )}
+              >
+                {choice.desc}
+              </span>
             </ChoiceCard>
           )
         })}
       </div>
 
-      <HintButton>ลองคิดดูว่า ถ้าเราไม่อยากเปิดเผยข้อมูลทั้งหมด เราจะพิสูจน์ได้อย่างไรโดยใช้ข้อมูลบางส่วน?</HintButton>
+      {!isStep1Correct && (
+        <HintButton label="ทำไม?">
+          คำใบ้: เราต้องการพิสูจน์ว่า Order B อยู่ในชุดข้อมูลจริง โดยไม่ต้องเปิดเผย Order อื่นทั้งหมด และไม่เปิดเผยตัวตนของเรา
+        </HintButton>
+      )}
 
       {step1Answer !== null && !isStep1Correct && (
-        <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
-          ลองคิดใหม่ครับ เราอยากเปิดเผยข้อมูลของเราให้น้อยที่สุดเท่าที่จะทำได้
+        <FeedbackCard variant="incorrect" title={step1Choices[step1Answer].feedbackTitle}>
+          {step1Choices[step1Answer].feedbackDesc}
         </FeedbackCard>
       )}
 
       {isStep1Correct && (
-        <FeedbackCard variant="correct" title="ถูกต้อง">
-          เราไม่จำเป็นต้องเปิดเผยทุก “คำสั่งซื้อ” ของเรา เราสามารถส่ง ”คำสั่งซื้อที”่ต้องการพิสูจน์ + หลักฐานบางส่วน แล้วให้คนตรวจสอบคำนวณกลับไปหาคำสั่งซื้อได้
-        </FeedbackCard>
+        <div className="lab5-animate-merge-up lab5-space-y-4">
+          <FeedbackCard variant="correct" title="ถูกต้อง นี่คือเป้าหมายของแลป">
+            เราจะเรียนทีละชั้น: Merkle Tree ในรูปแบบของ ZKP (ขั้น 2–7) แล้วใช้ ZKP ซ่อนตัวตน (ขั้น 8–9)
+          </FeedbackCard>
+
+          <Step1MerklePreview />
+
+          <div className="lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
+            <Users className="lab5-size-4 lab5-shrink-0 lab5-text-primary lab5-mt-0.5" />
+            <p className="lab5-text-xs lab5-leading-relaxed lab5-text-foreground-80">
+              <strong className="lab5-text-foreground">ตัวอย่างการใช้งานจริง:</strong> ระบบมีรายชื่อผู้มีสิทธิ์ 10,000 คน แต่ไม่อยากเปิดเผยรายชื่อทั้งหมด Merkle Tree ช่วยตรวจว่า “คนนี้อยู่ในรายชื่อจริงไหม” โดยใช้ Root + หลักฐานของคนนั้น
+            </p>
+          </div>
+        </div>
       )}
     </div>
   )
 }
 
 /**
- * ขั้นที่ 2: สร้างรอยประทับ (hash) ให้แต่ละ Order
+ * ขั้นที่ 2: เปลี่ยนรหัสลับเป็น Hash ให้แต่ละ Order
  *
  * @return {JSX.Element} เนื้อหาขั้นที่ 2
  * @author StealthTrade Team
  */
 function Step2HashOrders() {
   const { tree, hashedLeaves, revealHash } = useLab05()
-  const hashedCount = hashedLeaves.filter(Boolean).length
   const isAllHashed = hashedLeaves.every(Boolean)
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
-        sectionLabel="สร้างรอยประทับ"
-        title="ก่อนยืนยันคำสั่งซื้อว่ามีจริงหรือเปล่า? เราต้องทำให้แต่ละ “คำสั่งซื้อ” เป็น “Hash” ก่อน"
-        description="เรามี Order A, B, C และ D เราจะเอาข้อมูลมาเป็นสร้างต้นไม้ เพื่อค้นหาข้อมูลของเรา เราต้องเปลี่ยนแต่ละ “คำสั่งซื้อ” ให้เป็น Hash ก่อน มองว่า Hash คือ “รอยประทับดิจิทัล” ของข้อมูลก็ได้"
+        sectionLabel="สร้าง HASH"
+        title="เปลี่ยนรหัสลับเป็น Hash"
+        description="เราไม่เอาค่าดั้งเดิมของออร์เดอร์ไปวางในต้นไม้ แต่เปลี่ยนเป็น Hash ก่อน เพื่อให้ข้อมูลเดิมไม่ถูกเปิดเผย"
       />
 
-      <MentorMessage message="ทำไปทำไม? เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้างแผนภาพต้นไม้พิสูจน์ว่าเรามีคำสั่งซื้อนี้ในระบบจริงๆและยังเป็นการรักษาความปลอกภัยของคำสั่งซื้อของเราอีกด้วย" />
+      <MentorMessage message="ทำไปทำไม? เมื่อเราสั่งซื้อแล้วเราก็จะต้องส่งคำสั่งซื้อที่ทำการ Hash แล้วไปให้กับระบบครับ เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้าง Merkle Tree ครับ และหา Root ของชุดข้อมูลครับ" />
 
       <div className="lab5-space-y-3">
         {orders.map((order, index) => {
@@ -1275,7 +1551,9 @@ function Step2HashOrders() {
               <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-between lab5-gap-3">
                 <div>
                   <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</p>
-                  <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">{order.value}</p>
+                  <p className="lab5-text-xs lab5-text-muted-foreground">
+                    รหัสลับ: <span className="lab5-font-mono">{order.value}</span>
+                  </p>
                 </div>
 
                 {!isHashed ? (
@@ -1285,19 +1563,19 @@ function Step2HashOrders() {
                     className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-bg-primary lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
                   >
                     <Sparkles className="lab5-size-4" />
-                    สร้างรอยประทับ
+                    สร้าง Hash
                   </button>
                 ) : (
-                  <div className="lab5-flex lab5-items-center lab5-gap-2 lab5-text-xs lab5-font-semibold lab5-text-success">
-                    <ArrowDown className="lab5-size-4" />
-                    <span className="lab5-hidden lab5-sm:inline">Hash (SHA-256)</span>
+                  <div className="lab5-flex lab5-items-center lab5-gap-1.5 lab5-text-xs lab5-font-semibold lab5-text-success">
+                    <ArrowDown className="lab5-size-3.5" />
+                    <span>Hash (SHA-256)</span>
                   </div>
                 )}
               </div>
 
               {isHashed && tree && (
                 <div className="lab5-animate-merge-up lab5-mt-3 lab5-border-t lab5-border-border lab5-pt-3">
-                  <HashValue hash={tree.leafHashes[index]} label={`รอยประทับของ ${order.label} =`} tone="primary" />
+                  <HashValue hash={tree.leafHashes[index]} label={`Hash ของ ${order.label} =`} tone="primary" />
                 </div>
               )}
             </div>
@@ -1305,18 +1583,9 @@ function Step2HashOrders() {
         })}
       </div>
 
-      {hashedCount === 1 && !isAllHashed && (
-        <FeedbackCard variant="correct" title="รอยประทับแรกเสร็จแล้ว">
-          Order นี้ถูกเปลี่ยนเป็น Hash แล้ว ถ้าข้อมูลเดิมเหมือนเดิม Hash ก็จะได้ค่าเดิม
-          จุดสำคัญคือ ถ้าข้อมูลเปลี่ยนแม้เพียงเล็กน้อย Hash ที่ได้ก็จะเปลี่ยนตาม —
-          ลองสร้างรอยประทับให้ Order ที่เหลือ →
-        </FeedbackCard>
-      )}
-
       {isAllHashed && (
         <FeedbackCard variant="correct" title="ครบทั้ง 4 ใบแล้ว">
-          Order แต่ละใบถูกเปลี่ยนเป็นรอยประทับดิจิทัล (Hash) ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ของ Order A, B, C และ D
-          พร้อมนำไปประกอบเป็นต้นไม้แล้ว
+          รหัสลับของแต่ละออร์เดอร์ถูกเปลี่ยนเป็น Hash ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ครบ 4 ค่า Hash เหล่านี้คือ Input ของขั้นต่อไปในขั้นถัดไป — ขั้นต่อไปเราจะจับ Hash ทีละ 2 ตัวมารวมกัน
         </FeedbackCard>
       )}
     </div>
@@ -1495,48 +1764,50 @@ function Step4SelectTarget() {
 }
 
 /**
- * ขั้นที่ 5: หา sibling hash ที่อยู่บนเส้นทางหลักฐาน (Authentication Path)
+ * ขั้นที่ 5: สร้างและตรวจ Proof (หา Sibling Hash และคำนวณย้อนกลับหา Root)
  *
- * @return {JSX.Element|null} เนื้อหาขั้นที่ 5 หรือ null ถ้ายังไม่ได้เลือก Order
+ * @return {JSX.Element|null} เนื้อหาขั้นที่ 5
  * @author StealthTrade Team
  */
 function Step5AuthPath() {
-  const { selectedLeaf, authPathSteps, foundSiblings, findSibling } = useLab05()
+  const {
+    tree,
+    selectedLeaf,
+    authPathSteps,
+    foundSiblings,
+    findSibling,
+    isRootComputed,
+    computeRootStep,
+    resetRootStep,
+  } = useLab05()
   const [wrongNodeId, setWrongNodeId] = useState(null)
   const [flash, setFlash] = useState("idle")
+  const [showDetails, setShowDetails] = useState(false)
 
-  if (selectedLeaf === null) return null
+  const currentLeaf = selectedLeaf ?? 0
+  const targetLabel = orders[currentLeaf]?.label || "ออร์เดอร์ A"
 
-  const isComplete = authPathSteps.length > 0 && authPathSteps.every((pathStep) => foundSiblings.includes(pathStep.nodeId))
-  // เรียงตามลำดับที่คลิกจริง (ไม่ใช่ลำดับใน authPathSteps) เพื่อให้คำอธิบายตรงกับสิ่งที่ผู้เรียนทำ
+  // เรียงตามลำดับที่คลิกจริง (ไม่ใช่ลำดับใน authPathSteps)
   const orderedFoundSiblings = foundSiblings
     .map((nodeId) => authPathSteps.find((pathStep) => pathStep.nodeId === nodeId))
     .filter(Boolean)
 
-  const parentIndex = selectedLeaf >> 1
-  const parentLabel = parentIndex === 0 ? "H(A+B)" : "H(C+D)"
-  const targetLabel = orders[selectedLeaf].label
+  const isAllSiblingsFound = foundSiblings.length >= 2
 
   const nodeStateMap = {
-    [`leaf-${selectedLeaf}`]: "target",
+    [`leaf-${currentLeaf}`]: "target",
   }
   for (const nodeId of foundSiblings) nodeStateMap[nodeId] = "path"
-  // ให้เส้นทางไปหา parent สว่างขึ้นเมื่อเจอ sibling แล้ว เพื่อให้เห็นการเดินขึ้น
-  if (foundSiblings.length >= 1) nodeStateMap[`mid-${selectedLeaf >> 1}`] = "path"
-  if (isComplete) nodeStateMap.root = "path"
+  if (isRootComputed) {
+    nodeStateMap["mid-0"] = "path"
+    nodeStateMap.root = "path"
+  }
   if (wrongNodeId) nodeStateMap[wrongNodeId] = "error"
 
   const clickableNodeIds = ["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1"].filter(
-    (nodeId) => nodeId !== `leaf-${selectedLeaf}` && !foundSiblings.includes(nodeId),
+    (nodeId) => nodeId !== `leaf-${currentLeaf}` && !foundSiblings.includes(nodeId) && !isRootComputed,
   )
 
-  /**
-   * จัดการเมื่อผู้เรียนคลิกโหนด: แสดงผลตอบรับว่าถูกหรือผิด
-   *
-   * @param {string} nodeId รหัสโหนดที่ถูกคลิก
-   * @return {void}
-   * @author StealthTrade Team
-   */
   const handleClick = (nodeId) => {
     const result = findSibling(nodeId)
     if (result === "wrong") {
@@ -1551,64 +1822,193 @@ function Step5AuthPath() {
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
-        sectionLabel="หา Hash ข้าง ๆ"
-        title={`เรามี ${targetLabel} แล้ว แต่ยังขาดอะไร?`}
-        description={`ตอนนี้เรารู้ Hash ของ ${targetLabel} แล้ว ถ้าเราต้องการคำนวณต่อขึ้นไปหา Root เราต้องรู้ “Hash ของข้อมูลข้าง ๆ” ด้วย`}
+        sectionLabel="สร้างและตรวจ PROOF"
+        title={`พิสูจน์ว่า ${targetLabel} อยู่ในชุดข้อมูลจริง`}
+        description="เลือก Hash ที่อยู่ข้าง ๆ ตามเส้นทางจริง แล้วคำนวณย้อนกลับจาก Leaf ไปจนถึง Root ที่เชื่อถือได้"
       />
 
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-        <MerkleTreeDiagram nodeStateMap={nodeStateMap} clickableNodeIds={clickableNodeIds} onNodeClick={handleClick} />
+      {/* แถบคำใบ้สีม่วงด้านบน (แสดงตามสถานะ) */}
+      {!isAllSiblingsFound && (
+        <div className="lab5-animate-merge-up lab5-flex lab5-items-center lab5-justify-between lab5-gap-2 lab5-rounded-2xl lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-4 lab5-py-3 lab5-text-xs">
+          <div className="lab5-flex lab5-items-center lab5-gap-2">
+            <HelpCircle className="lab5-size-4 lab5-shrink-0 lab5-text-primary" />
+            <span className="lab5-font-bold lab5-text-primary">
+              {foundSiblings.length === 0
+                ? "ถ้าจะสร้าง H(A+B) เราต้องรู้อะไรเพิ่ม?"
+                : "เมื่อได้ H(A+B) แล้ว ต้องใช้อะไรต่อเพื่อไปยัง Root?"}
+            </span>
+          </div>
+          <span className="lab5-text-primary-80 lab5-shrink-0">คลิกบนต้นไม้เพื่อเลือก Sibling Hash</span>
+        </div>
+      )}
+
+      {/* Interactive Merkle Tree Box */}
+      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-4">
+        <div className="lab5-flex lab5-items-center lab5-justify-between">
+          <div>
+            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">Interactive Merkle Tree</p>
+            <p className="lab5-text-xs lab5-text-muted-foreground">Leaf → Parent Hash → Root</p>
+          </div>
+          <span className="lab5-rounded-full lab5-bg-primary-soft lab5-px-3 lab5-py-1 lab5-text-xs lab5-font-bold lab5-text-primary">
+            {foundSiblings.length}/2 Sibling Hash
+          </span>
+        </div>
+
+        <MerkleTreeDiagram
+          nodeStateMap={nodeStateMap}
+          clickableNodeIds={clickableNodeIds}
+          onNodeClick={handleClick}
+        />
       </div>
 
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
-        <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">
-          {isComplete ? "เส้นทางหลักฐาน (Authentication Path)" : "หลักฐานที่ต้องหา"}
-        </p>
-        {orderedFoundSiblings.length === 0 ? (
-          <p className="lab5-mt-2 lab5-text-sm lab5-text-muted-foreground">
-            ยังไม่ได้เลือก — ลองคลิก Hash ที่อยู่ข้าง ๆ {targetLabel} บนต้นไม้ด้านบน
+      {/* เส้นทางตรวจสอบสิทธิ์ (Authentication Path) */}
+      {foundSiblings.length > 0 && (
+        <div className="lab5-animate-merge-up lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-3">
+          <p className="lab5-text-xs lab5-font-bold lab5-text-foreground">
+            เส้นทางตรวจสอบสิทธิ์ (Authentication Path)
           </p>
-        ) : (
-          <ol className="lab5-mt-2 lab5-space-y-2">
+          <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
             {orderedFoundSiblings.map((sibling, index) => (
-              <li key={sibling.nodeId} className="lab5-flex lab5-items-center lab5-gap-2">
-                <span className="lab5-flex lab5-size-5 lab5-items-center lab5-justify-center lab5-rounded-full lab5-bg-primary lab5-text-11 lab5-font-bold lab5-text-primary-foreground">
-                  {index + 1}
+              <div
+                key={sibling.nodeId}
+                className="lab5-flex lab5-items-center lab5-justify-between lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-2.5"
+              >
+                <div className="lab5-flex lab5-items-center lab5-gap-2">
+                  <span className="lab5-flex lab5-size-5 lab5-items-center lab5-justify-center lab5-rounded-full lab5-bg-primary-soft lab5-text-xs lab5-font-bold lab5-text-primary">
+                    {index + 1}
+                  </span>
+                  <HashChip tone="primary" label={`${sibling.label} =`} hash={sibling.hash} />
+                </div>
+                <span className="lab5-text-xs lab5-text-muted-foreground">
+                  {sibling.position === "right" ? "ขวา" : "ซ้าย"}
                 </span>
-                <HashValue hash={sibling.hash} label={`${sibling.label} =`} tone="primary" />
-              </li>
+              </div>
             ))}
-          </ol>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
 
-      <HintButton>
-        เราต้องการเฉพาะ Hash ที่อยู่ข้าง ๆ เส้นทางที่เดินจาก {targetLabel} ไปหา Root ไม่ใช่ทุก Hash
-        ในต้นไม้
-      </HintButton>
-
-      {flash === "wrong" && !isComplete && (
+      {/* แจ้งเตือนเมื่อคลิกผิด */}
+      {flash === "wrong" && !isAllSiblingsFound && (
         <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
-          ลองดูตำแหน่งของ Order ที่เรากำลังพิสูจน์อีกครั้ง เราต้องหา Hash ที่อยู่ “ข้าง ๆ เส้นทาง”
-          ของมัน
+          ลองดูตำแหน่งของ Order ที่เรากำลังพิสูจน์อีกครั้ง เราต้องหา Hash ที่อยู่ “ข้าง ๆ เส้นทาง” ของมัน
         </FeedbackCard>
       )}
 
-      {orderedFoundSiblings.length === 1 && !isComplete && (
+      {/* แจ้งเตือนเมื่อพบ Sibling แรก */}
+      {foundSiblings.length === 1 && !isAllSiblingsFound && (
         <FeedbackCard variant="correct" title="ถูกต้อง">
-          {orderedFoundSiblings[0].label} คือ Hash ของข้อมูลที่อยู่ข้าง ๆ {targetLabel} เราเรียกสิ่งนี้ว่า{" "}
-          <span className="lab5-font-semibold lab5-text-primary">Sibling Hash</span> — เมื่อได้ {parentLabel}{" "}
-          แล้ว เรายังต้องใช้ Hash ของคู่ไหนเพื่อไปถึง Root?
+          พบ Sibling Hash ที่จำเป็นแล้ว ลองเดินตามเส้นทางขึ้นไปอีกระดับ
         </FeedbackCard>
       )}
 
-      {isComplete && (
-        <FeedbackCard variant="correct" title="ครบเส้นทางแล้ว">
-          ตอนนี้เรามี Hash ที่จำเป็นครบแล้ว Hash เหล่านี้รวมกันเป็น{" "}
-          <span className="lab5-font-semibold lab5-text-primary">เส้นทางหลักฐาน (Authentication Path)</span>{" "}
-          — เราจะใช้แค่นี้เพื่อคำนวณกลับไปหา Root
+      {/* Root Reconstruction Box */}
+      {isAllSiblingsFound && (
+        <div className="lab5-animate-merge-up lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-4">
+          <div className="lab5-flex lab5-items-start lab5-justify-between">
+            <div>
+              <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">Root Reconstruction</p>
+              <p className="lab5-text-xs lab5-text-muted-foreground">
+                คำนวณจากข้อมูลจริงทีละขั้นตามลำดับของ Authentication Path
+              </p>
+            </div>
+            {isRootComputed && (
+              <span className="lab5-text-success">
+                <Check className="lab5-size-5" />
+              </span>
+            )}
+          </div>
+
+          {/* สมการคำนวณ */}
+          <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-2 lab5-py-2 lab5-text-xs">
+            <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
+              H(A)
+            </span>
+            <span className="lab5-font-bold lab5-text-muted-foreground">+</span>
+            <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
+              H(B)
+            </span>
+            <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
+            {isRootComputed ? (
+              <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
+                H(A+B)
+              </span>
+            ) : (
+              <span className="lab5-rounded-lg lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-muted-foreground">
+                ?
+              </span>
+            )}
+            <span className="lab5-font-bold lab5-text-muted-foreground">+</span>
+            <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
+              H(C+D)
+            </span>
+            <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
+            <span className="lab5-rounded-lg lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-success">
+              Root
+            </span>
+          </div>
+
+          {!isRootComputed ? (
+            <div className="lab5-flex lab5-justify-center">
+              <button
+                type="button"
+                onClick={computeRootStep}
+                className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-bg-primary lab5-px-6 lab5-py-2.5 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
+              >
+                คำนวณ Hash สู่ Root
+              </button>
+            </div>
+          ) : (
+            <div className="lab5-space-y-3">
+              <div className="lab5-flex lab5-justify-center">
+                <button
+                  type="button"
+                  onClick={resetRootStep}
+                  className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface lab5-px-3 lab5-py-1 lab5-text-xs lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface-soft"
+                >
+                  <RotateCcw className="lab5-size-3.5" />
+                  คำนวณใหม่
+                </button>
+              </div>
+              <div className="lab5-flex lab5-items-center lab5-justify-center lab5-gap-2 lab5-rounded-xl lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-p-3 lab5-text-xs lab5-font-semibold lab5-text-success">
+                <span>ตรวจสอบผ่าน: ข้อมูลถูกต้อง Root ที่คำนวณได้ ตรงกับ ค่า Root ดั้งเดิมที่อ้างอิง</span>
+                <Check className="lab5-size-4" />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ผลลัพธ์สุดท้ายเมื่อคำนวณ Root เสร็จสิ้น */}
+      {isRootComputed && (
+        <FeedbackCard variant="correct" title="ตรวจสอบผ่าน">
+          Root ตรงกัน เป็นการ Hash ที่คุณคำนวณยืนยันได้ว่า ออร์เดอร์ A เป็นออร์เดอร์ของชุดข้อมูล โดยไม่ต้องเปิดเผย Leaf อื่นทั้งหมด
         </FeedbackCard>
       )}
+
+      {/* ส่วนท้าย Accordion */}
+      <div className="lab5-space-y-3">
+        <HintButton>
+          เราต้องการเฉพาะ Hash ที่อยู่ข้าง ๆ เส้นทางที่เดินจาก {targetLabel} ไปหา Root ไม่ใช่ทุก Hash ในต้นไม้
+        </HintButton>
+
+        <div className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface">
+          <button
+            type="button"
+            onClick={() => setShowDetails(!showDetails)}
+            className="lab5-flex lab5-w-full lab5-items-center lab5-justify-between lab5-p-3 lab5-text-xs lab5-font-semibold lab5-text-foreground"
+          >
+            <span>ดูรายละเอียดการคำนวณและหลักการ</span>
+            <ChevronDown className={JoinClassNames("lab5-size-4 lab5-transition-transform", showDetails && "lab5-rotate-180")} />
+          </button>
+          {showDetails && (
+            <div className="lab5-animate-merge-up lab5-border-t lab5-border-border lab5-bg-surface-soft lab5-p-4 lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground lab5-space-y-2">
+              <p><strong>Authentication Path:</strong> คือชุดของ Sibling Hash ที่จำเป็นต้องใช้ในการคำนวณย้อนกลับไปหา Merkle Root</p>
+              <p><strong>ทำไมถึงเป็นส่วนตัว?</strong> เพราะผู้พิสูจน์ไม่จำเป็นต้องส่งข้อมูลของ Order อื่นๆ ทั้งหมด ส่งเพียง Hash ของฝั่งตรงข้ามในแต่ละระดับต้นไม้เท่านั้น ผู้ตรวจสอบก็สามารถหา Root และยืนยันได้ทันที</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -1622,181 +2022,1023 @@ function Step5AuthPath() {
 
 
 /**
- * ขั้นที่ 6: ทดสอบการปลอมแปลงข้อมูลแล้วดูว่า root เปลี่ยนตามหรือไม่
+ * ขั้นที่ 6: ทดสอบการแก้ไขข้อมูล (แอบแก้ข้อมูลแล้วดูว่า Root เปลี่ยนตามไหม)
  *
- * @return {JSX.Element|null} เนื้อหาขั้นที่ 7 หรือ null ถ้ายังไม่พร้อมแสดง
+ * @return {JSX.Element|null} เนื้อหาขั้นที่ 6
  * @author StealthTrade Team
  */
 function Step7Tamper() {
-  const { tree, selectedLeaf, authPathSteps, isTamperMode, toggleTamper } = useLab05()
-  const [tamperedRoot, setTamperedRoot] = useState(null)
+  const { tree, selectedLeaf, tamperedProof, isTamperMode, toggleTamper } = useLab05()
+  const [isExplanationOpen, setIsExplanationOpen] = useState(false)
 
-  const midSibling = authPathSteps[1]
+  const currentLeaf = selectedLeaf ?? 0
+  const targetLabel = orders[currentLeaf]?.label || "ออร์เดอร์ A"
 
   useEffect(() => {
-    let isActive = true
-    if (!tree || selectedLeaf === null || authPathSteps.length < 2) return
-    const tamperedSiblings = [authPathSteps[0], { ...midSibling, hash: TamperHash(midSibling.hash) }]
-    ComputeRootFromProof(tree.leafHashes[selectedLeaf], tamperedSiblings).then((proofResult) => {
-      if (isActive) setTamperedRoot(proofResult.root)
-    })
-    return () => {
-      isActive = false
-    }
-  }, [tree, selectedLeaf, authPathSteps, midSibling])
+    setIsExplanationOpen(isTamperMode)
+  }, [isTamperMode])
 
-  if (selectedLeaf === null || !tree) return null
+  if (!tree) return null
 
-  const shownRoot = isTamperMode && tamperedRoot ? tamperedRoot : tree.root
   const isMatching = !isTamperMode
-  const targetLabel = orders[selectedLeaf].label
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
-        sectionLabel="ทดสอบการปลอมแปลง"
-        title="ถ้า Order ถูกเปลี่ยน เราจะจับได้ไหม?"
-        description={`ลองสมมติว่ามีคนแอบเปลี่ยนข้อมูลของ Order ในฝั่ง ${midSibling?.label} เล็กน้อย แล้วดูว่าเราจับได้ไหม`}
+        sectionLabel="ทดสอบการแก้ข้อมูล"
+        title="ถ้าข้อมูลคำสั่งซื้อถูกเปลี่ยน จะเกิดอะไรขึ้น?"
+        description={`ลองแก้ไขข้อมูลของ ${targetLabel} แล้วใช้ Authentication Path ชุดเดิมมาตรวจสอบอีกครั้ง`}
       />
 
+      {/* Switch Toggle Card */}
       <div className="lab5-flex lab5-items-center lab5-justify-between lab5-gap-4 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
         <div>
-          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดัดแปลงข้อมูลฝั่ง {midSibling?.label}</p>
-          <p className="lab5-text-xs lab5-text-muted-foreground">ลองสวิตช์เพื่อจำลองว่ามีคนแก้ไขข้อมูลเพียงเล็กน้อยฝั่งนี้</p>
+          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">จำลองการแก้ไขข้อมูลของ {targetLabel}</p>
+          <p className="lab5-text-xs lab5-text-muted-foreground">
+            {isTamperMode
+              ? `ระบบจะแก้ข้อมูลคำสั่งซื้อเล็กน้อย (${orders[currentLeaf].value} → ${orders[currentLeaf].tamperedValue}) แล้วคำนวณ Leaf Hash และ Root ใหม่จากข้อมูลจริงทันที`
+              : "ระบบจะคำนวณ Leaf Hash และ Root ใหม่จากข้อมูลจริงทันที"}
+          </p>
         </div>
-        <button type="button" role="switch" aria-checked={isTamperMode} onClick={toggleTamper} className={JoinClassNames("lab5-switch", isTamperMode && "lab5-switch--on")}>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isTamperMode}
+          onClick={toggleTamper}
+          className={JoinClassNames("lab5-switch", isTamperMode && "lab5-switch--on")}
+        >
           <span className="lab5-switch-knob" />
         </button>
       </div>
 
-      {isTamperMode && (
-        <div className="lab5-animate-merge-up lab5-rounded-2xl lab5-border lab5-border-danger-30 lab5-bg-danger-soft-40 lab5-p-4">
-          <p className="lab5-text-center lab5-text-xs lab5-font-semibold lab5-uppercase lab5-tracking-wide lab5-text-danger">สิ่งที่เกิดขึ้น</p>
-          <div className="lab5-mt-2 lab5-flex lab5-flex-col lab5-items-center lab5-gap-1 lab5-text-sm lab5-text-foreground">
-            <span>ข้อมูลของ Order เปลี่ยน</span>
-            <span className="lab5-text-muted-foreground">↓</span>
-            <span>Hash ของ Order นั้นเปลี่ยน</span>
-            <span className="lab5-text-muted-foreground">↓</span>
-            <span>Hash ของคู่นั้นเปลี่ยน</span>
-            <span className="lab5-text-muted-foreground">↓</span>
-            <span className="lab5-font-semibold lab5-text-danger">Root ที่คำนวณใหม่เปลี่ยน</span>
+      {/* ผลการตรวจสอบ Banner */}
+      {isMatching ? (
+        <div className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-p-4">
+          <Check className="lab5-size-5 lab5-shrink-0 lab5-text-success lab5-mt-0.5" />
+          <div className="lab5-space-y-0.5">
+            <p className="lab5-text-base lab5-font-bold lab5-text-success">ตรวจสอบผ่าน: ข้อมูลถูกต้อง</p>
+            <p className="lab5-text-xs lab5-text-success">ข้อมูลเดิมยังตรงกับค่า Root ดั้งเดิมที่อ้างอิง</p>
+          </div>
+        </div>
+      ) : (
+        <div className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-p-4">
+          <AlertTriangle className="lab5-size-5 lab5-shrink-0 lab5-text-danger lab5-mt-0.5" />
+          <div className="lab5-space-y-1">
+            <p className="lab5-text-base lab5-font-bold lab5-text-danger">ปฏิเสธ: ตรวจพบการแก้ไขข้อมูล</p>
+            <p className="lab5-text-xs lab5-text-danger">
+              ค่า Root ไม่ตรงกัน เพราะข้อมูลที่ใช้ตรวจสอบไม่ตรงกับชุดข้อมูลที่อ้างอิง
+            </p>
+            <p className="lab5-text-xs lab5-text-danger" style={{ opacity: 0.85 }}>
+              ธุรกรรมถูกปฏิเสธโดยกลไกจำลองของ Lab เท่านั้น ไม่ได้เชื่อมต่อหรือบล็อกธุรกรรมบน Blockchain จริง
+            </p>
           </div>
         </div>
       )}
 
-      <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
-        <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-          <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">Root ที่คำนวณใหม่</p>
-          <p className="lab5-text-10 lab5-font-medium lab5-text-muted-foreground-70">(Computed Root)</p>
-          <div className="lab5-mt-2">
-            <HashValue hash={shownRoot} tone={isMatching ? "success" : "danger"} />
-          </div>
+      {/* กล่องรวม Flow Pills และ Root Comparison */}
+      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-5">
+        {/* Flow Pills */}
+        <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-2 lab5-text-xs">
+          {isMatching ? (
+            <>
+              <span className="lab5-rounded-full lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-success">
+                ข้อมูล เดิม
+              </span>
+              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
+              <span className="lab5-rounded-full lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-primary">
+                Leaf Hash เดิม
+              </span>
+              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
+              <span className="lab5-rounded-full lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-success">
+                Root ตรงกัน
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="lab5-rounded-full lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-danger">
+                ข้อมูล เปลี่ยน
+              </span>
+              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
+              <span className="lab5-rounded-full lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-danger">
+                Leaf Hash เปลี่ยน
+              </span>
+              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
+              <span className="lab5-rounded-full lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-danger">
+                Root เปลี่ยน
+              </span>
+            </>
+          )}
         </div>
-        <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-          <p className="lab5-text-xs lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">Root ที่บันทึกไว้ตั้งแต่ต้น</p>
-          <p className="lab5-text-10 lab5-font-medium lab5-text-muted-foreground-70">(Committed Root)</p>
-          <div className="lab5-mt-2">
-            <HashValue hash={tree.root} tone="neutral" />
+
+        {/* Two Root Cards with Center Icon */}
+        <div className="lab5-relative lab5-grid lab5-grid-cols-2" style={{ gap: "2.75rem" }}>
+          {/* Left Box */}
+          <div
+            className="lab5-flex lab5-flex-col lab5-justify-between lab5-rounded-2xl lab5-border"
+            style={{
+              borderColor: "rgba(22, 169, 121, 0.4)",
+              backgroundColor: "rgba(234, 248, 242, 0.75)",
+              minHeight: "100px",
+              padding: "1.25rem 1.5rem",
+            }}
+          >
+            <div className="lab5-flex lab5-items-center lab5-gap-2 lab5-text-xs lab5-font-semibold lab5-text-success">
+              <ShieldCheck className="lab5-size-4 lab5-shrink-0" />
+              <span className="lab5-leading-snug">ค่า Root ดั้งเดิมที่อ้างอิง</span>
+            </div>
+            <div style={{ marginTop: "0.75rem" }}>
+              <HashChip tone="success" hash={tree.root} className="lab5-hash-chip--onsoft" />
+            </div>
+          </div>
+
+          {/* Center Indicator */}
+          <div
+            className="lab5-absolute lab5-z-10 lab5-flex lab5-items-center lab5-justify-center"
+            style={{
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              pointerEvents: "none",
+            }}
+          >
+            {isMatching ? (
+              <div
+                className="lab5-flex lab5-size-8 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-md"
+                style={{ backgroundColor: "#16a979" }}
+              >
+                <Check className="lab5-size-4" strokeWidth={2.8} />
+              </div>
+            ) : (
+              <div
+                className="lab5-flex lab5-size-8 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-md"
+                style={{ backgroundColor: "#e5485d" }}
+              >
+                <X className="lab5-size-4" strokeWidth={2.8} />
+              </div>
+            )}
+          </div>
+
+          {/* Right Box */}
+          <div
+            className="lab5-flex lab5-flex-col lab5-justify-between lab5-rounded-2xl lab5-border"
+            style={{
+              borderColor: isMatching ? "rgba(22, 169, 121, 0.4)" : "rgba(229, 72, 93, 0.4)",
+              backgroundColor: isMatching ? "rgba(234, 248, 242, 0.75)" : "rgba(255, 240, 242, 0.75)",
+              minHeight: "100px",
+              padding: "1.25rem 1.5rem",
+            }}
+          >
+            <div className={JoinClassNames("lab5-text-xs lab5-font-semibold lab5-leading-snug", isMatching ? "lab5-text-success" : "lab5-text-danger")}>
+              Root คำนวณได้
+            </div>
+            <div style={{ marginTop: "0.75rem" }}>
+              <HashChip
+                key={isMatching ? "match" : "tamper"}
+                tone={isMatching ? "success" : "danger"}
+                hash={isMatching ? tree.root : tamperedProof?.root}
+                className="lab5-hash-chip--onsoft"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {isMatching ? (
-        <FeedbackCard variant="success" title="✓ ตรงกัน">
-          ตอนนี้ Hash ทุกตัวถูกต้อง Root ที่คำนวณใหม่จึงเท่ากับ Root ที่บันทึกไว้ตั้งแต่ต้น —{" "}
-          {targetLabel} ได้รับการพิสูจน์แล้ว
-        </FeedbackCard>
-      ) : (
-        <FeedbackCard variant="incorrect" title="✗ Root ไม่ตรงกัน">
-          <span className="lab5-inline-flex lab5-items-center lab5-gap-1.5">
-            <AlertTriangle className="lab5-size-4 lab5-shrink-0" />
-            หลักฐานจึงตรวจสอบไม่ผ่าน
-          </span>{" "}
-          — แค่เปลี่ยนข้อมูลต้นทางเพียงเล็กน้อย Hash ที่เกี่ยวข้องจะเปลี่ยนตาม ทำให้ Root เปลี่ยนด้วย
-          การดัดแปลงข้อมูลจึงถูกตรวจจับได้ทันที นี่คือหัวใจความปลอดภัยของ Merkle Tree
-        </FeedbackCard>
+      {/* Accordion */}
+      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-shadow-sm lab5-overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsExplanationOpen((prev) => !prev)}
+          className="lab5-flex lab5-w-full lab5-items-center lab5-justify-between lab5-px-5 lab5-py-4 lab5-text-xs lab5-font-semibold lab5-text-foreground lab5-transition-colors"
+        >
+          <span className="lab5-text-sm lab5-font-medium">ทำไม Root ถึงเปลี่ยน?</span>
+          <ChevronDown className={JoinClassNames("lab5-size-4 lab5-text-muted-foreground lab5-transition-transform", isExplanationOpen && "lab5-rotate-180")} />
+        </button>
+        {isExplanationOpen && (
+          <div className="lab5-animate-merge-up lab5-zk-explain">
+            <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
+              <div className="lab5-zk-explain-card">
+                <p className="lab5-zk-field-label">Original Data</p>
+                <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">{orders[currentLeaf].value}</p>
+                <p className="lab5-zk-field-label lab5-mt-2">Original Leaf Hash</p>
+                <HashChip tone="success" hash={tree.leafHashes[currentLeaf]} />
+              </div>
+              <div className="lab5-zk-explain-card">
+                <p className="lab5-zk-field-label">Modified Data</p>
+                <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">{tamperedProof?.value} (แก้ไข)</p>
+                <p className="lab5-zk-field-label lab5-mt-2">Modified Leaf Hash</p>
+                <HashChip tone="danger" hash={tamperedProof?.leafHash} />
+              </div>
+            </div>
+            <p className="lab5-zk-explain-text">
+              เมื่อข้อมูลต้นทางเปลี่ยน Leaf Hash จึงเปลี่ยน และผลลัพธ์ของ Parent Hash ต่อเนื่องไปจนถึง Root เปลี่ยนตาม แม้จะแก้เพียงจุดเดียว
+            </p>
+            <p className="lab5-break-all lab5-font-mono lab5-text-11 lab5-leading-relaxed lab5-text-muted-foreground">
+              Parent Hashes: {tamperedProof?.steps.join(" → ")}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/** ขั้นย่อยของเวิร์กโฟลว์ ZKP (ขั้นที่ 7) */
+const zkpWorkflowStages = [
+  { title: "Root ที่ประกาศไว้", sub: "Committed Root" },
+  { title: "ข้อมูลลับของผู้ใช้", sub: "Private Witness" },
+  { title: "สร้าง Proof", sub: "ZK circuit (จำลอง)" },
+  { title: "หลักฐาน", sub: "Proof — จำลอง" },
+]
+
+/**
+ * ป้ายแคปซูลสำหรับแสดงค่า hash หรือข้อมูลสั้น ๆ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} [props.tone="neutral"] โทนสี ("neutral", "primary", "success", "danger")
+ * @param {boolean} [props.isDashed=false] ใช้เส้นขอบประหรือไม่
+ * @param {string} [props.label] ข้อความตัวหนานำหน้า
+ * @param {React.ReactNode} props.children เนื้อหาภายในป้าย
+ * @param {string} [props.className] ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} ป้ายแคปซูล
+ * @author StealthTrade Team
+ */
+function ZkChip({ tone = "neutral", isDashed = false, label, children, className }) {
+  return (
+    <span className={JoinClassNames("lab5-zk-chip", `lab5-zk-chip--${tone}`, isDashed && "lab5-zk-chip--dashed", className)}>
+      {label && <span className="lab5-zk-chip-label">{label}</span>}
+      {children}
+    </span>
+  )
+}
+
+/**
+ * ป้ายแคปซูลแสดงค่า hash แบบย่อ กดเพื่อดูค่าเต็ม (และคัดลอกได้) กดอีกครั้งเพื่อย่อกลับ
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {string} props.hash ค่า hash เต็ม
+ * @param {string} [props.tone="neutral"] โทนสี ("neutral", "white", "primary", "success", "danger")
+ * @param {boolean} [props.isDashed=false] ใช้เส้นขอบประหรือไม่
+ * @param {string} [props.label] ข้อความตัวหนานำหน้า
+ * @param {string} [props.className] ชื่อคลาสเพิ่มเติม
+ * @return {JSX.Element} ปุ่มแสดง hash
+ * @author StealthTrade Team
+ */
+function HashChip({ hash, tone = "neutral", isDashed = false, label, className }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+
+  /**
+   * คัดลอกค่า hash เต็มลงคลิปบอร์ด และแสดงสถานะ "คัดลอกแล้ว" ชั่วครู่
+   *
+   * @param {React.MouseEvent} event อีเวนต์คลิก (หยุดไม่ให้ย่อ hash กลับ)
+   * @return {Promise<void>}
+   * @author StealthTrade Team
+   */
+  const copyHash = async (event) => {
+    event.stopPropagation()
+    try {
+      await navigator.clipboard.writeText(hash)
+      setIsCopied(true)
+      setTimeout(() => setIsCopied(false), 1500)
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+
+  if (!hash) return null
+
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      title={isExpanded ? "กดเพื่อย่อ" : "กดเพื่อดูค่าเต็ม"}
+      aria-expanded={isExpanded}
+      onClick={() => setIsExpanded((previousIsExpanded) => !previousIsExpanded)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          setIsExpanded((previousIsExpanded) => !previousIsExpanded)
+        }
+      }}
+      className={JoinClassNames(
+        "lab5-zk-chip lab5-hash-chip",
+        `lab5-zk-chip--${tone}`,
+        isDashed && "lab5-zk-chip--dashed",
+        isExpanded && "lab5-hash-chip--expanded",
+        className,
       )}
+    >
+      {label && <span className="lab5-zk-chip-label">{label}</span>}
+      <span className="lab5-hash-chip-value">{isExpanded ? hash : TruncateHash(hash)}</span>
+      {isExpanded && (
+        <button type="button" onClick={copyHash} className="lab5-hash-chip-copy" aria-label="คัดลอก hash">
+          {isCopied ? <Check className="lab5-size-3" /> : <Copy className="lab5-size-3" />}
+        </button>
+      )}
+    </span>
+  )
+}
+
+/**
+ * หัวการ์ดที่มีไอคอนวงกลม หัวข้อ และคำอธิบาย
+ *
+ * @param {Object} props พร็อพของคอมโพเนนต์
+ * @param {React.ComponentType} props.icon ไอคอน
+ * @param {string} [props.tone="primary"] โทนของวงกลมไอคอน ("primary", "success", "neutral")
+ * @param {string} props.title หัวข้อ
+ * @param {string} [props.description] คำอธิบาย
+ * @param {boolean} [props.isCompact=false] ใช้ขนาดเล็ก (หัวการ์ดผู้พิสูจน์/ผู้ตรวจสอบ)
+ * @return {JSX.Element} หัวการ์ด
+ * @author StealthTrade Team
+ */
+function ZkCardHeader({ icon: Icon, tone = "primary", title, description, isCompact = false }) {
+  return (
+    <div className={JoinClassNames("lab5-zk-card-header", isCompact && "lab5-zk-card-header--compact")}>
+      <span className={JoinClassNames("lab5-zk-icon-circle", `lab5-zk-icon-circle--${tone}`)}>
+        <Icon className="lab5-size-4" />
+      </span>
+      <div className="lab5-min-w-0">
+        <p className="lab5-zk-card-title">{title}</p>
+        {description && <p className="lab5-zk-card-desc">{description}</p>}
+      </div>
     </div>
   )
 }
 
 /**
- * ขั้นที่ 7: สรุปประโยชน์ของ Merkle Tree
+ * ขั้นที่ 7: เวิร์กโฟลว์ ZKP (จำลอง) — ประกาศ Root → ข้อมูลลับของผู้ใช้ → สร้าง Proof → หลักฐาน
  *
  * @return {JSX.Element} เนื้อหาขั้นที่ 7
  * @author StealthTrade Team
  */
-function Step8Efficiency() {
-  const { selectedLeaf, authPathSteps, reset, goToStep } = useLab05()
+function Step7ZkpWorkflow() {
+  const { tree, selectedLeaf, authPathSteps, tamperedProof, zkpWorkflowStage, goToZkpStage, goNext } = useLab05()
+  const [isWitnessVisible, setIsWitnessVisible] = useState(false)
+  const [isWitnessTampered, setIsWitnessTampered] = useState(false)
 
-  const targetLabel = selectedLeaf !== null ? orders[selectedLeaf].label : "Order A"
-  const proofItems = selectedLeaf !== null ? [targetLabel, ...authPathSteps.map((pathStep) => `Hash ของ ${pathStep.label}`)] : [targetLabel]
+  const targetIndex = selectedLeaf ?? 0
+  const targetOrder = orders[targetIndex] || orders[0]
+  const rootHash = tree?.root
+  const leafHash = tree?.leafHashes[targetIndex]
+  const computedRoot = isWitnessTampered ? tamperedProof?.root : rootHash
+  const stage = zkpWorkflowStage
+  const isNextBlocked = stage === 3 && isWitnessTampered
+
+  return (
+    <div className="lab5-space-y-6">
+      <LessonHeading
+        sectionLabel="เวิร์กโฟลว์ ZKP (จำลอง)"
+        title="พิสูจน์ Order โดยไม่เปิดเผยข้อมูลทั้งหมด"
+        description="เว็บเทรดประกาศ Root ไว้ก่อน ผู้ใช้ใช้ Order และ Hash ข้างเคียงเป็นข้อมูลลับ แนวคิด ZKP ช่วยให้ผู้ตรวจสอบเช็กได้โดยไม่ต้องเห็นข้อมูลลับเหล่านี้"
+      />
+
+      <div className="lab5-zk-banner">
+        <Info className="lab5-size-4 lab5-shrink-0 lab5-text-primary" />
+        <span>แล็บนี้จำลองขั้นตอน ไม่ได้สร้างหรือ verify ZK Proof จริง</span>
+      </div>
+
+      {/* ตัวบอกขั้นย่อย */}
+      <div className="lab5-zk-card lab5-zk-stepper">
+        <div className="lab5-zk-stepper-head">
+          <span className="lab5-font-bold lab5-text-primary">
+            ขั้นที่ {stage} จาก 4 : {zkpWorkflowStages[stage - 1].title}
+          </span>
+          <span className="lab5-text-muted-foreground">เป้าหมาย: ตรวจสอบความถูกต้องโดยไม่เปิดเผยข้อมูลลับ</span>
+        </div>
+        <div className="lab5-zk-stepper-items">
+          {zkpWorkflowStages.map((workflowStage, index) => {
+            const stageNumber = index + 1
+            const isActive = stage === stageNumber
+            const isPast = stage > stageNumber
+            return (
+              <button
+                key={workflowStage.title}
+                type="button"
+                disabled={!isPast}
+                onClick={() => goToZkpStage(stageNumber)}
+                aria-current={isActive ? "step" : undefined}
+                className={JoinClassNames("lab5-zk-stepper-item", isActive && "lab5-zk-stepper-item--active")}
+              >
+                <span
+                  className={JoinClassNames(
+                    "lab5-zk-stepper-dot",
+                    isActive && "lab5-zk-stepper-dot--active",
+                    isPast && "lab5-zk-stepper-dot--done",
+                  )}
+                >
+                  {isPast ? <Check className="lab5-size-3" strokeWidth={3} /> : stageNumber}
+                </span>
+                <span className="lab5-zk-stepper-title">{workflowStage.title}</span>
+                <span className="lab5-zk-stepper-sub">{workflowStage.sub}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ขั้นย่อยที่ 1: Root ที่ประกาศไว้ */}
+      {stage === 1 && (
+        <div key="stage-1" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded">
+          <ZkCardHeader
+            icon={ShieldCheck}
+            tone="success"
+            title="เว็บเทรดประกาศ Root ไว้แล้ว"
+            description="เว็บเทรดรวม Order ในรอบนี้ แล้วคำนวณ Root หนึ่งค่าไว้ใช้ตรวจสอบภายหลัง"
+          />
+          <div className="lab5-zk-commit-grid">
+            <div className="lab5-zk-box lab5-zk-box--soft">
+              <p className="lab5-zk-box-title">
+                <Layers className="lab5-size-4 lab5-text-muted-foreground" />
+                ชุด Order ของรอบนี้
+              </p>
+              <p className="lab5-zk-box-text">เว็บเทรดรวบรวม Order ทั้งหมดในรอบนี้ไว้ เพื่อคำนวณสรุปเป็น Root</p>
+              <div className="lab5-zk-secret-box">
+                <span aria-hidden="true">🔒</span> เนื้อหา Order ทุกรายการถูกเก็บเป็นความลับ ไม่ได้เปิดเผยต่อสาธารณะ
+              </div>
+            </div>
+
+            <div className="lab5-zk-commit-arrow">
+              <ArrowRight className="lab5-size-4" />
+              <span>คำนวณเป็น Root</span>
+            </div>
+
+            <div className="lab5-zk-box lab5-zk-box--success">
+              <p className="lab5-zk-box-title lab5-text-success">
+                <Globe className="lab5-size-4" />
+                Root ที่ประกาศไว้
+                <span className="lab5-zk-badge lab5-zk-badge--success">ค่าอ้างอิงที่ผู้ตรวจสอบต้องเชื่อถือ</span>
+              </p>
+              <p className="lab5-zk-box-text">ค่าสรุปเพียงค่าเดียวที่ทุกคนสามารถใช้เป็นตัวอ้างอิงร่วมกัน</p>
+              <div>
+                <HashChip tone="success" label="Root ที่ประกาศไว้" hash={rootHash} />
+              </div>
+            </div>
+          </div>
+          <div className="lab5-zk-note lab5-zk-note--primary">
+            <Lightbulb className="lab5-size-3.5 lab5-shrink-0 lab5-text-muted-foreground" />
+            <span>
+              <strong>ข้อสังเกต:</strong> ผู้ตรวจต้องเชื่อถือ Root นี้ก่อน จึงจะใช้ตรวจข้อมูลภายหลังได้
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ขั้นย่อยที่ 2: ข้อมูลลับของผู้ใช้ */}
+      {stage === 2 && (
+        <div key="stage-2" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded lab5-zk-card--dashed">
+          <ZkCardHeader
+            icon={Lock}
+            title="ข้อมูลที่ใช้พิสูจน์ยังอยู่กับผู้ใช้"
+            description="ผู้ใช้มี Order ที่ต้องการพิสูจน์ และ Hash ข้างเคียงที่ใช้คำนวณกลับไปหา Root"
+          />
+          <div className="lab5-zk-witness">
+            <div className="lab5-zk-witness-head">
+              <p className="lab5-zk-witness-title">
+                <Lock className="lab5-size-4" />
+                ข้อมูลลับของผู้ใช้
+                <span className="lab5-zk-witness-tag">(Private Witness)</span>
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsWitnessVisible((previousIsVisible) => !previousIsVisible)}
+                className="lab5-zk-btn lab5-zk-btn--outline-primary"
+              >
+                {isWitnessVisible ? <EyeOff className="lab5-size-3.5" /> : <Eye className="lab5-size-3.5" />}
+                {isWitnessVisible ? "ซ่อนข้อมูลของผู้ใช้" : "ดูข้อมูลของผู้ใช้"}
+              </button>
+            </div>
+            <p className="lab5-zk-box-text">ข้อมูลที่คุณถือไว้ ได้แก่ Order ของตนเอง และ Hash ข้างเคียงเพื่อใช้คำนวณกลับไปหา Root</p>
+
+            {isWitnessVisible ? (
+              <div className="lab5-animate-merge-up lab5-zk-witness-detail">
+                <div>
+                  <p className="lab5-zk-field-label">Order ที่เลือก</p>
+                  <div className="lab5-zk-order-line">
+                    <ZkChip tone="primary">
+                      <span className="lab5-zk-chip-label">{targetOrder.label}</span>
+                    </ZkChip>
+                    <span className="lab5-font-mono lab5-text-xs lab5-text-foreground">{targetOrder.value}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="lab5-zk-field-label">Leaf Hash</p>
+                  <HashChip tone="primary" label={`H(${targetOrder.id})`} hash={leafHash} />
+                </div>
+                <div>
+                  <p className="lab5-zk-field-label">
+                    Hash ข้างเคียงที่ติดกัน <span className="lab5-font-medium lab5-text-muted-foreground">(Sibling Hash)</span>
+                  </p>
+                  <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
+                    {authPathSteps.map((pathStep) => (
+                      <HashChip key={pathStep.nodeId} tone="primary" label={pathStep.label} hash={pathStep.hash} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="lab5-zk-witness-hidden">
+                <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
+                  <ZkChip tone="primary" className="lab5-font-mono">
+                    <Lock className="lab5-size-3" />
+                    Order ที่เลือก: {targetOrder.label}
+                  </ZkChip>
+                  <ZkChip tone="primary" className="lab5-font-mono">
+                    <Lock className="lab5-size-3" />
+                    Hash ข้างเคียงที่ติดกัน
+                  </ZkChip>
+                </div>
+                <span className="lab5-text-11 lab5-text-muted-foreground">(กด "ดูข้อมูลของผู้ใช้" เพื่อเปิดรายละเอียด)</span>
+              </div>
+            )}
+          </div>
+          <div className="lab5-zk-note lab5-zk-note--soft">
+            <Contrast className="lab5-size-3.5 lab5-shrink-0" />
+            <span>
+              <strong>ข้อสังเกต:</strong> ในแนวคิด ZKP ข้อมูลเหล่านี้ใช้ตรวจอยู่ภายในวงจร แต่ไม่เปิดเผยให้ผู้ตรวจเห็น
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ขั้นย่อยที่ 3: สร้าง Proof */}
+      {stage === 3 && (
+        <div key="stage-3" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded">
+          <ZkCardHeader
+            icon={Cpu}
+            title="ใช้ข้อมูลลับสร้าง Proof"
+            description="ผู้ใช้ใช้ Order และ Hash ข้างเคียงเป็นข้อมูลลับ ส่วน ZK circuit กำหนดว่าข้อมูลต้องคำนวณไปถึง Root ที่ประกาศไว้ได้"
+          />
+          <div className="lab5-zk-banner lab5-zk-banner--box">
+            <Info className="lab5-size-4 lab5-shrink-0 lab5-text-primary" />
+            <span>ขั้นนี้เป็นภาพจำลอง ใช้การคำนวณ Merkle เพื่อสาธิตเงื่อนไข แต่ไม่ได้สร้าง ZK Proof จริง</span>
+          </div>
+          <div className="lab5-zk-note lab5-zk-note--soft lab5-zk-note--block">
+            <Lightbulb className="lab5-size-3.5 lab5-shrink-0" />
+            <span>
+              <strong>บทบาทของแต่ละส่วน:</strong> ZK circuit เป็นกติกาที่กำหนดเงื่อนไข — ถ้าข้อมูลผ่านเงื่อนไข Prover จะสร้าง Proof
+              เพื่อส่งให้ผู้ตรวจ (Verifier ในขั้นที่ 5) โดยไม่ต้องส่ง Order และ Hash ข้างเคียงทั้งหมด
+            </span>
+          </div>
+
+          <div className="lab5-zk-box lab5-zk-box--soft lab5-zk-toggle-row">
+            <div>
+              <p className="lab5-text-xs lab5-font-bold lab5-text-foreground">ทดลองเปลี่ยนสถานะข้อมูล</p>
+              <p className="lab5-text-11 lab5-text-muted-foreground">
+                ลองดูว่าถ้าใช้ข้อมูลผิดหรือไม่ตรงกับชุดข้อมูล การสร้าง Proof ตัวอย่างจะเป็นอย่างไร
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsWitnessTampered((previousIsTampered) => !previousIsTampered)}
+              className={JoinClassNames("lab5-zk-btn", isWitnessTampered ? "lab5-zk-btn--outline-danger" : "lab5-zk-btn--outline")}
+            >
+              <AlertTriangle className="lab5-size-3.5" />
+              {isWitnessTampered ? "คืนข้อมูลเดิม" : "ลองใช้ข้อมูลผิด"}
+            </button>
+          </div>
+
+          <div className="lab5-zk-box lab5-zk-box--soft lab5-zk-flow">
+            <p className="lab5-zk-flow-title">
+              ขั้นตอนการสร้าง Proof: ข้อมูลลับ + Root/เงื่อนไข → ZK circuit (กติกา) → Prover สร้าง Proof ตัวอย่าง
+            </p>
+            <div className="lab5-zk-flow-grid">
+              <div className="lab5-zk-flow-col lab5-zk-flow-col--secret">
+                <p className="lab5-zk-flow-col-title lab5-text-primary">
+                  <Lock className="lab5-size-3.5" />
+                  ข้อมูลลับ + Root/เงื่อนไข
+                </p>
+                <div className="lab5-zk-flow-sub">
+                  <strong className="lab5-text-primary">ข้อมูลลับ:</strong>{" "}
+                  {isWitnessTampered ? "⚠️ ข้อมูลถูกแก้ไข (ไม่ถูกต้อง)" : `Order ${targetOrder.label} + Hash ข้างเคียงที่ติดกัน`}
+                </div>
+                <div className="lab5-zk-flow-sub">
+                  <strong className="lab5-text-success">Root ที่ประกาศไว้:</strong> เปรียบเทียบเป็น Public Input
+                </div>
+              </div>
+              <ArrowRight className="lab5-zk-flow-arrow" />
+              <div className="lab5-zk-flow-col">
+                <p className="lab5-zk-flow-col-title lab5-text-foreground">
+                  <Cpu className="lab5-size-3.5 lab5-text-primary" />
+                  ZK circuit (กติกา)
+                </p>
+                <p className="lab5-zk-flow-text">กำหนดเงื่อนไขว่า Order และ Hash ข้างเคียงต้องคำนวณไปถึง Root ที่ประกาศไว้ได้</p>
+                <p className="lab5-zk-flow-hint">(วงจรเป็นกติกา ไม่ใช่ผู้สร้างหรือตรวจ proof เอง)</p>
+              </div>
+              <ArrowRight className="lab5-zk-flow-arrow" />
+              {isWitnessTampered ? (
+                <div className="lab5-zk-flow-col lab5-zk-flow-col--danger">
+                  <p className="lab5-zk-flow-col-title lab5-text-danger">
+                    <AlertTriangle className="lab5-size-3.5" />
+                    Prover สร้าง Proof ตัวอย่าง
+                  </p>
+                  <p className="lab5-zk-flow-strong lab5-text-danger">ข้อมูลไม่ตรงกับ Root จึงสร้าง Proof ตัวอย่างที่ผ่านเงื่อนไขไม่ได้</p>
+                  <p className="lab5-zk-flow-text lab5-text-danger">Order หรือ Hash ข้างเคียงไม่ตรงกับ Root จึงไม่ผ่านเงื่อนไขของ circuit</p>
+                </div>
+              ) : (
+                <div className="lab5-zk-flow-col lab5-zk-flow-col--success">
+                  <p className="lab5-zk-flow-col-title lab5-text-success">
+                    <Check className="lab5-size-3.5" strokeWidth={3} />
+                    Prover สร้าง Proof ตัวอย่าง
+                  </p>
+                  <p className="lab5-zk-flow-strong lab5-text-success">ข้อมูลผ่านเงื่อนไข — พร้อมแสดง Proof ตัวอย่างในขั้นถัดไป</p>
+                  <p className="lab5-zk-flow-text lab5-text-success">
+                    Prover สามารถสร้าง Proof เพื่อส่งให้ Verifier ตรวจในหน้าถัดไป โดยไม่ต้องเปิดเผยข้อมูลลับ
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="lab5-zk-root-row">
+              <div className="lab5-space-y-1">
+                <p className="lab5-zk-field-label">Root ที่คำนวณได้จากข้อมูล:</p>
+                <HashChip key={isWitnessTampered ? "tamper" : "match"} tone={isWitnessTampered ? "danger" : "success"} hash={computedRoot} />
+              </div>
+              <div className="lab5-space-y-1 lab5-zk-root-row-end">
+                <p className="lab5-zk-field-label">Root ที่ประกาศไว้ (Public Reference):</p>
+                <HashChip tone="success" hash={rootHash} />
+              </div>
+            </div>
+          </div>
+
+          {isWitnessTampered && (
+            <div className="lab5-animate-merge-up lab5-zk-reject">
+              <span>ข้อมูลไม่ตรงกับ Root จึงสร้าง Proof ตัวอย่างที่ผ่านเงื่อนไขไม่ได้</span>
+              <button type="button" onClick={() => setIsWitnessTampered(false)} className="lab5-zk-reject-btn">
+                คืนข้อมูลเดิม
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ขั้นย่อยที่ 4: หลักฐาน */}
+      {stage === 4 && (
+        <div key="stage-4" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded">
+          <ZkCardHeader
+            icon={Sparkles}
+            title="ส่งหลักฐาน แทนการส่งข้อมูลลับ"
+            description="ในระบบ ZKP จริง ผู้ใช้ส่ง Proof ให้ผู้ตรวจ โดยไม่ต้องส่ง Order และ Hash ข้างเคียงไปด้วย"
+          />
+          <div className="lab5-zk-box lab5-zk-box--soft lab5-zk-proof-strip">
+            <ZkChip tone="primary">ข้อมูลลับ</ZkChip>
+            <span className="lab5-text-muted-foreground">+</span>
+            <ZkChip tone="success">Root ที่ประกาศไว้</ZkChip>
+            <span className="lab5-text-muted-foreground">→</span>
+            <ZkChip tone="outline">ZK circuit (แนวคิด)</ZkChip>
+            <span className="lab5-text-muted-foreground">→</span>
+            <ZkChip tone="solid">Proof ตัวอย่าง</ZkChip>
+          </div>
+
+          <div className="lab5-zk-package">
+            <div className="lab5-zk-package-head">
+              <div>
+                <p className="lab5-text-xs lab5-font-bold lab5-text-primary">สิ่งที่ส่งให้ผู้ตรวจสอบ</p>
+                <p className="lab5-text-11 lab5-text-muted-foreground">แพ็กเกจนี้ประกอบด้วยข้อมูลสาธารณะและหลักฐานเท่านั้น</p>
+              </div>
+              <span className="lab5-zk-badge lab5-zk-badge--primary">ตัวอย่างจำลอง</span>
+            </div>
+            <div className="lab5-zk-package-item">
+              <p className="lab5-zk-field-label">1. Root ที่ประกาศไว้</p>
+              <HashChip tone="success" label="Root ที่ประกาศไว้" hash={rootHash} />
+            </div>
+            <div className="lab5-zk-package-item lab5-zk-package-item--proof">
+              <p className="lab5-zk-field-label lab5-text-primary lab5-flex lab5-items-center lab5-gap-1.5">
+                <ShieldCheck className="lab5-size-3.5" />
+                2. Proof ตัวอย่าง (จำลอง)
+              </p>
+              <div className="lab5-zk-proof-box">
+                <p className="lab5-text-lg lab5-font-medium lab5-text-foreground">หลักฐานขนาดสั้นที่ใช้ยืนยันความถูกต้อง</p>
+                <p className="lab5-text-11 lab5-text-muted-foreground">ไม่เปิดเผย Order หรือ Hash ข้างเคียงออกมาในหลักฐานนี้</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="lab5-zk-banner lab5-zk-banner--center lab5-font-semibold">
+            นี่คือตัวอย่างสิ่งที่ผู้ใช้ส่งต่อ โดยไม่แนบ Order และ Hash ข้างเคียงทั้งหมด
+          </div>
+          <div className="lab5-zk-disclaimer">⚠️ หมายเหตุ: นี่เป็นภาพจำลองเพื่อการเรียนรู้ ไม่ได้สร้างหรือ verify ZK Proof จริง</div>
+        </div>
+      )}
+
+      {/* ปุ่มนำทางขั้นย่อย */}
+      <div className="lab5-zk-subnav">
+        <button type="button" onClick={() => goToZkpStage(1)} className="lab5-zk-subnav-reset">
+          <RotateCcw className="lab5-size-3.5" />
+          เริ่มใหม่ (ขั้นตอนที่ 1)
+        </button>
+        <div className="lab5-flex lab5-items-center lab5-gap-2">
+          {stage > 1 && (
+            <button type="button" onClick={() => goToZkpStage(stage - 1)} className="lab5-zk-btn lab5-zk-btn--outline lab5-zk-btn--nav">
+              <ArrowLeft className="lab5-size-3.5" />
+              ย้อนกลับ
+            </button>
+          )}
+          {stage < 4 ? (
+            <button
+              type="button"
+              disabled={isNextBlocked}
+              onClick={() => goToZkpStage(stage + 1)}
+              className="lab5-zk-btn lab5-zk-btn--primary lab5-zk-btn--nav"
+            >
+              ขั้นถัดไป
+              <ArrowRight className="lab5-size-3.5" />
+            </button>
+          ) : (
+            <button type="button" onClick={goNext} className="lab5-zk-btn lab5-zk-btn--primary lab5-zk-btn--nav">
+              ไปด่านถัดไป: เปรียบเทียบกับ ZKP
+              <ArrowRight className="lab5-size-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * ขั้นที่ 8: Merkle กับ ZKP (เปรียบเทียบสิ่งที่ผู้ตรวจสอบเห็นระหว่าง Merkle proof กับ Merkle + ZKP)
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 8
+ * @author StealthTrade Team
+ */
+function Step8MerkleZkp() {
+  const { tree, selectedLeaf, authPathSteps } = useLab05()
+  const [zkpMode, setZkpMode] = useState("merkle") // "merkle" | "zkp"
+
+  const targetOrder = orders[selectedLeaf ?? 0] || orders[0]
+  const rootHash = tree?.root
+  const isZkp = zkpMode === "zkp"
+
+  const matrixRows = [
+    { name: "ลายเซ็นข้อมูลเดิม (Leaf Data)", isHidden: isZkp },
+    { name: "ค่า Hash คู่เคียง (Sibling Hashes)", isHidden: isZkp },
+    { name: "ค่ารากดั้งเดิม (Trusted Root)", isHidden: false, isPublic: true },
+  ]
+
+  return (
+    <div className="lab5-space-y-6">
+      <LessonHeading
+        sectionLabel="MERKLE กับ ZKP"
+        title="มาดูกันว่าการใช้ Merkle proof  กับ Merkle + ZKP แตกต่างกันอย่างไร?"
+        description={
+          <>
+            Merkle proof พิสูจน์ได้ว่า Order อยู่ในต้นไม้ แต่ผู้ตรวจสอบต้องเห็น Order และ Hash ที่ส่งมาทั้งหมด
+            <br />
+            ลองสลับดูว่าถ้านำการตรวจแบบเดียวกันไปไว้ในระบบ ZKP ผู้ตรวจสอบจะเห็นอะไรเปลี่ยนไป
+          </>
+        }
+      />
+
+      <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => setZkpMode("merkle")}
+          aria-pressed={!isZkp}
+          className={JoinClassNames("lab5-zk-mode", !isZkp && "lab5-zk-mode--danger")}
+        >
+          <p className="lab5-zk-mode-title">Merkle proof อย่างเดียว</p>
+          <p className="lab5-zk-mode-sub">ส่งหลักฐานให้ผู้ตรวจสอบตรง ๆ</p>
+        </button>
+        <button
+          type="button"
+          onClick={() => setZkpMode("zkp")}
+          aria-pressed={isZkp}
+          className={JoinClassNames("lab5-zk-mode", isZkp && "lab5-zk-mode--success")}
+        >
+          <p className="lab5-zk-mode-title">Merkle + ZKP (จำลอง)</p>
+          <p className="lab5-zk-mode-sub">ซ่อนข้อมูลไว้ในวงจรพิสูจน์</p>
+        </button>
+      </div>
+
+      <div className="lab5-zk-shared-root">
+        <span className="lab5-text-xs lab5-font-bold lab5-text-foreground">ราก (เห็นเหมือนกันทั้งสองโหมด)</span>
+        <HashChip tone="white" hash={rootHash} />
+      </div>
+
+      <div className="lab5-space-y-3">
+        <div className="lab5-flex lab5-items-center lab5-justify-between">
+          <h3 className="lab5-text-sm lab5-font-bold lab5-text-foreground">เปรียบเทียบสิ่งที่แต่ละฝ่ายมองเห็น</h3>
+          <span className="lab5-text-11 lab5-font-bold lab5-text-primary">Side-by-side view</span>
+        </div>
+
+        <div key={zkpMode} className="lab5-animate-merge-up lab5-grid lab5-gap-4 lab5-sm:grid-cols-2">
+          {/* ผู้พิสูจน์ */}
+          <div className="lab5-zk-party lab5-zk-party--prover">
+            <ZkCardHeader
+              icon={Lock}
+              isCompact
+              title="ผู้พิสูจน์ (Prover)"
+              description={isZkp ? "ข้อมูลที่ซ่อนไว้ในวงจร" : "ส่งทุกอย่างนี้ให้ผู้ตรวจสอบ"}
+            />
+            <div className="lab5-zk-party-body">
+              {isZkp ? (
+                <>
+                  <div>
+                    <p className="lab5-zk-field-label">Order ที่เลือก (ข้อมูลลับ)</p>
+                    <ZkChip tone="primary" isDashed className="lab5-font-mono">
+                      <Lock className="lab5-size-3" />
+                      {targetOrder.label} - {targetOrder.value}
+                    </ZkChip>
+                  </div>
+                  <div>
+                    <p className="lab5-zk-field-label">Sibling Hashes (ข้อมูลลับ)</p>
+                    <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
+                      {authPathSteps.map((pathStep) => (
+                        <ZkChip key={pathStep.nodeId} tone="primary" isDashed className="lab5-font-mono">
+                          <Lock className="lab5-size-3" />
+                          {pathStep.label}
+                        </ZkChip>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="lab5-zk-party-empty">
+                  ไม่มีอะไรถูกซ่อน ผู้พิสูจน์ส่ง {targetOrder.label}
+                  <br />
+                  และ SiblingHashes ให้ผู้ตรวจสอบตรง ๆ
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* ผู้ตรวจสอบ */}
+          <div className="lab5-zk-party">
+            <ZkCardHeader
+              icon={Eye}
+              tone="neutral"
+              isCompact
+              title="ผู้ตรวจสอบ (Verifier) เห็น"
+              description={isZkp ? "ราก + proof จำลอง" : "ราก + Order + Sibling Hashes"}
+            />
+            <div className="lab5-zk-party-body">
+              <div>
+                <p className="lab5-zk-field-label">ราก</p>
+                <HashChip hash={rootHash} />
+              </div>
+              {isZkp ? (
+                <>
+                  <div>
+                    <p className="lab5-zk-field-label">หลักฐานแบบซ่อนข้อมูล (Zero-Knowledge Proof)</p>
+                    <ZkChip className="lab5-font-sans">ยืนยันสิทธิ์ได้โดยไม่เปิดเผยออร์เดอร์</ZkChip>
+                  </div>
+                  <p className="lab5-flex lab5-items-center lab5-gap-1.5 lab5-text-11 lab5-text-muted-foreground">
+                    <EyeOff className="lab5-size-3.5 lab5-shrink-0" />
+                    ผู้ตรวจสอบไม่เห็น Order ที่เลือก และไม่เห็น Sibling Hashes
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="lab5-zk-field-label">Order ที่กำลังพิสูจน์</p>
+                    <p className="lab5-flex lab5-items-baseline lab5-gap-2">
+                      <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">{targetOrder.label}</span>
+                      <span className="lab5-font-mono lab5-text-11 lab5-text-muted-foreground">{targetOrder.value}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="lab5-zk-field-label">Sibling Hashes ที่ส่งมาพร้อมหลักฐาน</p>
+                    <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
+                      {authPathSteps.map((pathStep) => (
+                        <HashChip key={pathStep.nodeId} tone="primary" label={pathStep.label} hash={pathStep.hash} />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Visibility Matrix */}
+      <div className="lab5-zk-matrix">
+        <div className="lab5-zk-matrix-head">
+          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">Visibility Matrix</p>
+          <p className="lab5-text-11 lab5-text-muted-foreground">สรุปสิ่งที่ผู้พิสูจน์และผู้ตรวจสอบมองเห็น</p>
+        </div>
+        <table className="lab5-zk-matrix-table">
+          <thead>
+            <tr>
+              <th>ข้อมูลในระบบ</th>
+              <th className="lab5-text-center">Prover</th>
+              <th className="lab5-text-center">Verifier</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matrixRows.map((row) => (
+              <tr key={row.name}>
+                <td>{row.name}</td>
+                <td className="lab5-text-center lab5-text-success">เห็น</td>
+                <td className={JoinClassNames("lab5-text-center", row.isPublic || row.isHidden ? "lab5-text-success" : "lab5-text-danger")}>
+                  {row.isHidden ? "ซ่อนด้วย ZKP" : "เห็น"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="lab5-zk-callout">
+        {isZkp ? (
+          <p>
+            ในแนวคิดของ ZKP วงจรจะตรวจการคำนวณจาก Order ไปหาราก ให้อยู่ข้างใน ผู้ตรวจสอบจึงยืนยันได้ว่า “มีออร์เดอร์บางรายอยู่ใต้ราก
+            นี้” โดยไม่ต้องเห็น Order และเส้นทางที่ใช้
+          </p>
+        ) : (
+          <p>
+            ผู้ตรวจสอบคำนวณรากเองได้จากหลักฐานที่ได้รับ จึงยืนยันได้ว่า {targetOrder.label} อยู่ในต้นไม้ แต่ก็รู้ด้วยว่า กำลังพิสูจน์{" "}
+            <strong className="lab5-text-foreground">{targetOrder.label}</strong>
+          </p>
+        )}
+      </div>
+
+      <p className="lab5-text-11 lab5-leading-relaxed lab5-text-muted-foreground">
+        ตัวอย่างระบบที่ใช้แนวคิดใกล้เคียงกัน: Semaphore ใช้ Merkle Tree ของออร์เดอร์กลุ่มร่วมกับ ZK circuit
+        เพื่อพิสูจน์ว่าเป็นออร์เดอร์กลุ่มโดยไม่ระบุตัวตน ส่วนในแลปนี้เป็นเพียงภาพจำลองเพื่อให้เห็นว่าผู้ตรวจสอบเห็นข้อมูลต่างกันอย่างไร
+      </p>
+    </div>
+  )
+}
+
+/**
+ * ขั้นที่ 9: สรุปบริบทการเทรด (แล้วมันช่วยอะไรเรา?)
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 9
+ * @author StealthTrade Team
+ */
+function Step9Efficiency() {
+  const { goToStep, reset } = useLab05()
+
+  const comparisonRows = [
+    ["อาจต้องดู/ส่งข้อมูลจำนวนมาก", "ใช้ Root + หลักฐานเฉพาะเส้นทาง"],
+    ["ตรวจออร์เดอร์ของชุดใหญ่ได้ยากกว่า", "ตรวจออร์เดอร์ได้เป็นขั้นตอน"],
+    ["หลักฐานอาจโตตามจำนวนข้อมูล", "Authentication Path โตตามความลึกของต้นไม้"],
+    ["ไม่มีค่าเดียวสรุปทั้งชุด", "มี Merkle Root เป็นค่าอ้างอิง"],
+  ]
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading sectionLabel="สรุปประโยชน์" title="แล้วมันช่วยอะไรเรา?" />
 
-      <div className="lab5-grid lab5-gap-4 lab5-sm:grid-cols-2">
-        <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">ต้องเปิดเผยทุกอย่าง</p>
-          <ul className="lab5-mt-2 lab5-space-y-1.5">
-            {orders.map((order) => (
-              <li key={order.id} className="lab5-rounded-lg lab5-bg-surface lab5-px-3 lab5-py-1.5 lab5-text-sm lab5-text-foreground">
-                {order.label}
-              </li>
+      <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
+        <div className="lab5-zk-summary-card">
+          <p className="lab5-text-xs lab5-font-bold lab5-text-muted-foreground">ไม่มี Merkle Tree</p>
+          <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-gap-2">
+            {["A", "B", "C", "D"].map((id) => (
+              <span key={id} className="lab5-zk-summary-leaf">
+                {id}
+              </span>
             ))}
-          </ul>
+          </div>
+          <p className="lab5-text-xs lab5-text-muted-foreground">ต้องเปิดเผยทุก Order</p>
         </div>
 
-        <div className="lab5-rounded-2xl lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-p-4">
-          <p className="lab5-text-sm lab5-font-bold lab5-text-primary">พิสูจน์ {targetLabel} ด้วย Merkle Tree</p>
-          <ul className="lab5-mt-2 lab5-space-y-1.5">
-            {proofItems.map((item) => (
-              <li key={item} className="lab5-rounded-lg lab5-bg-surface lab5-px-3 lab5-py-1.5 lab5-text-sm lab5-text-foreground">
-                {item}
-              </li>
-            ))}
-          </ul>
+        <div className="lab5-zk-summary-card lab5-zk-summary-card--primary">
+          <p className="lab5-text-xs lab5-font-bold lab5-text-primary">มี Merkle Tree</p>
+          <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-gap-2 lab5-text-xs">
+            <span className="lab5-zk-summary-leaf lab5-zk-summary-leaf--active">A</span>
+            <span className="lab5-text-muted-foreground">+</span>
+            <span className="lab5-zk-summary-hash">H(B)</span>
+            <span className="lab5-text-muted-foreground">+</span>
+            <span className="lab5-zk-summary-hash">H(C+D)</span>
+            <ArrowRight className="lab5-size-3.5 lab5-text-primary" />
+            <span className="lab5-zk-summary-hash lab5-zk-summary-hash--root">Root</span>
+          </div>
+          <p className="lab5-text-xs lab5-text-muted-foreground">Order อื่นเปิดเผยแค่ Hash ที่จำเป็น</p>
         </div>
       </div>
 
-      <p className="lab5-text-center lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80">
-        เราไม่จำเป็นต้องเปิดเผยข้อมูลของ Order อื่นทั้งหมด เราใช้แค่ข้อมูลที่อยู่บนเส้นทางกลับไปหา Root
-        เท่านั้น
-      </p>
-
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-text-center">
-        <p className="lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80">
-          ยิ่งต้นไม้ใหญ่ เส้นทางที่ต้องใช้ก็เพิ่มทีละชั้นเท่านั้น ไม่ต้องส่งข้อมูลทุก Order ทั้งหมด —
-          ต้นไม้ใหญ่ขึ้น แต่หลักฐานหนึ่งรายการไม่จำเป็นต้องโตเท่ากับข้อมูลทั้งหมด
-        </p>
-        <p className="lab5-mt-1 lab5-text-xs lab5-text-muted-foreground">
-          ทางเทคนิคเรียกขนาดของหลักฐานนี้ว่า <span className="lab5-font-mono">O(log n)</span>
-        </p>
+      <div className="lab5-zk-matrix">
+        <table className="lab5-zk-matrix-table lab5-zk-summary-table">
+          <thead>
+            <tr>
+              <th className="lab5-text-foreground">ไม่มี Merkle Tree</th>
+              <th className="lab5-text-primary">มี Merkle Tree</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparisonRows.map(([withoutTree, withTree]) => (
+              <tr key={withoutTree}>
+                <td className="lab5-text-muted-foreground">{withoutTree}</td>
+                <td>{withTree}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div className="lab5-flex lab5-flex-col lab5-items-center lab5-gap-4 lab5-rounded-2xl lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-p-6 lab5-text-center">
-        <PartyPopper className="lab5-size-8 lab5-text-success" />
-        <div>
-          <p className="lab5-text-lg lab5-font-extrabold lab5-text-foreground">เรียนจบ Lab 05 แล้ว</p>
-          <p className="lab5-mt-1 lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-foreground-70">
-            คุณสร้างต้นไม้ พิสูจน์การมีอยู่ของข้อมูล และตรวจจับการปลอมแปลงได้ด้วยตัวเองแล้ว
-          </p>
-        </div>
-        <div className="lab5-flex lab5-flex-wrap lab5-justify-center lab5-gap-3">
-          <button
-            type="button"
-            onClick={() => goToStep(4)}
-            className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-border lab5-border-primary-30 lab5-bg-surface lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-primary lab5-transition-colors lab5-hover-primary-soft"
-          >
+      <div className="lab5-animate-merge-up lab5-zk-complete">
+        <PartyPopper className="lab5-mx-auto lab5-size-8 lab5-text-success" />
+        <h3 className="lab5-text-lg lab5-font-bold lab5-text-foreground">เรียนจบ Lab 05 แล้ว</h3>
+        <p className="lab5-text-xs lab5-text-muted-foreground">
+          คุณสร้างต้นไม้ พิสูจน์ว่าข้อมูลอยู่ในต้นไม้ และตรวจจับการปลอมแปลงได้ด้วยตัวเองแล้ว
+        </p>
+        <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-3 lab5-pt-3">
+          <button type="button" onClick={() => goToStep(4)} className="lab5-zk-btn lab5-zk-btn--outline-primary lab5-zk-btn--lg">
             ลองพิสูจน์ Order อื่น
           </button>
-          <button
-            type="button"
-            onClick={reset}
-            className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface-soft"
-          >
-            <RotateCcw className="lab5-size-4" />
+          <button type="button" onClick={reset} className="lab5-zk-btn lab5-zk-btn--outline lab5-zk-btn--lg">
+            <RotateCcw className="lab5-size-3.5" />
             เริ่มใหม่ทั้งหมด
           </button>
         </div>
@@ -1813,7 +3055,7 @@ function Step8Efficiency() {
  * เลือกเนื้อหาของขั้นตามหมายเลขขั้น
  *
  * @param {Object} props พร็อพของคอมโพเนนต์
- * @param {number} props.step หมายเลขขั้น (0-8)
+ * @param {number} props.step หมายเลขขั้น (0-9)
  * @return {JSX.Element|null} เนื้อหาของขั้นนั้น หรือ null ถ้าหมายเลขไม่ถูกต้อง
  * @author StealthTrade Team
  */
@@ -1834,7 +3076,11 @@ function StepContent({ step }) {
     case 6:
       return <Step7Tamper />
     case 7:
-      return <Step8Efficiency />
+      return <Step7ZkpWorkflow />
+    case 8:
+      return <Step8MerkleZkp />
+    case 9:
+      return <Step9Efficiency />
     default:
       return null
   }
@@ -1853,16 +3099,23 @@ function LabContainer() {
   return (
     <div className="lab5-flex lab5-min-h-dvh lab5-flex-col">
       {!isIntro && (
-        <header className="lab5-sticky lab5-top-0 lab5-z-10 lab5-border-b lab5-border-border lab5-bg-surface-85 lab5-px-4 lab5-py-3 lab5-backdrop-blur-sm">
-          <div className="lab5-mx-auto lab5-max-w-3xl lab5-space-y-2">
+        <header className="lab5-sticky lab5-top-0 lab5-z-30 lab5-border-b lab5-border-border lab5-bg-surface-85 lab5-backdrop-blur-sm lab5-shadow-sm">
+          <div className="lab5-mx-auto lab5-max-w-3xl lab5-space-y-2.5 lab5-px-4 lab5-py-3">
             <LabProgress />
             <Glossary />
           </div>
         </header>
       )}
 
-      <main className="lab5-flex-1 lab5-px-4 lab5-py-6 lab5-sm:py-10">
+      <main className={`lab5-flex-1 lab5-px-4 ${isIntro ? "lab5-intro-main" : "lab5-pt-4 lab5-pb-10"}`}>
         <div className="lab5-mx-auto lab5-flex lab5-max-w-3xl lab5-flex-col lab5-gap-6">
+          {!isIntro && STEP_META[currentStep]?.mission && (
+            <div className="lab5-rounded-2xl lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-4 lab5-py-3">
+              <p className="lab5-text-xs lab5-font-semibold lab5-text-primary">
+                <span className="lab5-font-bold">ภารกิจ:</span> {STEP_META[currentStep].mission}
+              </p>
+            </div>
+          )}
           {!isIntro && <MentorMessage message={STEP_META[currentStep].mentor} />}
           {/* รีเมานต์เนื้อหาขั้นใหม่ทุกครั้งที่เปลี่ยน เพื่อให้แอนิเมชันเข้าเล่นซ้ำ */}
           <div key={currentStep} className="lab5-animate-merge-up">

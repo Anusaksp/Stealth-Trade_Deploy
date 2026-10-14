@@ -163,6 +163,22 @@
   z-index: 10;
 }
 
+.lab5 .lab5-z-20 {
+  z-index: 20;
+}
+
+.lab5 .lab5-z-30 {
+  z-index: 30;
+}
+
+.lab5 .lab5-z-40 {
+  z-index: 40;
+}
+
+.lab5 .lab5-z-50 {
+  z-index: 50;
+}
+
 .lab5 .lab5-flex-col {
   flex-direction: column;
 }
@@ -207,6 +223,23 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.lab5 .lab5-grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+/* หน้าบทนำ: จัดเนื้อหาให้อยู่กึ่งกลางจอทั้งแนวตั้งและแนวนอน */
+.lab5 .lab5-intro-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.lab5 .lab5-intro-main > div {
+  width: 100%;
+}
+
 .lab5 .lab5-min-h-dvh {
   min-height: 100dvh;
 }
@@ -226,6 +259,10 @@
 
 .lab5 .lab5-max-w-md {
   max-width: 28rem;
+}
+
+.lab5 .lab5-max-w-lg {
+  max-width: 32rem;
 }
 
 .lab5 .lab5-max-w-2xl {
@@ -343,6 +380,11 @@
   padding-bottom: 0.75rem;
 }
 
+.lab5 .lab5-py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 .lab5 .lab5-py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
@@ -384,8 +426,20 @@
   margin-top: 0.5rem;
 }
 
+.lab5 .lab5-space-y-2\.5>*+* {
+  margin-top: 0.625rem;
+}
+
 .lab5 .lab5-space-y-3>*+* {
   margin-top: 0.75rem;
+}
+
+.lab5 .lab5-space-y-4>*+* {
+  margin-top: 1rem;
+}
+
+.lab5 .lab5-space-y-5>*+* {
+  margin-top: 1.25rem;
 }
 
 .lab5 .lab5-space-y-6>*+* {
@@ -585,6 +639,27 @@
   font-weight: 800;
 }
 
+/* ---- line heights ---- */
+.lab5 .lab5-leading-none {
+  line-height: 1;
+}
+
+.lab5 .lab5-leading-tight {
+  line-height: 1.35;
+}
+
+.lab5 .lab5-leading-normal {
+  line-height: 1.5;
+}
+
+.lab5 .lab5-leading-relaxed {
+  line-height: 1.7;
+}
+
+.lab5 .lab5-leading-loose {
+  line-height: 1.9;
+}
+
 /* ---- colors ---- */
 .lab5 .lab5-bg-background {
   background-color: var(--lab5-background);
@@ -599,7 +674,9 @@
 }
 
 .lab5 .lab5-bg-surface-85 {
-  background-color: color-mix(in srgb, var(--lab5-surface) 85%, transparent);
+  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.95);
+  background-color: color-mix(in srgb, var(--lab5-surface) 95%, transparent);
 }
 
 .lab5 .lab5-bg-primary {
@@ -674,6 +751,14 @@
   color: color-mix(in srgb, var(--lab5-primary) 70%, transparent);
 }
 
+.lab5 .lab5-text-primary-80 {
+  color: color-mix(in srgb, var(--lab5-primary) 80%, transparent);
+}
+
+.lab5 .lab5-text-white {
+  color: #ffffff;
+}
+
 .lab5 .lab5-text-primary-foreground {
   color: var(--lab5-primary-foreground);
 }
@@ -696,6 +781,10 @@
 
 .lab5 .lab5-border-border {
   border-color: var(--lab5-border);
+}
+
+.lab5 .lab5-border-surface {
+  border-color: var(--lab5-surface);
 }
 
 .lab5 .lab5-border-primary {
@@ -781,6 +870,14 @@
   border-radius: var(--lab5-radius-2xl);
 }
 
+.lab5 .lab5-rounded-3xl {
+  border-radius: 1.5rem;
+}
+
+.lab5 .lab5-divide-y > * + * {
+  border-top: 1px solid var(--lab5-border);
+}
+
 .lab5 .lab5-shadow-sm {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
@@ -790,8 +887,28 @@
 }
 
 .lab5 .lab5-backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lab5 .lab5-glossary-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  width: 28rem;
+  max-width: calc(100vw - 2rem);
+  border-radius: var(--lab5-radius-xl);
+  border: 1px solid var(--lab5-border);
+  background-color: var(--lab5-surface);
+  padding: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  z-index: 50;
+}
+
+.lab5 .lab5-center-translate {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* ---- transitions / transforms / misc effects ---- */
@@ -900,7 +1017,7 @@
 .lab5 .lab5-choice {
   width: 100%;
   border-radius: var(--lab5-radius-xl);
-  border: 2px solid var(--lab5-border);
+  border: 1.5px solid var(--lab5-border);
   background-color: var(--lab5-surface);
   padding: 1rem;
   text-align: left;
@@ -918,18 +1035,20 @@
 
 .lab5 .lab5-choice--selected {
   border-color: var(--lab5-primary);
-  background-color: var(--lab5-primary-soft);
+  background-color: var(--lab5-surface);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .lab5 .lab5-choice--correct {
   border-color: var(--lab5-success);
-  background-color: var(--lab5-success-soft);
+  border-width: 2px;
+  background-color: var(--lab5-surface);
 }
 
 .lab5 .lab5-choice--incorrect {
   border-color: var(--lab5-danger);
-  background-color: var(--lab5-danger-soft);
+  border-width: 2px;
+  background-color: var(--lab5-surface);
 }
 
 /* Feedback card */
@@ -984,9 +1103,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: var(--lab5-radius-lg);
+  border-radius: var(--lab5-radius-full);
   border: 1px solid;
-  padding: 0.25rem 0.625rem;
+  padding: 0.3125rem 0.75rem;
   font-family: var(--lab5-font-mono);
   font-size: 0.75rem;
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
@@ -1244,6 +1363,18 @@
 
 /* ---- responsive (breakpoint: 640px, ตาม Tailwind sm:) ---- */
 @media (min-width: 640px) {
+  .lab5 .lab5-sm\:flex {
+    display: flex;
+  }
+
+  .lab5 .lab5-sm\:block {
+    display: block;
+  }
+
+  .lab5 .lab5-sm\:hidden {
+    display: none;
+  }
+
   .lab5 .lab5-sm\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1271,6 +1402,21 @@
   .lab5 .lab5-sm\:py-10 {
     padding-top: 2.5rem;
     padding-bottom: 2.5rem;
+  }
+
+  .lab5 .lab5-sm\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .lab5 .lab5-sm\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .lab5 .lab5-sm\:text-5xl {
+    font-size: 3rem;
+    line-height: 1.15;
   }
 
   .lab5 .lab5-sm\:text-sm {
@@ -1306,4 +1452,1062 @@
   .lab5 .lab5-lg\:grid-cols-3fr {
     grid-template-columns: 1fr 1.4fr 1fr;
   }
+}
+/* ==========================================================================
+   ZKP workflow / Merkle กับ ZKP / สรุป (ขั้นที่ 6-9)
+   ========================================================================== */
+.lab5 .lab5-size-3 {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* ---- การ์ดพื้นฐาน ---- */
+.lab5 .lab5-zk-card {
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.5rem;
+  background-color: var(--lab5-surface);
+  box-shadow: 0 1px 2px rgba(37, 48, 74, 0.04);
+}
+
+.lab5 .lab5-zk-card--padded {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.lab5 .lab5-zk-card--dashed {
+  border-style: dashed;
+  border-color: #cfc8e3;
+}
+
+.lab5 .lab5-zk-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lab5 .lab5-zk-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-card-desc {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-card-header--compact {
+  padding: 1rem;
+  border-bottom: 1px solid var(--lab5-border);
+}
+
+.lab5 .lab5-zk-card-header--compact .lab5-zk-card-title {
+  font-size: 0.875rem;
+}
+
+.lab5 .lab5-zk-card-header--compact .lab5-zk-card-desc {
+  font-size: 11px;
+}
+
+.lab5 .lab5-zk-icon-circle {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+}
+
+.lab5 .lab5-zk-icon-circle--primary {
+  background-color: var(--lab5-primary-soft);
+  color: var(--lab5-primary);
+}
+
+.lab5 .lab5-zk-icon-circle--success {
+  background-color: var(--lab5-success-soft);
+  color: var(--lab5-success);
+}
+
+.lab5 .lab5-zk-icon-circle--neutral {
+  background-color: var(--lab5-surface-soft);
+  color: var(--lab5-muted-foreground);
+}
+
+/* ---- แบนเนอร์ / ข้อสังเกต ---- */
+.lab5 .lab5-zk-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d9cdfa;
+  border-radius: 1.25rem;
+  background-color: var(--lab5-primary-soft);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-banner--box {
+  border-radius: 1rem;
+}
+
+.lab5 .lab5-zk-banner--center {
+  justify-content: center;
+  text-align: center;
+}
+
+.lab5 .lab5-zk-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-note strong {
+  font-weight: 700;
+}
+
+.lab5 .lab5-zk-note--primary {
+  border-color: #d9cdfa;
+  background-color: var(--lab5-primary-soft);
+}
+
+.lab5 .lab5-zk-note--soft {
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-note--block {
+  align-items: flex-start;
+  border-radius: 1rem;
+}
+
+.lab5 .lab5-zk-note--block svg {
+  margin-top: 0.15rem;
+}
+
+.lab5 .lab5-zk-disclaimer {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface);
+  text-align: center;
+  font-size: 11px;
+  color: var(--lab5-muted-foreground);
+}
+
+/* ---- ป้ายแคปซูล ---- */
+.lab5 .lab5-zk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 9999px;
+  background-color: var(--lab5-surface-soft);
+  font-family: var(--lab5-font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--lab5-foreground);
+  white-space: nowrap;
+}
+
+.lab5 .lab5-zk-chip-label {
+  font-family: var(--lab5-font-sans);
+  font-weight: 700;
+}
+
+.lab5 .lab5-zk-chip--white {
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-chip--primary {
+  border-color: #d9cdfa;
+  background-color: var(--lab5-primary-soft);
+  color: var(--lab5-primary);
+}
+
+.lab5 .lab5-zk-chip--success {
+  border-color: rgba(22, 169, 121, 0.35);
+  background-color: var(--lab5-success-soft);
+  color: var(--lab5-success);
+}
+
+.lab5 .lab5-zk-chip--danger {
+  border-color: rgba(229, 72, 93, 0.35);
+  background-color: var(--lab5-danger-soft);
+  color: var(--lab5-danger);
+}
+
+.lab5 .lab5-zk-chip--outline {
+  background-color: var(--lab5-surface);
+  font-family: var(--lab5-font-sans);
+  font-weight: 600;
+}
+
+.lab5 .lab5-zk-chip--solid {
+  border-color: var(--lab5-primary);
+  background-color: var(--lab5-primary);
+  color: var(--lab5-primary-foreground);
+  font-family: var(--lab5-font-sans);
+  font-weight: 700;
+}
+
+.lab5 .lab5-zk-chip--dashed {
+  border-style: dashed;
+}
+
+.lab5 .lab5-zk-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lab5 .lab5-zk-badge--success {
+  background-color: rgba(22, 169, 121, 0.14);
+  color: var(--lab5-success);
+}
+
+.lab5 .lab5-zk-badge--primary {
+  border: 1px solid #d9cdfa;
+  background-color: var(--lab5-primary-soft);
+  color: var(--lab5-primary);
+}
+
+.lab5 .lab5-zk-field-label {
+  margin-bottom: 0.375rem;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lab5-foreground);
+}
+
+/* ---- ปุ่ม ---- */
+.lab5 .lab5-zk-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 9999px;
+  background-color: var(--lab5-surface);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lab5-foreground);
+  cursor: pointer;
+  transition: background-color 0.15s ease, filter 0.15s ease, color 0.15s ease;
+}
+
+.lab5 .lab5-zk-btn:hover:not(:disabled) {
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-btn--outline-primary {
+  border-color: #cdbff6;
+  color: var(--lab5-primary);
+}
+
+.lab5 .lab5-zk-btn--outline-primary:hover:not(:disabled) {
+  background-color: var(--lab5-primary-soft);
+}
+
+.lab5 .lab5-zk-btn--outline-danger {
+  border-color: rgba(229, 72, 93, 0.5);
+  background-color: var(--lab5-danger-soft);
+  color: var(--lab5-danger);
+}
+
+.lab5 .lab5-zk-btn--outline-danger:hover:not(:disabled) {
+  background-color: #ffe3e7;
+}
+
+.lab5 .lab5-zk-btn--primary {
+  border-color: var(--lab5-primary);
+  background-color: var(--lab5-primary);
+  color: var(--lab5-primary-foreground);
+}
+
+.lab5 .lab5-zk-btn--primary:hover:not(:disabled) {
+  background-color: var(--lab5-primary);
+  filter: brightness(1.08);
+}
+
+.lab5 .lab5-zk-btn--primary:disabled {
+  border-color: #e3e6f0;
+  background-color: #e3e6f0;
+  color: var(--lab5-muted-foreground);
+  cursor: not-allowed;
+}
+
+.lab5 .lab5-zk-btn--nav {
+  padding: 0.4rem 1rem;
+  font-size: 12px;
+}
+
+.lab5 .lab5-zk-btn--lg {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+}
+
+/* ---- ตัวบอกขั้นย่อย ---- */
+.lab5 .lab5-zk-stepper {
+  padding: 1rem;
+}
+
+.lab5 .lab5-zk-stepper-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  font-size: 11px;
+}
+
+.lab5 .lab5-zk-stepper-head > span:first-child {
+  font-size: 12px;
+}
+
+.lab5 .lab5-zk-stepper-items {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.lab5 .lab5-zk-stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.5rem 0.4rem;
+  border: 0;
+  border-radius: 0.875rem;
+  background: transparent;
+  text-align: center;
+  cursor: default;
+}
+
+.lab5 .lab5-zk-stepper-item:not(:disabled) {
+  cursor: pointer;
+}
+
+.lab5 .lab5-zk-stepper-item--active {
+  background-color: var(--lab5-primary-soft);
+}
+
+.lab5 .lab5-zk-stepper-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 9999px;
+  background-color: var(--lab5-surface);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-stepper-dot--active {
+  border-color: var(--lab5-primary);
+  background-color: var(--lab5-primary);
+  color: var(--lab5-primary-foreground);
+}
+
+.lab5 .lab5-zk-stepper-dot--done {
+  border-color: #138a63;
+  background-color: #138a63;
+  color: #ffffff;
+}
+
+.lab5 .lab5-zk-stepper-title {
+  font-size: 11px;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-stepper-sub {
+  font-size: 9px;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-stepper-item--active .lab5-zk-stepper-title,
+.lab5 .lab5-zk-stepper-item--active .lab5-zk-stepper-sub {
+  font-weight: 700;
+  color: var(--lab5-primary);
+}
+
+/* ---- กล่องย่อย ---- */
+.lab5 .lab5-zk-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1rem;
+}
+
+.lab5 .lab5-zk-box--soft {
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-box--success {
+  border-color: rgba(22, 169, 121, 0.45);
+  background-color: var(--lab5-success-soft);
+}
+
+.lab5 .lab5-zk-box-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-box-text {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #4b5568;
+}
+
+.lab5 .lab5-zk-secret-box {
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed var(--lab5-border);
+  border-radius: 0.75rem;
+  background-color: var(--lab5-surface);
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--lab5-foreground);
+}
+
+/* ขั้นย่อยที่ 1 */
+.lab5 .lab5-zk-commit-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.lab5 .lab5-zk-commit-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--lab5-primary);
+}
+
+/* ขั้นย่อยที่ 2 */
+.lab5 .lab5-zk-witness {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #d9cdfa;
+  border-radius: 1rem;
+  background-color: #f7f4ff;
+}
+
+.lab5 .lab5-zk-witness-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lab5 .lab5-zk-witness-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--lab5-primary);
+}
+
+.lab5 .lab5-zk-witness-tag {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-witness-hidden {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px dashed #d9cdfa;
+  border-radius: 0.75rem;
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-witness-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 0.75rem;
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-order-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ขั้นย่อยที่ 3 */
+.lab5 .lab5-zk-toggle-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lab5 .lab5-zk-flow {
+  gap: 1rem;
+}
+
+.lab5 .lab5-zk-flow-title {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-flow-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.lab5 .lab5-zk-flow-arrow {
+  justify-self: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--lab5-muted-foreground);
+  transform: rotate(90deg);
+}
+
+.lab5 .lab5-zk-flow-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-self: stretch;
+  padding: 0.75rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 0.75rem;
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-flow-col--secret {
+  border-style: dashed;
+  border-color: #cdbff6;
+}
+
+.lab5 .lab5-zk-flow-col--success {
+  border-color: rgba(22, 169, 121, 0.45);
+  background-color: var(--lab5-success-soft);
+}
+
+.lab5 .lab5-zk-flow-col--danger {
+  border-color: rgba(229, 72, 93, 0.45);
+  background-color: var(--lab5-danger-soft);
+}
+
+.lab5 .lab5-zk-flow-col-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lab5 .lab5-zk-flow-sub {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--lab5-surface-soft);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-flow-text {
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-flow-strong {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.lab5 .lab5-zk-flow-hint {
+  font-size: 9px;
+  line-height: 1.6;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-root-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lab5 .lab5-zk-reject {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  border: 1px solid rgba(229, 72, 93, 0.35);
+  border-radius: 1rem;
+  background-color: var(--lab5-danger-soft);
+  font-size: 11px;
+  color: var(--lab5-danger);
+}
+
+.lab5 .lab5-zk-reject-btn {
+  padding: 0.375rem 0.875rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background-color: #d63a4f;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.lab5 .lab5-zk-reject-btn:hover {
+  filter: brightness(1.08);
+}
+
+/* ขั้นย่อยที่ 4 */
+.lab5 .lab5-zk-proof-strip {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  font-size: 11px;
+}
+
+.lab5 .lab5-zk-proof-strip .lab5-zk-chip {
+  font-family: var(--lab5-font-sans);
+  font-weight: 700;
+}
+
+.lab5 .lab5-zk-package {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid #cdbff6;
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-package-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--lab5-border);
+}
+
+.lab5 .lab5-zk-package-item {
+  padding: 0.75rem;
+  border-radius: 0.875rem;
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-package-item--proof {
+  border: 1px solid #d9cdfa;
+  background-color: #faf8ff;
+}
+
+.lab5 .lab5-zk-proof-box {
+  padding: 0.75rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 0.625rem;
+  background-color: var(--lab5-surface);
+}
+
+/* ปุ่มนำทางขั้นย่อย */
+.lab5 .lab5-zk-subnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--lab5-border);
+}
+
+.lab5 .lab5-zk-subnav-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lab5-foreground);
+  cursor: pointer;
+}
+
+.lab5 .lab5-zk-subnav-reset:hover {
+  color: var(--lab5-primary);
+}
+
+/* ---- ขั้นที่ 8: Merkle กับ ZKP ---- */
+.lab5 .lab5-zk-mode {
+  padding: 1rem;
+  border: 2px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.lab5 .lab5-zk-mode:hover {
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-mode-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-mode-sub {
+  font-size: 11px;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-mode--danger,
+.lab5 .lab5-zk-mode--danger:hover {
+  border-color: var(--lab5-danger);
+  background-color: #f6e9f0;
+}
+
+.lab5 .lab5-zk-mode--danger .lab5-zk-mode-title {
+  color: var(--lab5-danger);
+}
+
+.lab5 .lab5-zk-mode--success,
+.lab5 .lab5-zk-mode--success:hover {
+  border-color: var(--lab5-success);
+  background-color: #e6f2ee;
+}
+
+.lab5 .lab5-zk-mode--success .lab5-zk-mode-title {
+  color: var(--lab5-success);
+}
+
+.lab5 .lab5-zk-shared-root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-party {
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-party--prover {
+  border-style: dashed;
+  border-color: #cdbff6;
+}
+
+.lab5 .lab5-zk-party-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.lab5 .lab5-zk-party-empty {
+  padding: 0.25rem 0.5rem 2rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.8;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-matrix {
+  overflow: hidden;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface);
+}
+
+.lab5 .lab5-zk-matrix-head {
+  padding: 1rem;
+  border-bottom: 1px solid var(--lab5-border);
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-matrix-table th {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--lab5-border);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lab5-muted-foreground);
+}
+
+.lab5 .lab5-zk-matrix-table th:first-child {
+  width: 60%;
+}
+
+.lab5 .lab5-zk-matrix-table th.lab5-text-center {
+  text-align: center;
+}
+
+.lab5 .lab5-zk-matrix-table td {
+  padding: 0.75rem;
+}
+
+.lab5 .lab5-zk-matrix-table tbody tr + tr td {
+  border-top: 1px solid var(--lab5-border);
+}
+
+.lab5 .lab5-zk-matrix-table td.lab5-text-success,
+.lab5 .lab5-zk-matrix-table td.lab5-text-danger {
+  font-weight: 500;
+}
+
+.lab5 .lab5-zk-callout {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface);
+  font-size: 1.125rem;
+  line-height: 1.9;
+  color: #4b5568;
+}
+
+.lab5 .lab5-zk-callout strong {
+  font-weight: 700;
+}
+
+/* ---- ขั้นที่ 6: คำอธิบาย ---- */
+.lab5 .lab5-zk-explain {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid var(--lab5-border);
+}
+
+.lab5 .lab5-zk-explain-card {
+  padding: 0.75rem;
+  border-radius: 0.875rem;
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-explain-card .lab5-zk-field-label {
+  margin-bottom: 0.125rem;
+}
+
+.lab5 .lab5-zk-explain-text {
+  font-size: 1.125rem;
+  line-height: 1.9;
+  color: #4b5568;
+}
+
+/* ---- ขั้นที่ 9: สรุป ---- */
+.lab5 .lab5-zk-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1rem;
+  border: 1px solid var(--lab5-border);
+  border-radius: 1.25rem;
+  background-color: var(--lab5-surface-soft);
+}
+
+.lab5 .lab5-zk-summary-card--primary {
+  border-color: #cdbff6;
+  background-color: var(--lab5-primary-soft);
+}
+
+.lab5 .lab5-zk-summary-leaf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: var(--lab5-surface);
+  font-family: var(--lab5-font-mono);
+  font-size: 12px;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-summary-leaf--active {
+  background-color: var(--lab5-primary);
+  color: var(--lab5-primary-foreground);
+}
+
+.lab5 .lab5-zk-summary-hash {
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  background-color: var(--lab5-surface);
+  font-family: var(--lab5-font-mono);
+  font-size: 12px;
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-summary-hash--root {
+  background-color: var(--lab5-success-soft);
+  color: var(--lab5-success);
+}
+
+.lab5 .lab5-zk-summary-table th {
+  width: 45%;
+  padding: 0.75rem 1rem;
+  background-color: var(--lab5-surface-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lab5 .lab5-zk-summary-table td {
+  padding: 0.75rem 1rem;
+}
+
+.lab5 .lab5-zk-summary-table th.lab5-text-foreground {
+  color: var(--lab5-foreground);
+}
+
+.lab5 .lab5-zk-summary-table th.lab5-text-primary {
+  color: var(--lab5-primary);
+}
+
+.lab5 .lab5-zk-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(22, 169, 121, 0.3);
+  border-radius: 1.5rem;
+  background-color: var(--lab5-success-soft);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .lab5 .lab5-zk-commit-grid {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .lab5 .lab5-zk-flow-grid {
+    grid-template-columns: 1fr auto 0.95fr auto 1.15fr;
+  }
+
+  .lab5 .lab5-zk-flow-arrow {
+    transform: none;
+  }
+
+  .lab5 .lab5-zk-root-row-end {
+    text-align: right;
+  }
+}
+
+/* ---- ป้าย hash กดดูค่าเต็มได้ ---- */
+.lab5 .lab5-hash-chip {
+  max-width: 100%;
+  cursor: pointer;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lab5 .lab5-hash-chip:hover {
+  filter: brightness(0.97);
+  box-shadow: 0 0 0 2px rgba(109, 75, 216, 0.12);
+}
+
+.lab5 .lab5-hash-chip:focus-visible {
+  outline: 2px solid var(--lab5-primary);
+  outline-offset: 2px;
+}
+
+.lab5 .lab5-hash-chip--onsoft {
+  background-color: var(--lab5-surface);
+  box-shadow: 0 1px 2px rgba(37, 48, 74, 0.06);
+}
+
+.lab5 .lab5-hash-chip--expanded {
+  align-items: flex-start;
+  border-radius: 0.75rem;
+  white-space: normal;
+}
+
+.lab5 .lab5-hash-chip--expanded .lab5-hash-chip-value {
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.lab5 .lab5-hash-chip-copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lab5 .lab5-hash-chip-copy:hover {
+  background-color: rgba(37, 48, 74, 0.08);
 }
