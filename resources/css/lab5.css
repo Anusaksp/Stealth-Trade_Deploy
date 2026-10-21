@@ -2511,3 +2511,2080 @@
 .lab5 .lab5-hash-chip-copy:hover {
   background-color: rgba(37, 48, 74, 0.08);
 }
+
+/* ==========================================================================
+   Step 7 — พิสูจน์ว่ามีเงินพอ (Proof Balance)
+   ========================================================================== */
+
+/* Wrapper */
+.lab5 .lab5-s7-wrapper {
+  max-width: 896px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Section tag pill */
+.lab5 .lab5-s7-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background-color: #ede9fe;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* Main heading */
+.lab5 .lab5-s7-heading {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+/* Description underline */
+.lab5 .lab5-s7-desc {
+  font-size: 14px;
+  color: #1d4ed8;
+  text-decoration: underline;
+  margin: 0;
+  line-height: 1.5;
+  cursor: default;
+}
+
+/* Dual-card grid */
+.lab5 .lab5-s7-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Shared card base */
+.lab5 .lab5-s7-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Witness card (dashed purple border) */
+.lab5 .lab5-s7-card--witness {
+  border: 1.5px dashed #d8b4fe;
+}
+
+/* Statement card (solid grey border) */
+.lab5 .lab5-s7-card--statement {
+  border: 1.5px solid #e2e8f0;
+}
+
+/* Card header row */
+.lab5 .lab5-s7-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Card icon wrapper */
+.lab5 .lab5-s7-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s7-card-icon--purple {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s7-card-icon--green {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Card title */
+.lab5 .lab5-s7-card-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+/* Card subtitle */
+.lab5 .lab5-s7-card-subtitle {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Card label */
+.lab5 .lab5-s7-input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+/* Card number input */
+.lab5 .lab5-s7-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.lab5 .lab5-s7-input:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+}
+
+/* Badge: PRIVATE */
+.lab5 .lab5-s7-badge--private {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #ffe4e6;
+  color: #e11d48;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Badge: PUBLIC */
+.lab5 .lab5-s7-badge--public {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #ede9fe;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Center Circuit connector */
+.lab5 .lab5-s7-circuit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  min-width: 100px;
+}
+
+.lab5 .lab5-s7-circuit-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid #c084fc;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s7-circuit-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-top: 6px;
+}
+
+.lab5 .lab5-s7-circuit-cond {
+  font-size: 11px;
+  font-weight: 500;
+  color: #7c3aed;
+  white-space: nowrap;
+}
+
+/* Presets row */
+.lab5 .lab5-s7-presets {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lab5 .lab5-s7-presets-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.lab5 .lab5-s7-preset-btn {
+  padding: 5px 14px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lab5 .lab5-s7-preset-btn--active {
+  border-color: #c084fc;
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+/* Arena card */
+.lab5 .lab5-s7-arena {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background-color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Arena header */
+.lab5 .lab5-s7-arena-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lab5 .lab5-s7-arena-party {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lab5 .lab5-s7-arena-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s7-arena-avatar--prover {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s7-arena-avatar--verifier {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.lab5 .lab5-s7-arena-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s7-arena-name--verifier {
+  color: #16a34a;
+}
+
+.lab5 .lab5-s7-arena-role {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Arena body */
+.lab5 .lab5-s7-arena-body {
+  padding: 24px 20px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Placeholder text */
+.lab5 .lab5-s7-arena-placeholder {
+  color: #64748b;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Result grid */
+.lab5 .lab5-s7-result-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Result panel base */
+.lab5 .lab5-s7-result-panel {
+  padding: 14px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s7-result-panel--success-prover {
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+}
+
+.lab5 .lab5-s7-result-panel--success-verifier {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.lab5 .lab5-s7-result-panel--fail-prover {
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+.lab5 .lab5-s7-result-panel--fail-verifier {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+/* Result panel row labels */
+.lab5 .lab5-s7-result-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.lab5 .lab5-s7-result-title--purple { color: #7c3aed; }
+.lab5 .lab5-s7-result-title--green  { color: #16a34a; }
+.lab5 .lab5-s7-result-title--red    { color: #e11d48; }
+
+.lab5 .lab5-s7-result-body {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.lab5 .lab5-s7-result-body--dark { color: #334155; }
+.lab5 .lab5-s7-result-body--slate { color: #475569; }
+
+.lab5 .lab5-s7-result-note {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.lab5 .lab5-s7-result-note--red   { color: #e11d48; }
+.lab5 .lab5-s7-result-note--green { color: #16a34a; }
+.lab5 .lab5-s7-result-note--grey  { color: #64748b; }
+
+/* Mid transfer / fail column */
+.lab5 .lab5-s7-mid-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.lab5 .lab5-s7-mid-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.lab5 .lab5-s7-mid-label--purple { color: #7c3aed; }
+.lab5 .lab5-s7-mid-label--red    { color: #e11d48; }
+
+.lab5 .lab5-s7-mid-arrow--purple { color: #7c3aed; }
+.lab5 .lab5-s7-mid-arrow--red    { color: #e11d48; }
+
+/* Action button wrapper */
+.lab5 .lab5-s7-action-wrap {
+  padding: 0 20px 20px 20px;
+}
+
+/* Main submit button */
+.lab5 .lab5-s7-submit-btn {
+  padding: 12px 24px;
+  border-radius: 14px;
+  background-color: #6d28d9;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(109, 40, 217, 0.25);
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.lab5 .lab5-s7-submit-btn:hover {
+  background-color: #5b21b6;
+  box-shadow: 0 4px 8px rgba(109, 40, 217, 0.35);
+}
+
+/* Footer bar */
+.lab5 .lab5-s7-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.lab5 .lab5-s7-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lab5 .lab5-s7-footer-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lab5 .lab5-s7-footer-badge--secret {
+  border: 1px dashed #cbd5e1;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lab5 .lab5-s7-footer-badge--public {
+  border: 1px solid #86efac;
+  background-color: #f0fdf4;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lab5 .lab5-s7-footer-counter {
+  font-size: 12px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+/* Checklist row */
+.lab5 .lab5-s7-checklist {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.lab5 .lab5-s7-check-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.lab5 .lab5-s7-check-btn--idle {
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.lab5 .lab5-s7-check-btn--done {
+  border: 1px solid #86efac;
+  background-color: #f0fdf4;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.lab5 .lab5-s7-check-circle {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid #94a3b8;
+  flex-shrink: 0;
+}
+
+/* Hint button */
+.lab5 .lab5-s7-hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #f5f3ff;
+  color: #6d4bd8;
+  border: none;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.lab5 .lab5-s7-hint-btn:hover {
+  background-color: #ede9fe;
+}
+
+.lab5 .lab5-s7-hint-box {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 14px;
+  font-size: 12px;
+  background-color: #f8fafc;
+  color: #475569;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   Step 7 — Arena Swimlane Sequence (Matches Screenshot)
+   ========================================================================== */
+
+.lab5 .lab5-s7-swimlane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 24px 16px 24px;
+}
+
+.lab5 .lab5-s7-swim-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 0;
+}
+
+.lab5 .lab5-s7-swim-col--left {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.lab5 .lab5-s7-swim-col--mid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 52px;
+}
+
+.lab5 .lab5-s7-swim-col--right {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Row 1 — Private Bubble (Prover local check) */
+.lab5 .lab5-s7-bubble-private {
+  width: 100%;
+  max-width: 440px;
+  border: 1px dashed #c084fc;
+  background-color: #faf5ff;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s7-bubble-private--fail {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+}
+
+.lab5 .lab5-s7-bubble-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s7-bubble-tag--fail {
+  color: #e11d48;
+}
+
+.lab5 .lab5-s7-bubble-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lab5 .lab5-s7-inline-icon {
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s7-text-fail {
+  color: #e11d48;
+}
+
+/* Row 2 — Send Bubble (Purple card) */
+.lab5 .lab5-s7-bubble-send {
+  width: 100%;
+  max-width: 440px;
+  background-color: #f3e8ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lab5 .lab5-s7-send-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s7-send-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s7-send-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.lab5 .lab5-s7-chip-statement {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #86efac;
+  background: #f0fdf4;
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lab5 .lab5-s7-chip-proof {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #ddd6fe;
+  background: #faf5ff;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--lab5-font-mono, monospace);
+  white-space: nowrap;
+}
+
+.lab5 .lab5-s7-chip-proof-fail {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #e11d48;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Row 3 — Verifier Bubble (Green dashed card on right) */
+.lab5 .lab5-s7-bubble-verifier {
+  width: 100%;
+  max-width: 440px;
+  border: 1px dashed #86efac;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s7-bubble-verifier--fail {
+  border-color: #fca5a5;
+  background-color: #fff1f2;
+}
+
+.lab5 .lab5-s7-verifier-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.lab5 .lab5-s7-verifier-tag--fail {
+  color: #e11d48;
+}
+
+.lab5 .lab5-s7-verifier-text {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.lab5 .lab5-s7-mark-accept {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.lab5 .lab5-s7-mark-reject {
+  color: #e11d48;
+  font-weight: 700;
+}
+
+/* Center Column Icons & Buttons */
+.lab5 .lab5-s7-mid-icon-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s7-mid-icon-circle--purple {
+  border: 1.5px dashed #c084fc;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s7-mid-icon-circle--green {
+  border: 1.5px dashed #86efac;
+  color: #16a34a;
+}
+
+.lab5 .lab5-s7-mid-icon-circle--fail {
+  border: 1.5px dashed #fca5a5;
+  color: #e11d48;
+}
+
+.lab5 .lab5-s7-mid-btn-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #6d28d9;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.3);
+}
+
+.lab5 .lab5-s7-mid-btn-arrow--fail {
+  background: #ffe4e6;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Step 7 — Verifier Order Log Table
+   ========================================================================== */
+
+.lab5 .lab5-s7-verifier-table-wrap {
+  border: 1.5px solid #e0e7ff;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(109, 75, 216, 0.06);
+}
+
+.lab5 .lab5-s7-verifier-table-header {
+  padding: 18px 20px 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lab5 .lab5-s7-verifier-table-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.lab5 .lab5-s7-verifier-table-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.lab5 .lab5-s7-verifier-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lab5 .lab5-s7-verifier-table th {
+  padding: 10px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fafafa;
+}
+
+.lab5 .lab5-s7-verifier-table td {
+  padding: 13px 20px;
+  font-size: 13px;
+  color: #334155;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+}
+
+.lab5 .lab5-s7-verifier-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lab5 .lab5-s7-verifier-table tbody tr:hover td {
+  background: #fafafe;
+}
+
+.lab5 .lab5-s7-verifier-order-text {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.lab5 .lab5-s7-verifier-proof-chip {
+  color: #7c3aed;
+  font-family: var(--lab5-font-mono);
+  font-size: 11px;
+}
+
+.lab5 .lab5-s7-verifier-hidden {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lab5 .lab5-s7-verifier-result {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lab5 .lab5-s7-verifier-result--accept {
+  color: #16a34a;
+}
+
+.lab5 .lab5-s7-verifier-result--reject {
+  color: #e11d48;
+}
+
+/* ==========================================================================
+   Step 8 — Interactive vs zk-SNARK Comparison (Matches media_1792537449486.png)
+   ========================================================================== */
+
+.lab5 .lab5-s8-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lab5 .lab5-s8-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lab5 .lab5-s8-tag {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background-color: #ede9fe;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.lab5 .lab5-s8-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.lab5 .lab5-s8-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 2 Mode Tabs */
+.lab5 .lab5-s8-tabs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.lab5 .lab5-s8-tab-btn {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s8-tab-btn--interactive-active {
+  border: 2px solid #f43f5e;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.08);
+}
+
+.lab5 .lab5-s8-tab-btn--snark-active {
+  border: 2px solid #10b981;
+  background-color: #f0fdf4;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+}
+
+.lab5 .lab5-s8-tab-btn--idle {
+  border: 1.5px solid #e2e8f0;
+}
+
+.lab5 .lab5-s8-tab-btn--idle:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.lab5 .lab5-s8-tab-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lab5 .lab5-s8-tab-title--rose {
+  color: #e11d48;
+}
+
+.lab5 .lab5-s8-tab-title--purple {
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s8-tab-title--green {
+  color: #059669;
+}
+
+.lab5 .lab5-s8-tab-title--slate {
+  color: #1e293b;
+}
+
+.lab5 .lab5-s8-tab-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Arena Card */
+.lab5 .lab5-s8-arena {
+  background: #ffffff;
+  border: 1.5px solid #e0e7ff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(109, 75, 216, 0.06);
+}
+
+.lab5 .lab5-s8-arena-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lab5 .lab5-s8-arena-party {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lab5 .lab5-s8-avatar--prover {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f3e8ff;
+  color: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s8-avatar--verifier {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s8-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s8-name--verifier {
+  color: #16a34a;
+}
+
+.lab5 .lab5-s8-role {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Arena Body / Messages */
+.lab5 .lab5-s8-arena-body {
+  padding: 24px 20px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.lab5 .lab5-s8-placeholder {
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Step 8 Swimlane Messages (Matches media_1792538195368.png) */
+.lab5 .lab5-s8-swimlane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 20px;
+}
+
+.lab5 .lab5-s8-swim-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 0;
+}
+
+.lab5 .lab5-s8-swim-left {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.lab5 .lab5-s8-swim-mid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 52px;
+}
+
+.lab5 .lab5-s8-swim-right {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Swimlane cards */
+.lab5 .lab5-s8-card-prover {
+  width: 100%;
+  max-width: 440px;
+  background-color: #f3e8ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s8-card-verifier-challenge {
+  width: 100%;
+  max-width: 440px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s8-card-verifier-check {
+  width: 100%;
+  max-width: 440px;
+  background-color: #ffffff;
+  border: 1px dashed #86efac;
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s8-header-prover {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.lab5 .lab5-s8-header-verifier {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.lab5 .lab5-s8-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e1b4b;
+  line-height: 1.5;
+}
+
+.lab5 .lab5-s8-chip-purple {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #ddd6fe;
+  background: #faf5ff;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--lab5-font-mono, monospace);
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.lab5 .lab5-s8-chip-white {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 700;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* Swimlane icons */
+.lab5 .lab5-s8-circle-arrow-purple {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #6d28d9;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.25);
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s8-circle-arrow-green {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #10b981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s8-circle-shield {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px dashed #86efac;
+  background-color: #ffffff;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s8-fastforward-banner {
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6d28d9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 20px 16px 20px;
+}
+
+/* Arena Action Section */
+.lab5 .lab5-s8-action-section {
+  padding: 14px 20px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lab5 .lab5-s8-action-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.lab5 .lab5-s8-action-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lab5 .lab5-s8-btn-submit {
+  background-color: #6d28d9;
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 9px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.25);
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.lab5 .lab5-s8-btn-submit:hover {
+  background-color: #5b21b6;
+  box-shadow: 0 4px 10px rgba(109, 40, 217, 0.35);
+}
+
+.lab5 .lab5-s8-btn-reset {
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.lab5 .lab5-s8-btn-reset:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Arena Footer */
+.lab5 .lab5-s8-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lab5 .lab5-s8-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lab5 .lab5-s8-footer-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lab5 .lab5-s8-badge--confidence {
+  border: 1px solid #86efac;
+  background-color: #f0fdf4;
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lab5 .lab5-s8-badge--online {
+  border: 1px dashed #cbd5e1;
+  background-color: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lab5 .lab5-s8-footer-counter {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Comparison Table Card */
+.lab5 .lab5-s8-table-card {
+  background: #ffffff;
+  border: 1.5px solid #e0e7ff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(109, 75, 216, 0.06);
+}
+
+.lab5 .lab5-s8-table-header {
+  padding: 16px 20px 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s8-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lab5 .lab5-s8-table th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background-color: #fafafa;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lab5 .lab5-s8-table td {
+  padding: 14px 20px;
+  font-size: 12.5px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.lab5 .lab5-s8-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lab5 .lab5-s8-table tbody tr:hover td {
+  background-color: #fcfbfe;
+}
+
+.lab5 .lab5-s8-cell-green {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* Step 8 Quiz Section (Matches media_1792537959400.png) */
+.lab5 .lab5-s8-quiz-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.lab5 .lab5-s8-quiz-question {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.lab5 .lab5-s8-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lab5 .lab5-s8-quiz-opt {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.lab5 .lab5-s8-quiz-opt:hover {
+  border-color: #cbd5e1;
+  background-color: #fcfcfd;
+}
+
+.lab5 .lab5-s8-quiz-opt--correct {
+  border: 2px solid #86efac;
+  background-color: #f0fdf4;
+}
+
+.lab5 .lab5-s8-quiz-opt--wrong {
+  border: 2px solid #fecdd3;
+  background-color: #fff1f2;
+}
+
+.lab5 .lab5-s8-quiz-opt-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s8-quiz-opt-title--correct {
+  color: #16a34a;
+}
+
+.lab5 .lab5-s8-quiz-opt-title--wrong {
+  color: #e11d48;
+}
+
+.lab5 .lab5-s8-quiz-opt-desc {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.lab5 .lab5-s8-quiz-hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #f5f3ff;
+  color: #7c3aed;
+  border: none;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.lab5 .lab5-s8-quiz-hint-btn:hover {
+  background-color: #ede9fe;
+}
+
+.lab5 .lab5-s8-quiz-hint-box {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  background-color: #f8fafc;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* zk-SNARK additions (Matches media_1792538943991.png) */
+.lab5 .lab5-s8-chip-green {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #bbf7d0;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lab5 .lab5-s8-card-subtext {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.lab5 .lab5-s8-btn-snark-replay {
+  background-color: #ffffff;
+  color: #7c3aed;
+  border: 1.5px solid #ddd6fe;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.lab5 .lab5-s8-btn-snark-replay:hover {
+  background-color: #faf5ff;
+  border-color: #c4b5fd;
+}
+
+.lab5 .lab5-s8-snark-summary-pill {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 9999px;
+  padding: 10px 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #166534;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.lab5 .lab5-s8-quiz-correct-box {
+  background-color: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lab5 .lab5-s8-quiz-correct-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.lab5 .lab5-s8-quiz-correct-text {
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.6;
+  margin-left: 22px;
+}
+
+/* ==========================================================================
+   Step 9 — Merkle Tree + zk-SNARK ช่วยอะไรเรา? (Matches media_1792539684391.png)
+   ========================================================================== */
+.lab5 .lab5-s9-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lab5 .lab5-s9-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.lab5 .lab5-s9-tag {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+}
+
+.lab5 .lab5-s9-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.lab5 .lab5-s9-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Tabs */
+.lab5 .lab5-s9-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.lab5 .lab5-s9-tab-btn {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab5 .lab5-s9-tab-btn--active-rose {
+  border: 2px solid #f43f5e;
+  background-color: #fff1f2;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.08);
+}
+
+.lab5 .lab5-s9-tab-btn--active-green {
+  border: 2px solid #10b981;
+  background-color: #f0fdf4;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+}
+
+.lab5 .lab5-s9-tab-btn--idle {
+  border: 1.5px solid #e2e8f0;
+}
+
+.lab5 .lab5-s9-tab-btn--idle:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.lab5 .lab5-s9-tab-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lab5 .lab5-s9-tab-title--rose {
+  color: #e11d48;
+}
+
+.lab5 .lab5-s9-tab-title--green {
+  color: #059669;
+}
+
+.lab5 .lab5-s9-tab-title--slate {
+  color: #1e293b;
+}
+
+.lab5 .lab5-s9-tab-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Root bar */
+.lab5 .lab5-s9-root-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lab5 .lab5-s9-root-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s9-root-chip {
+  background-color: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #16a34a;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--lab5-font-mono, monospace);
+  padding: 4px 14px;
+  border-radius: 9999px;
+  display: inline-flex;
+}
+
+/* Visibility Matrix Card */
+.lab5 .lab5-s9-matrix-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.lab5 .lab5-s9-matrix-header {
+  padding: 18px 24px 14px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lab5 .lab5-s9-matrix-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.lab5 .lab5-s9-matrix-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.lab5 .lab5-s9-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lab5 .lab5-s9-table th {
+  padding: 10px 24px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: #fafafa;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lab5 .lab5-s9-table th:first-child {
+  text-align: left;
+  width: 50%;
+}
+
+.lab5 .lab5-s9-table th:nth-child(2),
+.lab5 .lab5-s9-table th:nth-child(3) {
+  text-align: center;
+  width: 25%;
+}
+
+.lab5 .lab5-s9-table td {
+  padding: 14px 24px;
+  font-size: 12.5px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.lab5 .lab5-s9-table td:first-child {
+  text-align: left;
+}
+
+.lab5 .lab5-s9-table td:nth-child(2),
+.lab5 .lab5-s9-table td:nth-child(3) {
+  text-align: center;
+}
+
+.lab5 .lab5-s9-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lab5 .lab5-s9-cell-red {
+  color: #e11d48;
+  font-weight: 700;
+}
+
+.lab5 .lab5-s9-cell-green {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* Callout Box */
+.lab5 .lab5-s9-callout {
+  background-color: #f5f3ff;
+  border: 1px solid #ede9fe;
+  border-radius: 16px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lab5 .lab5-s9-callout-text {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #5b21b6;
+  line-height: 1.5;
+}
+
+/* Section: จำไว้ 3 อย่าง (Matches media_1792539994348.png) */
+.lab5 .lab5-s9-takeaway-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.lab5 .lab5-s9-takeaway-heading {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.lab5 .lab5-s9-takeaway-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.lab5 .lab5-s9-takeaway-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f5f3ff;
+  color: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lab5 .lab5-s9-takeaway-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lab5 .lab5-s9-takeaway-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s9-takeaway-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Feature mapping table: จากแลปนี้ สู่ฟีเจอร์จริงใน Stealth Trade (Cycle 2) */
+.lab5 .lab5-s9-features-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  margin-top: 6px;
+}
+
+.lab5 .lab5-s9-features-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s9-features-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+  gap: 16px;
+}
+
+.lab5 .lab5-s9-features-row:last-child {
+  border-bottom: none;
+}
+
+.lab5 .lab5-s9-features-step {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.lab5 .lab5-s9-features-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lab5 .lab5-s9-features-title {
+  font-size: 12.5px;
+  color: #1e293b;
+}
+
+.lab5 .lab5-s9-features-tag {
+  color: #6d28d9;
+  font-weight: 800;
+  margin-right: 4px;
+}
+
+.lab5 .lab5-s9-features-desc {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* Completion Card: เรียนจบ Lab 05 • 07 แล้ว */
+.lab5 .lab5-s9-complete-card {
+  background-color: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 24px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.lab5 .lab5-s9-complete-trophy {
+  color: #16a34a;
+  margin-bottom: 2px;
+}
+
+.lab5 .lab5-s9-complete-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.lab5 .lab5-s9-complete-desc {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  max-width: 540px;
+  line-height: 1.5;
+}
+
+.lab5 .lab5-s9-complete-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.lab5 .lab5-s9-btn-outline {
+  background-color: #ffffff;
+  color: #6d28d9;
+  border: 1.5px solid #ddd6fe;
+  border-radius: 9999px;
+  padding: 9px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.lab5 .lab5-s9-btn-outline:hover {
+  background-color: #faf5ff;
+  border-color: #c4b5fd;
+}
+
+.lab5 .lab5-s9-btn-primary {
+  background-color: #6d28d9;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 9px 24px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.25);
+}
+
+.lab5 .lab5-s9-btn-primary:hover {
+  background-color: #5b21b6;
+}
+
+

@@ -19,6 +19,8 @@ import React, {
 } from "react"
 import {
   AlertTriangle,
+  Wallet,
+  FileText,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -28,14 +30,17 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  Clock,
   Copy,
   Eye,
   EyeOff,
+  FastForward,
   Fingerprint,
   Globe,
   GraduationCap,
   HelpCircle,
   Info,
+  Key,
   Layers,
   Lightbulb,
   Link2,
@@ -46,9 +51,12 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
+  Trophy,
+  User,
   Users,
   X,
   XCircle,
+  Zap,
 } from "lucide-react"
 import "../../css/lab5.css"
 
@@ -247,55 +255,63 @@ export const STEP_META = [
   {
     index: 1,
     topic: "โจทย์ความเป็นส่วนตัว",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
+    mission: "เลือกออร์เดอร์ของคุณ แล้วเลือกวิธีพิสูจน์ที่ปลอดภัยที่สุด",
     mentor:
-      "หากเราต้องการจะเช็คความถูกต้องของรายการออร์เดอร์ที่เราได้สั่งซื้อไป จะมีกระบวนการอย่างไร?\nจึงได้เกิดขั้นตอนของ merkle tree ขึ้นมาเพื่อแก้ปัญหานี้",
+      "สวัสดีครับ! สมมติว่าคุณเพิ่งส่งคำสั่งซื้อในเว็บเทรด\nตอนนี้คุณอยากให้คนอื่นเชื่อว่า \"ออร์เดอร์ของฉันอยู่ในระบบจริง\" แต่ไม่อยากให้ใครเห็นข้อมูลออร์เดอร์ของคุณ\nเราจะแก้ปัญหานี้ไปด้วยกันทีละขั้นครับ ไม่ต้องมีพื้นฐานมาก่อนเลย",
   },
   {
     index: 2,
-    topic: "สร้าง Hash",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
-    mentor: "มาทำการจำลองการสั่งซื้อเพื่อส่งคำสั่งซื้อเข้าไปให้กับระบบกันครับ",
+    topic: "สร้าง Hash และต้นไม้",
+    mission: "เปลี่ยนรหัสลับเป็น Hash แล้วจับคู่ขึ้นไปจนได้ Root",
+    mentor:
+      "ก่อนสร้างต้นไม้ เราต้องรู้จัก \"Hash\" ก่อนครับ\nให้คิดว่า Hash คือลายนิ้วมือของข้อมูล — ข้อมูลเดียวกันได้ลายนิ้วมือเดิมเสมอ แต่ถ้าเห็นแค่ลายนิ้วมือ\nจะย้อนกลับไปรู้ข้อมูลต้นฉบับไม่ได้",
   },
   {
     index: 3,
-    topic: "ประกอบต้นไม้",
-    mentor: "เอาล่ะครับ! เรามาดูวิธีการที่ผู้ตวจสอบ (ระบบ) ตรวจหา Order ของเรากันครับ",
+    topic: "สร้างและตรวจ Proof",
+    mentor:
+      "คราวนี้คุณคือ Prover ครับ — เว็บเทรดประกาศ Root ไว้แล้ว และคุณต้องคุยกับ Verifier ให้เขาเชื่อว่าออร์เดอร์ B อยู่ในต้นไม้\nไม่ต้องส่งทุกใบ ส่งแค่ของที่ Verifier ต้องใช้คำนวณขึ้นไปหา Root ก็พอ ลองเลือกข้อความที่จะส่งทีละสเต็ปดูครับ",
   },
   {
     index: 4,
-    topic: "เลือกสิ่งที่จะพิสูจน์",
-    mentor: "ตอนนี้เลือก Order ที่คุณอยากพิสูจน์ได้เลยครับ",
+    topic: "ทดสอบการแก้ไขข้อมูล",
+    mission: "ลองแอบแก้ข้อมูล แล้วดูว่าระบบจับได้หรือไม่",
+    mentor:
+      "ถ้ามีคนแอบแก้ข้อมูลออร์เดอร์ — แม้แต่ตัวอักษรเดียว — จะเกิดอะไรขึ้น?\nลองเปิดสวิตช์ด้านล่างดูครับ แล้วสังเกตสีของต้นไม้",
   },
   {
     index: 5,
-    topic: "สร้างและตรวจ Proof",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
-    mentor: "ต่อมาจะเป็นขั้นตอนการหาว่าข้อมูลของเรา อยู่ในชุดข้อมูลหรือเปล่าครับ",
+    topic: "Merkle Proof ยังเผยอะไร",
+    mission: "อ่านทุกข้อความที่ข้ามเส้นไปฝั่ง Verifier แล้วตอบคำถาม",
+    mentor:
+      "Merkle proof เก่งมากครับ แต่ลองเปลี่ยนมุมมอง — นี่คือบทสนทนาจากขั้นที่ 3 ทั้งหมด\nถ้าคุณเป็น Verifier ที่ได้รับข้อความเหล่านี้ คุณจะรู้อะไรเกี่ยวกับเจ้าของออร์เดอร์บ้าง?",
   },
   {
     index: 6,
-    topic: "ทดสอบการแก้ไขข้อมูล",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
-    mentor: "ลองเปลี่ยนข้อมูลดูอย่างเล็กน้อย แล้วดูว่า Hash กับ Root เปลี่ยนตามไหมครับ",
+    topic: "ไปป์ไลน์ zk-SNARK",
+    mission: "เดินผ่าน 5 ชิ้นส่วนของ zk-SNARK ทีละขั้น จนผู้ตรวจยอมรับ",
+    mentor:
+      "zk-SNARK เหมือน \"เครื่องตรวจปิดผนึก\" ที่อยู่ในเครื่องของคุณครับ\nงานเกือบทั้งหมดเกิดขึ้นฝั่งซ้ายของเส้น (ในเครื่องคุณ) แล้วส่งของข้ามเส้นไปหา Verifier แค่ครั้งเดียว\nลองทำทีละชิ้นทั้ง 5 ชิ้น แล้วดูว่าข้อความไหนข้ามเส้นบ้าง",
   },
   {
     index: 7,
-    topic: "เวิร์กโฟลว์ ZKP (จำลอง)",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
-    mentor: "มาดู 4 ขั้นตอนกันครับ: ประกาศ Root → ข้อมูลลับของผู้ใช้ → สร้าง Proof → แสดงหลักฐาน (จำลอง)",
+    topic: "พิสูจน์ว่ามีเงินพอ",
+    mentor:
+      "ไปป์ไลน์เดียวกันนี้ใช้พิสูจน์ได้ \"ทุกเงื่อนไข\" ครับ ไม่ใช่แค่ Merkle Tree\nลองเรื่องที่ใกล้ตัวที่สุดในเว็บเทรด: \"ฉันมีเงินพอซื้อ\" โดยไม่ต้องบอกว่ามีเงินเท่าไหร่ —\nสังเกตว่ายอดเงินไม่เคยข้ามเส้นไปเลย",
   },
   {
     index: 8,
-    topic: "Merkle กับ ZKP",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
-    mentor: "ลองสลับดูครับว่าเมื่อใช้ ZKP ข้อมูลอะไรถูกซ่อน และผู้ตรวจยังตรวจอะไรได้บ้าง",
+    topic: "ทำไม zk-SNARK ถึงเหมาะกับเว็บเทรด?",
+    mission: "เทียบ Lab 03 กับ zk-SNARK แล้วตอบคำถาม",
+    mentor:
+      "จำ Lab 03 ได้ไหมครับ? ตอนนั้นเราพิสูจน์ด้วยการถาม-ตอบหลายรอบ (Commit → Challenge → Response) ลองเล่นเป็น Prover ทั้งสองแบบ แล้วนับดูว่าต้องส่งข้อความข้ามเส้นกี่ครั้ง",
   },
   {
     index: 9,
-    topic: "สรุปในบริบทการเทรด",
-    mission: "เลือกรายการและทดสอบตรวจสอบสิทธิ์เพื่อเริ่มการทดลอง",
-    mentor: "ปิดท้ายด้วยการดูว่า proof เดิมถูกใช้ซ้ำในบริบทเดิมได้ไหมครับ",
+    topic: "Merkle Tree + zk-SNARK ช่วยอะไรเรา?",
+    mission: "ทบทวนสิ่งที่เรียน และดูว่าจะไปเป็นฟีเจอร์จริงไหนในเว็บเทรด",
+    mentor:
+      "เก่งมากครับ! มาทบทวนกันว่าเราเรียนอะไรไปบ้าง และทั้งหมดนี้จะกลายเป็นฟีเจอร์จริงตรงไหนใน Stealth Trade",
   },
 ]
 
@@ -311,7 +327,7 @@ const initialState = {
   builtPairs: [false, false],
   isRootBuilt: false,
   // step 4
-  selectedLeaf: 0,
+  selectedLeaf: 1,
   // step 5
   foundSiblings: [],
   // step 6
@@ -382,19 +398,15 @@ export function Lab05Provider({ children }) {
         case 2:
           return lessonState.hashedLeaves.every(Boolean)
         case 3:
-          return lessonState.builtPairs.every(Boolean) && lessonState.isRootBuilt
+          return lessonState.foundSiblings.length >= 2
         case 4:
-          return lessonState.selectedLeaf !== null
+          return true
         case 5:
-          return (
-            authPathSteps.length > 0 &&
-            authPathSteps.every((pathStep) => lessonState.foundSiblings.includes(pathStep.nodeId)) &&
-            lessonState.isRootComputed
-          )
+          return true
         case 6:
           return true
         case 7:
-          return lessonState.isZkpWorkflowDone
+          return lessonState.completedSteps.includes(7) || lessonState.isZkpWorkflowDone
         case 8:
           return true
         case 9:
@@ -655,6 +667,7 @@ export function Lab05Provider({ children }) {
     goPrev,
     goToStep,
     reset,
+    markComplete,
     canProceed,
     isStepComplete,
     answerStep1,
@@ -724,7 +737,7 @@ function ChoiceCard({ isSelected, choiceState = "default", isDisabled, onClick, 
 const feedbackConfig = {
   correct: { icon: CheckCircle2, tone: "success" },
   success: { icon: CheckCircle2, tone: "success" },
-  incorrect: { icon: RotateCcw, tone: "danger" },
+  incorrect: { icon: XCircle, tone: "danger" },
   failed: { icon: XCircle, tone: "danger" },
 }
 
@@ -742,21 +755,47 @@ const feedbackConfig = {
 function FeedbackCard({ variant, title, children, className }) {
   const config = feedbackConfig[variant]
   const Icon = config.icon
+  const isDanger = config.tone === "danger"
+
   return (
     <div
       role="status"
       className={JoinClassNames(
-        "lab5-animate-merge-up lab5-feedback",
-        config.tone === "success" ? "lab5-feedback--success" : "lab5-feedback--danger",
+        "lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3",
         className,
       )}
+      style={{
+        borderRadius: "1rem",
+        padding: "1.125rem 1.25rem",
+        backgroundColor: isDanger ? "#fff5f5" : "#eaf8f2",
+        border: isDanger ? "1.5px solid #fecdd3" : "1.5px solid #a7f3d0",
+      }}
     >
-      <Icon className={JoinClassNames("lab5-feedback-icon", config.tone === "success" ? "lab5-feedback-icon--success" : "lab5-feedback-icon--danger")} />
-      <div className="lab5-space-y-1">
-        <p className={JoinClassNames("lab5-feedback-title", config.tone === "success" ? "lab5-feedback-title--success" : "lab5-feedback-title--danger")}>
+      <Icon
+        className="lab5-size-5 lab5-shrink-0"
+        style={{
+          color: isDanger ? "#ef4444" : "#16a979",
+          marginTop: "2px",
+        }}
+      />
+      <div className="lab5-space-y-1" style={{ flex: 1 }}>
+        <p
+          className="lab5-text-sm lab5-font-bold"
+          style={{
+            color: isDanger ? "#e11d48" : "#16a979",
+            margin: 0,
+          }}
+        >
           {title}
         </p>
-        {children && <div className="lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80">{children}</div>}
+        {children && (
+          <div
+            className="lab5-text-xs lab5-leading-relaxed"
+            style={{ color: "#475569", lineHeight: 1.6 }}
+          >
+            {children}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -966,7 +1005,7 @@ function MentorMessage({ message }) {
       </div>
       <div className="lab5-min-w-0">
         <div className="lab5-flex lab5-items-baseline lab5-gap-2">
-          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร. ซีโร่</span>
+          <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">ดร. ธีร์</span>
           <span className="lab5-text-xs lab5-text-muted-foreground">ผู้สอน</span>
         </div>
         <p className="lab5-mt-0.5 lab5-text-sm lab5-leading-relaxed lab5-text-foreground-80 lab5-text-pretty" style={{ whiteSpace: "pre-line" }}>{message}</p>
@@ -1015,7 +1054,7 @@ const nodeStateClass = {
  * @return {JSX.Element} แผนภาพต้นไม้
  * @author StealthTrade Team
  */
-function MerkleTreeDiagram({ nodeStateMap = {}, visibilityMap, hashNodeIds = [], clickableNodeIds = [], onNodeClick, className }) {
+function MerkleTreeDiagram({ nodeStateMap = {}, visibilityMap, hashNodeIds = [], clickableNodeIds = [], onNodeClick, customHashes = {}, className }) {
   const { tree } = useLab05()
 
   /**
@@ -1026,6 +1065,7 @@ function MerkleTreeDiagram({ nodeStateMap = {}, visibilityMap, hashNodeIds = [],
    * @author StealthTrade Team
    */
   const getHashByNodeId = (nodeId) => {
+    if (customHashes && customHashes[nodeId]) return customHashes[nodeId]
     if (!tree || !hashNodeIds.includes(nodeId)) return undefined
     if (nodeId === "root") return tree.root
     if (nodeId.startsWith("mid-")) return tree.midHashes[Number(nodeId.slice(4))]
@@ -1065,7 +1105,7 @@ function MerkleTreeDiagram({ nodeStateMap = {}, visibilityMap, hashNodeIds = [],
     const toState = getNodeState(toId)
     const isLit = (nodeStateName) => nodeStateName === "path" || nodeStateName === "target" || nodeStateName === "success"
     const isError = (nodeStateName) => nodeStateName === "error"
-    if (isError(fromState) || isError(toState)) return "error"
+    if (isError(fromState) && isError(toState)) return "error"
     return isLit(fromState) && isLit(toState) ? "active" : false
   }
 
@@ -1172,7 +1212,9 @@ function LabProgress() {
         })}
       </div>
       <p className="lab5-text-center lab5-text-xs lab5-font-medium lab5-text-muted-foreground">
-        {currentStep === 0 ? "บทนำ" : `ขั้นที่ ${currentStep} · ${STEP_META[currentStep]?.topic || ""}`}
+        {currentStep === 0
+          ? "บทนำ"
+          : `${currentStep <= 4 ? "ภาค 1 · Merkle Tree" : "ภาค 2 · zk-SNARK"} · ขั้นที่ ${currentStep} · ${STEP_META[currentStep]?.topic || ""}`}
       </p>
     </div>
   )
@@ -1242,41 +1284,129 @@ function StepIntro() {
   const { goNext } = useLab05()
 
   return (
-    <div className="lab5-space-y-8 lab5-text-center" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
-      <div className="lab5-space-y-6">
-        <div className="lab5-flex lab5-justify-center">
-          <span className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-4 lab5-py-1.5 lab5-font-mono lab5-text-10 lab5-font-bold lab5-uppercase lab5-tracking-wide lab5-text-muted-foreground">
-            LAB 5 <span style={{ opacity: 0.5 }}>·</span> Merkle Trees
-          </span>
-        </div>
-
-        <div className="lab5-space-y-2">
-          <h1
-            className="lab5-text-balance lab5-text-4xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-5xl"
-            style={{ backgroundImage: 'linear-gradient(to right, #12a05a 15%, #5b3ff2 45%)', WebkitBackgroundClip: 'text', color: 'transparent' }}
-          >
-            Lab 05 — Merkle Trees แบบ ZKP
-          </h1>
-          <h2 className="lab5-text-balance lab5-text-2xl lab5-font-extrabold lab5-leading-tight lab5-text-foreground lab5-sm:text-4xl">
-            พิสูจน์ข้อมูลโดยไม่ต้องเปิดเผยข้อมูลลับ
-          </h2>
-        </div>
-
-        <p className="lab5-mx-auto lab5-max-w-lg lab5-text-pretty lab5-text-sm lab5-leading-relaxed lab5-text-muted-foreground lab5-sm:text-base">
-          เว็บเทรดมี Order จำนวนมาก เราจะพิสูจน์ได้อย่างไรว่า Order ของเราอยู่ในชุดข้อมูล โดยไม่ต้องเปิดเผยข้อมูลทั้งหมดให้ผู้ตรวจสอบ?
-          <br />
-          เรียนรู้ผ่านการสร้าง Merkle Tree และจำลองการพิสูจน์ด้วย ZKP
-        </p>
+    <div
+      className="lab5-text-center"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "1.5rem",
+      }}
+    >
+      {/* Top Pill Tag */}
+      <div>
+        <span
+          className="lab5-inline-flex lab5-items-center lab5-gap-2.5 lab5-rounded-full lab5-border lab5-px-4 lab5-py-1.5 lab5-font-mono lab5-font-bold lab5-uppercase"
+          style={{
+            fontSize: "0.6875rem",
+            letterSpacing: "0.08em",
+            borderColor: "#e2e8f0",
+            backgroundColor: "#ffffff",
+            color: "#64748b",
+          }}
+        >
+          LAB 5 <span style={{ opacity: 0.35 }}>·</span> MERKLE TREES <span style={{ opacity: 0.35 }}>·</span> ZK-SNARK
+        </span>
       </div>
 
-      <div style={{ marginTop: '3rem' }}>
+      {/* Main Title & Subtitle */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+        <h1
+          className="lab5-text-balance lab5-text-4xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-5xl"
+          style={{ fontWeight: 800, margin: 0 }}
+        >
+          <span style={{ color: "#10b981" }}>Lab 05 — </span>
+          <span style={{ color: "#544af4" }}>Merkle Trees แบบ ZKP</span>
+        </h1>
+        <h2
+          className="lab5-text-balance lab5-text-2xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-3xl"
+          style={{ color: "#1e293b", fontWeight: 800, margin: 0 }}
+        >
+          พิสูจน์ข้อมูลโดยไม่ต้องเปิดเผยข้อมูลลับ
+        </h2>
+      </div>
+
+      {/* Description */}
+      <p
+        className="lab5-mx-auto lab5-max-w-xl lab5-text-center lab5-text-sm lab5-leading-relaxed lab5-sm:text-base"
+        style={{
+          lineHeight: 1.75,
+          color: "#64748b",
+          margin: 0,
+        }}
+      >
+        เว็บเทรดมี Order จำนวนมาก เราจะพิสูจน์ได้อย่างไรว่า Order
+        <br />
+        ของเราอยู่ในชุดข้อมูล โดยไม่ต้องเปิดเผยข้อมูลทั้งหมดให้ผู้ตรวจสอบ?
+        <br />
+        เรียนรู้ผ่านการสร้าง Merkle Tree แล้วต่อยอดเป็น zk-SNARK —
+        <br />
+        ไม่ต้องมีพื้นฐานมาก่อน
+      </p>
+
+      {/* Badges Row */}
+      <div
+        className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center"
+        style={{ gap: "0.625rem", marginTop: "0.25rem" }}
+      >
+        <div
+          className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-border lab5-px-3.5 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-shadow-sm"
+          style={{
+            backgroundColor: "#ffffff",
+            borderColor: "#e2e8f0",
+            color: "#334155",
+            gap: "0.5rem",
+          }}
+        >
+          <span>ภาค 1</span>
+          <span style={{ opacity: 0.35 }}>·</span>
+          <span>Merkle Tree</span>
+        </div>
+        <div
+          className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-border lab5-px-3.5 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-shadow-sm"
+          style={{
+            backgroundColor: "#ffffff",
+            borderColor: "#e2e8f0",
+            color: "#334155",
+            gap: "0.5rem",
+          }}
+        >
+          <span>ภาค 2</span>
+          <span style={{ opacity: 0.35 }}>·</span>
+          <span>zk-SNARK</span>
+        </div>
+        <div
+          className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-border lab5-px-3.5 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-shadow-sm"
+          style={{
+            backgroundColor: "#ffffff",
+            borderColor: "#e2e8f0",
+            color: "#334155",
+            gap: "0.5rem",
+          }}
+        >
+          <span>9 ขั้น</span>
+          <span style={{ opacity: 0.35 }}>·</span>
+          <span>ประมาณ 20 นาที</span>
+        </div>
+      </div>
+
+      {/* CTA Button */}
+      <div style={{ marginTop: "0.75rem" }}>
         <button
           type="button"
           onClick={goNext}
-          className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-bg-primary lab5-px-6 lab5-py-3 lab5-text-base lab5-font-bold lab5-text-primary-foreground lab5-shadow-sm lab5-transition-all lab5-hover-brightness"
+          className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-text-base lab5-font-bold lab5-text-white lab5-transition-all hover:lab5-brightness"
+          style={{
+            gap: "0.625rem",
+            padding: "0.65rem 1.75rem",
+            backgroundColor: "#5850ec",
+            boxShadow: "0 4px 14px rgba(88, 80, 236, 0.35)",
+            cursor: "pointer",
+          }}
         >
-          เริ่มเรียนรู้
-          <ArrowRight className="lab5-size-5" />
+          <span>เริ่มเรียนรู้</span>
+          <ArrowRight className="lab5-size-4" style={{ width: 18, height: 18 }} />
         </button>
       </div>
     </div>
@@ -1285,10 +1415,16 @@ function StepIntro() {
 
 const step1Choices = [
   {
-    title: "ส่งรายชื่อทั้งหมด + บอกว่าฉันคือใคร",
+    title: "ส่งข้อมูลออร์เดอร์ทั้งหมด + บอกว่าฉันคือใบไหน",
     desc: "— ตรวจได้ แต่ไม่เป็นส่วนตัว",
     feedbackTitle: "ตรวจได้ แต่ไม่เป็นส่วนตัวเลย",
-    feedbackDesc: "ผู้ตรวจเห็นรายชื่อทั้งหมดและรู้ว่าคุณคือใคร ซึ่งจะไม่ตรงกับหลักการของ ZKP",
+    feedbackDesc: (
+      <span>
+        ผู้ตรวจจะเห็นออร์เดอร์ของ <strong>ทุกคน</strong> และรู้ด้วยว่าคุณคือใบไหน — เหมือนต้องโชว์สมุดบัญชีทั้งเล่ม
+        <br />
+        เพื่อพิสูจน์ว่ามีชื่อเราอยู่บรรทัดเดียว
+      </span>
+    ),
   },
   {
     title: "ส่ง Root อย่างเดียว",
@@ -1300,7 +1436,7 @@ const step1Choices = [
     title: "ส่งหลักฐานแบบ Merkle + ZKP",
     desc: "— เป้าหมายของแลปนี้",
     feedbackTitle: "ถูกต้อง นี่คือเป้าหมายของแลป",
-    feedbackDesc: "เราจะเรียนทีละชั้น: Merkle Tree ในรูปแบบของ ZKP (ขั้น 2–7) แล้วใช้ ZKP ซ่อนตัวตน (ขั้น 8–9)",
+    feedbackDesc: "เราจะเรียนเป็น 2 ภาค: ภาคแรกสร้างเครื่องมือพิสูจน์ ภาคสองเพิ่มความลับเข้าไป",
   },
 ]
 
@@ -1408,117 +1544,386 @@ function Step1MerklePreview() {
  * @author StealthTrade Team
  */
 function Step1WhyMerkle() {
-  const { step1Answer, isStep1Correct, answerStep1 } = useLab05()
+  const { step1Answer, isStep1Correct, answerStep1, selectLeaf } = useLab05()
+  const [selectedOrderIndex, setSelectedOrderIndex] = useState(null)
+  const [showHint, setShowHint] = useState(false)
+
+  const handleSelectOrder = (index) => {
+    setSelectedOrderIndex(index)
+    selectLeaf(index)
+  }
+
+  const activeOrder = selectedOrderIndex !== null ? orders[selectedOrderIndex] : null
 
   return (
     <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="ปัญหาที่เราจะแก้"
-        title="จะพิสูจน์ว่าออร์เดอร์ B ของเราที่สั่งซื้อไป อยู่ในชุดข้อมูลหรือเปล่า?"
-      />
-
-      <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
-        {orders.map((order) => {
-          const isTarget = order.id === "B"
-          return (
-            <div
-              key={order.id}
-              className={JoinClassNames(
-                "lab5-rounded-xl lab5-p-3.5 lab5-text-center lab5-transition-all",
-                isTarget
-                  ? "lab5-border-2 lab5-border-primary lab5-bg-primary-soft lab5-shadow-sm"
-                  : "lab5-border lab5-border-border lab5-bg-surface-soft",
-              )}
-            >
-              <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">
-                {order.label}
-              </p>
-              <p className="lab5-mt-1 lab5-font-mono lab5-text-11 lab5-leading-tight lab5-text-muted-foreground">{order.value}</p>
-              {isTarget && <p className="lab5-mt-1.5 lab5-text-11 lab5-font-semibold lab5-text-primary">← อยากพิสูจน์</p>}
-            </div>
-          )
-        })}
+      {/* 1. ปัญหาที่เราจะแก้ & Title */}
+      <div className="lab5-space-y-2">
+        <span
+          className="lab5-inline-block lab5-rounded-full lab5-px-3 lab5-py-1 lab5-text-xs lab5-font-bold"
+          style={{ backgroundColor: "#f3e8ff", color: "#6d4bd8" }}
+        >
+          ปัญหาที่เราจะแก้
+        </span>
+        <h2
+          className="lab5-text-balance lab5-text-xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-2xl"
+          style={{ color: "#0f172a", fontWeight: 800, margin: 0 }}
+        >
+          จะพิสูจน์ได้อย่างไรว่าออร์เดอร์ของเราอยู่ในระบบ โดยไม่เปิดเผยข้อมูลลับ?
+        </h2>
       </div>
 
-      <div className="lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
-        <Lightbulb className="lab5-size-5 lab5-shrink-0 lab5-text-primary lab5-mt-0.5" />
-        <div className="lab5-space-y-1 lab5-text-xs lab5-leading-relaxed lab5-text-foreground-80">
-          <p className="lab5-text-muted-foreground">
-            Merkle Tree สรุปชุดข้อมูลทั้งหมดให้เหลือค่าเดียว เรียกว่า Root
-          </p>
-          <p className="lab5-text-muted-foreground">
-            ถ้าอยากตรวจสอบ 1 รายการ ให้ทำการส่ง Order นั้น + Hash ของออร์เดอร์ที่เราซื้ออยู่ ที่จำเป็นต่อการคำนวณย้อนกลับไปหา Root หรือชุดข้อมูลที่ทำการเก็บ ออร์เดอร์ของเรา
-          </p>
-        </div>
-      </div>
-
-      <div className="lab5-space-y-1">
-        <p className="lab5-text-xs lab5-font-semibold lab5-text-foreground">
-          เป้าหมาย: พิสูจน์ว่าคุณเป็นออร์เดอร์ โดยไม่บอกว่าคุณเป็นใคร เลือกวิธีส่งข้อมูล 1 วิธี
-        </p>
-        <p className="lab5-text-xs lab5-text-muted-foreground">
-          ZKP = พิสูจน์ว่าบางอย่างเป็นจริง โดยไม่เปิดเผยข้อมูลลับ
-        </p>
-      </div>
-
-      <div className="lab5-space-y-3">
-        {step1Choices.map((choice, index) => {
-          const isSelected = step1Answer === index
-          const choiceState = isSelected ? (index === 2 ? "correct" : "incorrect") : "default"
-          return (
-            <ChoiceCard
-              key={index}
-              isSelected={isSelected}
-              choiceState={choiceState}
-              onClick={() => answerStep1(index)}
-              className="lab5-flex lab5-flex-col lab5-items-start lab5-gap-0.5"
-            >
-              <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">{choice.title}</span>
+      {/* 2. สองการ์ดบทบาท: ผู้พิสูจน์ (Prover) & ผู้ตรวจสอบ (Verifier) */}
+      <div className="lab5-grid lab5-grid-cols-1 lab5-gap-4 lab5-sm:grid-cols-2">
+        {/* Prover */}
+        <div
+          className="lab5-flex lab5-items-start lab5-transition-all"
+          style={{
+            background: "linear-gradient(145deg, #ffffff 0%, #faf8ff 100%)",
+            border: "1.5px solid #ede9fe",
+            borderRadius: "1.125rem",
+            padding: "1.25rem 1.375rem",
+            gap: "1.25rem",
+            boxShadow: "0 4px 20px -2px rgba(109, 75, 216, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02)",
+          }}
+        >
+          <div
+            className="lab5-flex lab5-shrink-0 lab5-items-center lab5-justify-center"
+            style={{
+              width: 44,
+              height: 44,
+              minWidth: 44,
+              borderRadius: "13px",
+              background: "linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)",
+              color: "#6d4bd8",
+              boxShadow: "0 2px 8px rgba(109, 75, 216, 0.16)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              marginTop: "2px",
+            }}
+          >
+            <Users className="lab5-size-5" />
+          </div>
+          <div className="lab5-space-y-1.5" style={{ flex: 1, minWidth: 0 }}>
+            <div className="lab5-flex lab5-items-center lab5-justify-between lab5-gap-2">
+              <h3 className="lab5-text-sm lab5-font-extrabold" style={{ color: "#0f172a", margin: 0 }}>
+                ผู้พิสูจน์ <span style={{ color: "#6d4bd8", fontWeight: 600 }}>(Prover)</span>
+              </h3>
               <span
-                className={JoinClassNames(
-                  "lab5-text-xs",
-                  choiceState === "incorrect"
-                    ? "lab5-text-danger"
-                    : choiceState === "correct"
-                    ? "lab5-text-success"
-                    : "lab5-text-muted-foreground",
-                )}
+                style={{
+                  fontSize: "0.625rem",
+                  fontWeight: 700,
+                  backgroundColor: "#ede9fe",
+                  color: "#6d4bd8",
+                  padding: "2px 8px",
+                  borderRadius: "9999px",
+                  letterSpacing: "0.02em",
+                }}
               >
-                {choice.desc}
+                คุณ
               </span>
-            </ChoiceCard>
-          )
-        })}
-      </div>
-
-      {!isStep1Correct && (
-        <HintButton label="ทำไม?">
-          คำใบ้: เราต้องการพิสูจน์ว่า Order B อยู่ในชุดข้อมูลจริง โดยไม่ต้องเปิดเผย Order อื่นทั้งหมด และไม่เปิดเผยตัวตนของเรา
-        </HintButton>
-      )}
-
-      {step1Answer !== null && !isStep1Correct && (
-        <FeedbackCard variant="incorrect" title={step1Choices[step1Answer].feedbackTitle}>
-          {step1Choices[step1Answer].feedbackDesc}
-        </FeedbackCard>
-      )}
-
-      {isStep1Correct && (
-        <div className="lab5-animate-merge-up lab5-space-y-4">
-          <FeedbackCard variant="correct" title="ถูกต้อง นี่คือเป้าหมายของแลป">
-            เราจะเรียนทีละชั้น: Merkle Tree ในรูปแบบของ ZKP (ขั้น 2–7) แล้วใช้ ZKP ซ่อนตัวตน (ขั้น 8–9)
-          </FeedbackCard>
-
-          <Step1MerklePreview />
-
-          <div className="lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
-            <Users className="lab5-size-4 lab5-shrink-0 lab5-text-primary lab5-mt-0.5" />
-            <p className="lab5-text-xs lab5-leading-relaxed lab5-text-foreground-80">
-              <strong className="lab5-text-foreground">ตัวอย่างการใช้งานจริง:</strong> ระบบมีรายชื่อผู้มีสิทธิ์ 10,000 คน แต่ไม่อยากเปิดเผยรายชื่อทั้งหมด Merkle Tree ช่วยตรวจว่า “คนนี้อยู่ในรายชื่อจริงไหม” โดยใช้ Root + หลักฐานของคนนั้น
+            </div>
+            <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b", margin: 0, lineHeight: 1.6 }}>
+              คือ <strong style={{ color: "#0f172a", fontWeight: 700 }}>"คุณ"</strong> — คนที่อ้างว่าบางอย่างเป็นจริง
+              <br />
+              และถือข้อมูลลับไว้
             </p>
           </div>
         </div>
-      )}
+
+        {/* Verifier */}
+        <div
+          className="lab5-flex lab5-items-start lab5-transition-all"
+          style={{
+            background: "linear-gradient(145deg, #ffffff 0%, #f4fdf8 100%)",
+            border: "1.5px solid #d1fae5",
+            borderRadius: "1.125rem",
+            padding: "1.25rem 1.375rem",
+            gap: "1.25rem",
+            boxShadow: "0 4px 20px -2px rgba(16, 185, 129, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02)",
+          }}
+        >
+          <div
+            className="lab5-flex lab5-shrink-0 lab5-items-center lab5-justify-center"
+            style={{
+              width: 44,
+              height: 44,
+              minWidth: 44,
+              borderRadius: "13px",
+              background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
+              color: "#059669",
+              boxShadow: "0 2px 8px rgba(16, 185, 129, 0.16)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              marginTop: "2px",
+            }}
+          >
+            <ShieldCheck className="lab5-size-5" />
+          </div>
+          <div className="lab5-space-y-1.5" style={{ flex: 1, minWidth: 0 }}>
+            <div className="lab5-flex lab5-items-center lab5-justify-between lab5-gap-2">
+              <h3 className="lab5-text-sm lab5-font-extrabold" style={{ color: "#0f172a", margin: 0 }}>
+                ผู้ตรวจสอบ <span style={{ color: "#059669", fontWeight: 600 }}>(Verifier)</span>
+              </h3>
+              <span
+                style={{
+                  fontSize: "0.625rem",
+                  fontWeight: 700,
+                  backgroundColor: "#d1fae5",
+                  color: "#059669",
+                  padding: "2px 8px",
+                  borderRadius: "9999px",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                ระบบ
+              </span>
+            </div>
+            <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b", margin: 0, lineHeight: 1.6 }}>
+              คือ <strong style={{ color: "#0f172a", fontWeight: 700 }}>"ระบบ/ผู้ตรวจ"</strong> —
+              <br />
+              คนที่ต้องตัดสินว่าจะเชื่อคำอ้างของคุณหรือไม่
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Section ①: เลือกออร์เดอร์ที่เป็นของคุณ */}
+      <div className="lab5-space-y-3">
+        <p className="lab5-text-xs lab5-font-bold" style={{ color: "#334155", margin: 0 }}>
+          ① เลือกออร์เดอร์ที่เป็นของคุณ (เลือกใบไหนก็ได้)
+        </p>
+
+        <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
+          {orders.map((order, index) => {
+            const isSelected = selectedOrderIndex === index
+            return (
+              <button
+                type="button"
+                key={order.id}
+                onClick={() => handleSelectOrder(index)}
+                className="lab5-rounded-2xl lab5-p-4 lab5-text-center lab5-transition-all"
+                style={{
+                  backgroundColor: isSelected ? "#f3effe" : "#ffffff",
+                  border: isSelected ? "1.5px solid #d8b4fe" : "1px solid #e2e8f0",
+                  cursor: "pointer",
+                }}
+              >
+                <p className="lab5-text-sm lab5-font-bold" style={{ color: "#0f172a", margin: 0 }}>
+                  {order.label}
+                </p>
+                <p
+                  className="lab5-mt-1 lab5-font-mono lab5-text-xs"
+                  style={{ color: "#64748b", margin: "4px 0 0 0" }}
+                >
+                  {order.value}
+                </p>
+                {isSelected && (
+                  <p
+                    className="lab5-font-semibold"
+                    style={{ color: "#6d4bd8", margin: "6px 0 0 0", fontSize: "0.6875rem" }}
+                  >
+                    ← ออร์เดอร์ของคุณ
+                  </p>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* 4. Tip Box */}
+      <div
+        className="lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-p-4"
+        style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
+      >
+        <Lightbulb className="lab5-size-4 lab5-shrink-0" style={{ color: "#6d4bd8", marginTop: 2 }} />
+        <div className="lab5-space-y-1 lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b" }}>
+          <p style={{ margin: 0 }}>
+            ข้อความอย่าง{" "}
+            <span className="lab5-font-mono" style={{ color: "#334155" }}>
+              {activeOrder ? activeOrder.value : "secret-B-q92m"}
+            </span>{" "}
+            คือ <strong style={{ color: "#1e293b" }}>"รหัสลับของออร์เดอร์"</strong> — มีแต่เจ้าของออร์เดอร์ที่รู้
+          </p>
+          <p style={{ margin: 0 }}>
+            เว็บเทรดจริงมีออร์เดอร์เป็นล้านใบ แลปนี้ใช้แค่ 4 ใบเพื่อให้เห็นภาพชัด ๆ
+          </p>
+        </div>
+      </div>
+
+      {/* 5. Section ②: ถ้าต้องพิสูจน์ให้ผู้ตรวจเชื่อ คุณจะส่งอะไรไปให้เขา? */}
+      <div className="lab5-space-y-3">
+        <div className="lab5-space-y-0.5">
+          <p className="lab5-text-xs lab5-font-bold" style={{ color: "#334155", margin: 0 }}>
+            ② ถ้าต้องพิสูจน์ให้ผู้ตรวจเชื่อ คุณจะส่งอะไรไปให้เขา?
+          </p>
+          <p className="lab5-text-xs" style={{ color: "#64748b", margin: 0 }}>
+            ZKP (Zero-Knowledge Proof) = พิสูจน์ว่าบางอย่างเป็นจริง โดยไม่เปิดเผยข้อมูลลับ
+          </p>
+        </div>
+
+        {selectedOrderIndex === null ? (
+          <div
+            className="lab5-flex lab5-items-center lab5-gap-2.5 lab5-rounded-xl lab5-border lab5-px-4 lab5-py-3"
+            style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+          >
+            <Lightbulb className="lab5-size-4 lab5-shrink-0" style={{ color: "#6d4bd8" }} />
+            <span className="lab5-text-xs" style={{ color: "#475569" }}>
+              เลือกออร์เดอร์ของคุณในข้อ ① ก่อน แล้วค่อยเลือกวิธีพิสูจน์
+            </span>
+          </div>
+        ) : (
+          <div className="lab5-space-y-3">
+            {step1Choices.map((choice, index) => {
+              const isSelected = step1Answer === index
+              const choiceState = isSelected ? (index === 2 ? "correct" : "incorrect") : "default"
+              return (
+                <button
+                  type="button"
+                  key={index}
+                  onClick={() => answerStep1(index)}
+                  className="lab5-flex lab5-flex-col lab5-items-start lab5-gap-1 lab5-transition-all"
+                  style={{
+                    width: "100%",
+                    borderRadius: "1rem",
+                    padding: "1.125rem 1.25rem",
+                    textAlign: "left",
+                    backgroundColor: "#ffffff",
+                    border: isSelected
+                      ? choiceState === "correct"
+                        ? "2px solid #10b981"
+                        : "2px solid #a855f7"
+                      : "1.5px solid #e2e8f0",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span className="lab5-text-sm lab5-font-bold" style={{ color: "#0f172a" }}>
+                    {choice.title}
+                  </span>
+                  <span
+                    className="lab5-text-xs"
+                    style={{
+                      color:
+                        choiceState === "incorrect"
+                          ? "#e11d48"
+                          : choiceState === "correct"
+                            ? "#059669"
+                            : "#64748b",
+                      fontWeight: choiceState === "incorrect" || choiceState === "correct" ? 600 : 400,
+                    }}
+                  >
+                    {choice.desc}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ผลตอบรับคำตอบ (แสดงทันทีใต้ตัวเลือก) */}
+        {step1Answer !== null && !isStep1Correct && (
+          <FeedbackCard variant="incorrect" title={step1Choices[step1Answer].feedbackTitle}>
+            {step1Choices[step1Answer].feedbackDesc}
+          </FeedbackCard>
+        )}
+
+        {isStep1Correct && (
+          <div className="lab5-animate-merge-up lab5-space-y-4">
+            <FeedbackCard variant="correct" title={step1Choices[2].feedbackTitle}>
+              {step1Choices[2].feedbackDesc}
+            </FeedbackCard>
+
+            <div className="lab5-grid lab5-grid-cols-1 lab5-gap-4 lab5-sm:grid-cols-2">
+              {/* Card 1: ภาค 1 */}
+              <div
+                className="lab5-space-y-2 lab5-rounded-2xl lab5-border lab5-p-4"
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderColor: "#e2e8f0",
+                }}
+              >
+                <div>
+                  <span
+                    style={{
+                      fontSize: "0.6875rem",
+                      fontWeight: 700,
+                      backgroundColor: "#ede9fe",
+                      color: "#6d4bd8",
+                      padding: "3px 10px",
+                      borderRadius: "9999px",
+                    }}
+                  >
+                    ภาค 1 · ขั้น 2–4
+                  </span>
+                </div>
+                <h4 style={{ fontSize: "0.875rem", fontWeight: 800, color: "#0f172a", margin: "6px 0 2px 0" }}>
+                  Merkle Tree
+                </h4>
+                <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0, lineHeight: 1.6 }}>
+                  พิสูจน์ว่า "ออร์เดอร์ของฉันอยู่ในชุดข้อมูลจริง"
+                  <br />
+                  โดยไม่ต้องส่งข้อมูลทั้งหมด
+                </p>
+              </div>
+
+              {/* Card 2: ภาค 2 */}
+              <div
+                className="lab5-space-y-2 lab5-rounded-2xl lab5-border lab5-p-4"
+                style={{
+                  backgroundColor: "#f9f7ff",
+                  borderColor: "#ede9fe",
+                }}
+              >
+                <div>
+                  <span
+                    style={{
+                      fontSize: "0.6875rem",
+                      fontWeight: 700,
+                      backgroundColor: "#ede9fe",
+                      color: "#6d4bd8",
+                      padding: "3px 10px",
+                      borderRadius: "9999px",
+                    }}
+                  >
+                    ภาค 2 · ขั้น 5–9
+                  </span>
+                </div>
+                <h4 style={{ fontSize: "0.875rem", fontWeight: 800, color: "#0f172a", margin: "6px 0 2px 0" }}>
+                  zk-SNARK
+                </h4>
+                <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0, lineHeight: 1.6 }}>
+                  ซ่อนไม่ให้ผู้ตรวจรู้ด้วยซ้ำว่าเป็นออร์เดอร์ใบไหน แต่ยังเชื่อได้ 100%
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ปุ่ม "ทำไม?" */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowHint((prev) => !prev)}
+            className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-px-3.5 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-transition-all"
+            style={{
+              backgroundColor: "#f5f3ff",
+              color: "#6d4bd8",
+              cursor: "pointer",
+            }}
+          >
+            <HelpCircle className="lab5-size-3.5" />
+            <span>ทำไม?</span>
+          </button>
+        </div>
+
+        {showHint && (
+          <div
+            className="lab5-animate-merge-up lab5-rounded-xl lab5-border lab5-p-3.5 lab5-text-xs"
+            style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0", color: "#475569", lineHeight: 1.6 }}
+          >
+            <strong style={{ color: "#0f172a" }}>คำใบ้:</strong> เราต้องการพิสูจน์ว่า Order ของเราอยู่ในชุดข้อมูลจริง โดยไม่ต้องเปิดเผย Order อื่นทั้งหมด และไม่เปิดเผยตัวตนของเรา
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -1531,61 +1936,302 @@ function Step1WhyMerkle() {
  */
 function Step2HashOrders() {
   const { tree, hashedLeaves, revealHash } = useLab05()
+  const [playgroundInput, setPlaygroundInput] = useState("BUY 0.5 BTC")
+  const [playgroundHash, setPlaygroundHash] = useState("")
+  const [showHint, setShowHint] = useState(false)
   const isAllHashed = hashedLeaves.every(Boolean)
+
+  useEffect(() => {
+    let isCancelled = false
+    Sha256Hex(playgroundInput).then((hash) => {
+      if (!isCancelled) setPlaygroundHash(hash)
+    })
+    return () => {
+      isCancelled = true
+    }
+  }, [playgroundInput])
+
+  const revealAllHashes = () => {
+    orders.forEach((_, idx) => revealHash(idx))
+  }
 
   return (
     <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="สร้าง HASH"
-        title="เปลี่ยนรหัสลับเป็น Hash"
-        description="เราไม่เอาค่าดั้งเดิมของออร์เดอร์ไปวางในต้นไม้ แต่เปลี่ยนเป็น Hash ก่อน เพื่อให้ข้อมูลเดิมไม่ถูกเปิดเผย"
-      />
+      {/* 1. Header */}
+      <div className="lab5-space-y-2">
+        <span
+          className="lab5-inline-block lab5-rounded-full lab5-px-3 lab5-py-1 lab5-text-xs lab5-font-bold"
+          style={{ backgroundColor: "#f3e8ff", color: "#6d4bd8" }}
+        >
+          สร้าง HASH
+        </span>
+        <h2
+          className="lab5-text-balance lab5-text-xl lab5-font-extrabold lab5-leading-tight lab5-sm:text-2xl"
+          style={{ color: "#0f172a", fontWeight: 800, margin: 0 }}
+        >
+          เปลี่ยนรหัสลับเป็น Hash แล้วประกอบเป็นต้นไม้
+        </h2>
+        <p className="lab5-text-sm lab5-leading-relaxed" style={{ color: "#64748b", margin: 0 }}>
+          เราไม่เอารหัสลับไปวางในต้นไม้ตรง ๆ แต่เปลี่ยนเป็น Hash ก่อน ข้อมูลเดิมจริงไม่ถูกเปิดเผย
+        </p>
+      </div>
 
-      <MentorMessage message="ทำไปทำไม? เมื่อเราสั่งซื้อแล้วเราก็จะต้องส่งคำสั่งซื้อที่ทำการ Hash แล้วไปให้กับระบบครับ เพราะเราจะเอา Hash เหล่านี้ไปจับคู่กันในขั้นต่อไป เพื่อสร้าง Merkle Tree ครับ และหา Root ของชุดข้อมูลครับ" />
+      {/* 2. Interactive Playground Box */}
+      <div
+        className="lab5-rounded-2xl lab5-border"
+        style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", padding: "1.25rem" }}
+      >
+        {/* Header */}
+        <div className="lab5-flex lab5-items-start" style={{ gap: "0.875rem" }}>
+          <div
+            className="lab5-flex lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full"
+            style={{ backgroundColor: "#f5f3ff", color: "#6d4bd8", width: "2rem", height: "2rem" }}
+          >
+            <Fingerprint style={{ width: "1rem", height: "1rem" }} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+            <h3 className="lab5-text-sm lab5-font-bold" style={{ color: "#0f172a", margin: 0 }}>
+              ลองเล่นก่อน: Hash คือ "ลายนิ้วมือของข้อมูล"
+            </h3>
+            <p className="lab5-text-xs" style={{ color: "#64748b", margin: 0, lineHeight: 1.55 }}>
+              พิมพ์อะไรก็ได้ลงในช่อง แล้วลองเปลี่ยนแค่ 1 ตัวอักษร — สังเกตว่า Hash เปลี่ยนไปทั้งหมด
+            </p>
+          </div>
+        </div>
 
-      <div className="lab5-space-y-3">
-        {orders.map((order, index) => {
-          const isHashed = hashedLeaves[index]
-          return (
-            <div key={order.id} className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
-              <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-between lab5-gap-3">
-                <div>
-                  <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</p>
-                  <p className="lab5-text-xs lab5-text-muted-foreground">
-                    รหัสลับ: <span className="lab5-font-mono">{order.value}</span>
-                  </p>
+        {/* Input box */}
+        <div style={{ marginTop: "1rem" }}>
+          <input
+            type="text"
+            value={playgroundInput}
+            onChange={(e) => setPlaygroundInput(e.target.value)}
+            className="lab5-w-full lab5-rounded-xl lab5-border lab5-font-mono lab5-text-sm lab5-transition-all"
+            style={{
+              borderColor: "#e2e8f0",
+              backgroundColor: "#ffffff",
+              color: "#0f172a",
+              outline: "none",
+              letterSpacing: "0.025em",
+              padding: "0.625rem 0.875rem",
+            }}
+            placeholder="พิมพ์ข้อความที่ต้องการ Hash..."
+          />
+        </div>
+
+        {/* Output box */}
+        <div
+          className="lab5-rounded-xl lab5-border"
+          style={{
+            backgroundColor: "#faf8ff",
+            borderColor: "#ede9fe",
+            padding: "0.75rem 0.875rem",
+            marginTop: "0.625rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.25rem",
+          }}
+        >
+          <p className="lab5-text-xs lab5-font-bold" style={{ color: "#475569", margin: 0 }}>
+            SHA-256 ของข้อความนี้
+          </p>
+          <p
+            className="lab5-font-mono lab5-text-xs lab5-break-all"
+            style={{ color: "#5850ec", fontWeight: 600, margin: 0, lineHeight: 1.6 }}
+          >
+            {playgroundHash || "กำลังคำนวณ..."}
+          </p>
+        </div>
+
+        {/* 3 feature pills */}
+        <div
+          className="lab5-flex lab5-flex-wrap lab5-items-center"
+          style={{ gap: "0.5rem", marginTop: "0.875rem" }}
+        >
+          {[
+            { icon: <Check style={{ width: "0.75rem", height: "0.75rem", color: "#16a979" }} />, label: "✓ ข้อมูลเดิม → Hash เดิมเสมอ" },
+            { icon: <Sparkles style={{ width: "0.75rem", height: "0.75rem", color: "#6d4bd8" }} />, label: "แก้แค่นิดเดียว → Hash เปลี่ยนหมด" },
+            { icon: <Lock style={{ width: "0.75rem", height: "0.75rem", color: "#64748b" }} />, label: "ดู Hash แล้วย้อนกลับไม่ได้" },
+          ].map(({ icon, label }) => (
+            <div
+              key={label}
+              className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-border"
+              style={{
+                backgroundColor: "#ffffff",
+                borderColor: "#e2e8f0",
+                color: "#475569",
+                fontSize: "0.6875rem",
+                fontWeight: 600,
+                padding: "0.3125rem 0.75rem",
+                gap: "0.375rem",
+              }}
+            >
+              {icon}
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. Section: สร้าง Hash ให้ออร์เดอร์ทั้ง 4 ใบ */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+        {/* Section header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Clock style={{ width: "1rem", height: "1rem", color: "#475569", flexShrink: 0 }} />
+            <p className="lab5-text-xs lab5-font-bold" style={{ color: "#334155", margin: 0 }}>
+              ① สร้าง Hash ให้ออร์เดอร์ทั้ง 4 ใบ
+            </p>
+          </div>
+          {!isAllHashed && (
+            <button
+              type="button"
+              onClick={revealAllHashes}
+              className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-border lab5-text-xs lab5-font-semibold lab5-transition-all"
+              style={{
+                backgroundColor: "#ffffff",
+                borderColor: "#ddd6fe",
+                color: "#6d4bd8",
+                cursor: "pointer",
+                padding: "0.375rem 0.875rem",
+                gap: "0.375rem",
+              }}
+            >
+              <Sparkles style={{ width: "0.75rem", height: "0.75rem" }} />
+              <span>✨ สร้างทั้งหมดทีเดียว</span>
+            </button>
+          )}
+        </div>
+
+        {/* 4 Cards */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {orders.map((order, index) => {
+            const isHashed = hashedLeaves[index]
+            const isUserOrder = order.id === "B"
+            return (
+              <div
+                key={order.id}
+                className="lab5-rounded-2xl lab5-border lab5-transition-all"
+                style={{
+                  borderColor: "#e2e8f0",
+                  backgroundColor: "#ffffff",
+                  padding: "1rem 1.25rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "1rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <p className="lab5-text-sm lab5-font-bold" style={{ color: "#0f172a", margin: 0 }}>
+                        {order.label}
+                      </p>
+                      {isUserOrder && (
+                        <span
+                          style={{
+                            fontSize: "0.625rem",
+                            fontWeight: 700,
+                            backgroundColor: "#ede9fe",
+                            color: "#6d4bd8",
+                            padding: "2px 8px",
+                            borderRadius: "9999px",
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          ของคุณ
+                        </span>
+                      )}
+                    </div>
+                    <p
+                      className="lab5-text-xs"
+                      style={{ color: "#64748b", margin: "3px 0 0 0" }}
+                    >
+                      รหัสลับ: <span className="lab5-font-mono">{order.value}</span>
+                    </p>
+                  </div>
+
+                  {!isHashed ? (
+                    <button
+                      type="button"
+                      onClick={() => revealHash(index)}
+                      className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-text-xs lab5-font-bold lab5-text-white lab5-transition-all"
+                      style={{
+                        padding: "0.5rem 1.25rem",
+                        backgroundColor: "#5850ec",
+                        boxShadow: "0 2px 8px rgba(88, 80, 236, 0.25)",
+                        cursor: "pointer",
+                        gap: "0.375rem",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <Sparkles style={{ width: "0.75rem", height: "0.75rem" }} />
+                      <span>✨ สร้าง Hash</span>
+                    </button>
+                  ) : (
+                    <div
+                      className="lab5-inline-flex lab5-items-center lab5-text-xs lab5-font-semibold"
+                      style={{ color: "#16a979", gap: "0.375rem" }}
+                    >
+                      <Check style={{ width: "1rem", height: "1rem" }} />
+                      <span>Hash แล้ว</span>
+                    </div>
+                  )}
                 </div>
 
-                {!isHashed ? (
-                  <button
-                    type="button"
-                    onClick={() => revealHash(index)}
-                    className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-bg-primary lab5-px-4 lab5-py-2 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
-                  >
-                    <Sparkles className="lab5-size-4" />
-                    สร้าง Hash
-                  </button>
-                ) : (
-                  <div className="lab5-flex lab5-items-center lab5-gap-1.5 lab5-text-xs lab5-font-semibold lab5-text-success">
-                    <ArrowDown className="lab5-size-3.5" />
-                    <span>Hash (SHA-256)</span>
+                {isHashed && tree && (
+                  <div className="lab5-animate-merge-up" style={{ marginTop: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid #f1f5f9" }}>
+                    <HashValue hash={tree.leafHashes[index]} label={`Hash ของ ${order.label} =`} tone="primary" />
                   </div>
                 )}
               </div>
+            )
+          })}
+        </div>
 
-              {isHashed && tree && (
-                <div className="lab5-animate-merge-up lab5-mt-3 lab5-border-t lab5-border-border lab5-pt-3">
-                  <HashValue hash={tree.leafHashes[index]} label={`Hash ของ ${order.label} =`} tone="primary" />
-                </div>
-              )}
-            </div>
-          )
-        })}
+        {/* ปุ่ม "ทำไม?" */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowHint((prev) => !prev)}
+            className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-text-xs lab5-font-semibold lab5-transition-all"
+            style={{
+              backgroundColor: "#f5f3ff",
+              color: "#6d4bd8",
+              cursor: "pointer",
+              padding: "0.375rem 0.875rem",
+              gap: "0.375rem",
+              border: "1px solid #ede9fe",
+            }}
+          >
+            <HelpCircle style={{ width: "0.75rem", height: "0.75rem" }} />
+            <span>? ทำไม?</span>
+          </button>
+        </div>
+
+        {showHint && (
+          <div
+            className="lab5-animate-merge-up lab5-rounded-xl lab5-border lab5-text-xs"
+            style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0", color: "#475569", lineHeight: 1.6, padding: "0.875rem 1rem" }}
+          >
+            <strong style={{ color: "#0f172a" }}>คำใบ้:</strong> เราแปลงรหัสลับแต่ละ Order ให้เป็น Hash เพื่อเป็นลายนิ้วมือดิจิทัลที่ผู้ตรวจนำไปคำนวณ Merkle Root ได้ โดยที่ไม่มีใครรู้ข้อมูลจริงข้างใน
+          </div>
+        )}
       </div>
 
       {isAllHashed && (
         <FeedbackCard variant="correct" title="ครบทั้ง 4 ใบแล้ว">
-          รหัสลับของแต่ละออร์เดอร์ถูกเปลี่ยนเป็น Hash ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ครบ 4 ค่า Hash เหล่านี้คือ Input ของขั้นต่อไปในขั้นถัดไป — ขั้นต่อไปเราจะจับ Hash ทีละ 2 ตัวมารวมกัน
+          รหัสลับของแต่ละออร์เดอร์ถูกเปลี่ยนเป็น Hash ด้วย SHA-256 แล้ว ตอนนี้เรามี Hash ครบ 4 ค่า Hash เหล่านี้คือ Input ของขั้นต่อไป — ในขั้นถัดไปเราจะจับ Hash ทีละ 2 ตัวมารวมกันเพื่อสร้าง Merkle Tree
         </FeedbackCard>
       )}
     </div>
@@ -1621,92 +2267,924 @@ function PairButton({ label, isDone, onClick }) {
 }
 
 /**
- * ขั้นที่ 3: ประกอบต้นไม้โดยจับคู่ hash จนได้ root
+ * ขั้นที่ 3: คุยกับ Verifier เพื่อพิสูจน์ว่า ออร์เดอร์ B อยู่ในชุดข้อมูลจริง
  *
  * @return {JSX.Element} เนื้อหาขั้นที่ 3
  * @author StealthTrade Team
  */
 function Step3BuildTree() {
-  const { builtPairs, isRootBuilt, buildPair, buildRoot } = useLab05()
-  const isFirstPairDone = builtPairs[0] && !builtPairs[1]
-  const hasBothPairs = builtPairs.every(Boolean)
+  const {
+    tree,
+    selectedLeaf,
+    selectLeaf,
+    foundSiblings,
+    findSibling,
+  } = useLab05()
 
+  const [wrongNodeId, setWrongNodeId] = useState(null)
+  const [flash, setFlash] = useState("idle")
+  const [showWhyHint, setShowWhyHint] = useState(false)
+
+  // ตรวจสอบให้แน่ใจว่าเป้าหมายคือ leaf-1 (ออร์เดอร์ B)
+  useEffect(() => {
+    if (selectedLeaf !== 1) {
+      selectLeaf(1)
+    }
+  }, [selectedLeaf, selectLeaf])
+
+  const isLeaf0Found = foundSiblings.includes("leaf-0")
+  const isMid1Found = foundSiblings.includes("mid-1")
+  const isAllFound = isLeaf0Found && isMid1Found
+
+  const clickableNodeIds = useMemo(() => {
+    if (isAllFound) return []
+    return ["leaf-0", "leaf-2", "leaf-3", "mid-0", "mid-1"]
+  }, [isAllFound])
+
+  const handleClick = (nodeId) => {
+    if (isAllFound) return
+    const result = findSibling(nodeId)
+    if (result === "wrong") {
+      setWrongNodeId(nodeId)
+      setFlash("wrong")
+      setTimeout(() => setWrongNodeId(null), 700)
+    } else if (result === "correct") {
+      setFlash("correct")
+    }
+  }
+
+  // เส้นเชื่อม root -> mid-0 -> leaf-1 ไฮไลต์สีม่วง (active)
   const nodeStateMap = {
-    "leaf-0": "neutral",
-    "leaf-1": "neutral",
+    "leaf-1": "target",
+    "mid-0": "path",
+    root: "path",
+    "leaf-0": isLeaf0Found ? "path" : "neutral",
     "leaf-2": "neutral",
     "leaf-3": "neutral",
-    "mid-0": builtPairs[0] ? "path" : "neutral",
-    "mid-1": builtPairs[1] ? "path" : "neutral",
-    root: isRootBuilt ? "success" : "neutral",
+    "mid-1": isMid1Found ? "path" : "neutral",
   }
+  if (wrongNodeId) nodeStateMap[wrongNodeId] = "error"
 
-  const visibilityMap = {
-    "mid-0": builtPairs[0],
-    "mid-1": builtPairs[1],
-    root: isRootBuilt,
-  }
+  const rootHash = tree?.root || ""
+  const leafHashB = tree?.leafHashes?.[1] || "06e8f51390"
+  const leafHashA = tree?.leafHashes?.[0] || "9b68202511"
+  const midHashCD = tree?.midHashes?.[1] || "bc04ed1144"
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
-        sectionLabel="ประกอบต้นไม้"
-        title="นำค่า Hash มาจับคู่กันเพื่อสร้างโครงสร้าง Merkle Tree"
-        description="ตอนนี้เรามีรอยประทับของ Order A, B, C และ D แล้ว ขั้นต่อไป เราจะเอา Hash ทีละ 2 ตัวมารวมกันเพื่อที่จะสร้าง แผนภาพต้นไม้ "
+        sectionLabel="สร้างและตรวจ PROOF"
+        title="คุยกับ Verifier เพื่อพิสูจน์ว่า ออร์เดอร์ B อยู่ในชุดข้อมูลจริง"
+        description="บอกคำอ้าง → ส่งข้อมูลของคุณ → ส่ง Hash ข้าง ๆ (Sibling Hash) โดยคลิกบนต้นไม้ แล้ว Verifier จะคำนวณย้อนกลับไปหา Root เอง"
       />
 
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-        <MerkleTreeDiagram nodeStateMap={nodeStateMap} visibilityMap={visibilityMap} hashNodeIds={["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1", "root"]} />
-      </div>
+      {/* Interactive Merkle Tree Box */}
+      <div
+        className="lab5-rounded-2xl lab5-border"
+        style={{
+          backgroundColor: "#ffffff",
+          borderColor: "#e2e8f0",
+          padding: "1.25rem 1.25rem 1rem",
+        }}
+      >
+        <MerkleTreeDiagram
+          nodeStateMap={nodeStateMap}
+          clickableNodeIds={clickableNodeIds}
+          onNodeClick={handleClick}
+          hashNodeIds={["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1", "root"]}
+        />
 
-      {!hasBothPairs && (
-        <div className="lab5-space-y-3">
-          <p className="lab5-text-center lab5-text-sm lab5-font-medium lab5-text-foreground">คุณคิดว่า คู่แรกควรเป็นคู่ไหน?</p>
-          <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
-            <PairButton label="จับคู่ H(A) + H(B)" isDone={builtPairs[0]} onClick={() => buildPair(0)} />
-            <PairButton label="จับคู่ H(C) + H(D)" isDone={builtPairs[1]} onClick={() => buildPair(1)} />
+        {/* แถบสถานะด้านล่างของ Merkle Tree Box */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "0.875rem",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              backgroundColor: "#f5f3ff",
+              borderRadius: "9999px",
+              padding: "0.25rem 0.875rem 0.25rem 0.375rem",
+              border: "1px solid #ede9fe",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                backgroundColor: "#5850ec",
+                color: "#ffffff",
+                fontSize: "0.6875rem",
+                fontWeight: 700,
+                padding: "0.2rem 0.625rem",
+                borderRadius: "9999px",
+              }}
+            >
+              {foundSiblings.length}/2 Sibling Hash
+            </span>
+            <span style={{ fontSize: "0.75rem", color: "#6d4bd8", fontWeight: 500 }}>
+              กรอบม่วงอ่อน = ใบของเรา · คลิกที่ไหนเพื่อส่ง
+            </span>
           </div>
         </div>
-      )}
+      </div>
 
-      {isFirstPairDone && (
-        <FeedbackCard variant="correct" title="ได้ Hash ของคู่แรกแล้ว">
-          เราเอา Hash ของ A และ B มารวมกัน แล้วสร้าง Hash ใหม่ที่แทน “คู่ A+B” — ทำแบบเดียวกันกับ C
-          และ D ต่อได้เลย
+      {/* แจ้งเตือนเมื่อคลิกผิด */}
+      {flash === "wrong" && !isAllFound && (
+        <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
+          โหนดนี้ไม่ใช่ Sibling Hash ที่ Verifier ต้องการ! ลองดูตำแหน่งของ ออร์เดอร์ B แล้วหา Hash ที่อยู่ข้าง ๆ เพื่อรวมขึ้นไปหา Root
         </FeedbackCard>
       )}
 
-      {hasBothPairs && !isRootBuilt && (
-        <div className="lab5-animate-merge-up lab5-space-y-3">
-          <FeedbackCard variant="correct" title="ครบทั้งสองคู่แล้ว">ตอนนี้เรามี Hash ที่แทนข้อมูลเป็นคู่แล้ว</FeedbackCard>
-          <MentorMessage message="ตอนนี้เรายังมี 2 Hash — ถ้าอยากได้ Hash เดียวที่สรุปข้อมูลทั้ง 4 “คำสั่งซื้อ” เราต้องรวม 2 คู่นี้อีกครั้ง" />
-          <button
-            type="button"
-            onClick={buildRoot}
-            className="lab5-mx-auto lab5-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-bg-primary lab5-px-6 lab5-py-3 lab5-text-sm lab5-font-bold lab5-text-primary-foreground lab5-shadow-sm lab5-transition-all lab5-hover-brightness"
-          >
-            <Link2 className="lab5-size-4" />
-            รวม H(A+B) + H(C+D) เป็น Root
-          </button>
+      {/* กล่องแชทโต้ตอบระหว่าง คุณ (Prover) กับ ผู้ตรวจ (Verifier) */}
+      <div
+        className="lab5-rounded-2xl lab5-border"
+        style={{
+          backgroundColor: "#ffffff",
+          borderColor: "#e2e8f0",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header สองฝั่ง */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0.875rem 1.25rem",
+            borderBottom: "1px solid #f1f5f9",
+          }}
+        >
+          {/* คุณ / Prover */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+            <div
+              style={{
+                width: "2rem",
+                height: "2rem",
+                borderRadius: "9999px",
+                backgroundColor: "#f5f3ff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <User style={{ width: "1rem", height: "1rem", color: "#7c3aed" }} />
+            </div>
+            <div>
+              <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#7c3aed" }}>คุณ</span>
+              <span style={{ display: "block", fontSize: "0.6875rem", color: "#94a3b8", lineHeight: 1 }}>Prover</span>
+            </div>
+          </div>
+
+          {/* ผู้ตรวจ / Verifier */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+            <div style={{ textAlign: "right" }}>
+              <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#16a34a" }}>ผู้ตรวจ</span>
+              <span style={{ display: "block", fontSize: "0.6875rem", color: "#94a3b8", lineHeight: 1 }}>Verifier</span>
+            </div>
+            <div
+              style={{
+                width: "2rem",
+                height: "2rem",
+                borderRadius: "9999px",
+                backgroundColor: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ShieldCheck style={{ width: "1.125rem", height: "1.125rem", color: "#16a34a" }} />
+            </div>
+          </div>
         </div>
-      )}
 
-      <HintButton>
-        Parent hash เกิดจากการนำ Hash ของคู่ลูกมารวมกันแล้วสร้างรอยประทับใหม่ เราจับคู่แบบนี้ไปเรื่อย
-        ๆ จนเหลือ Hash เดียว นั่นคือ Root
-      </HintButton>
+        {/* รายการข้อความแชท */}
+        <div
+          style={{
+            padding: "1.25rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+          }}
+        >
+          {/* ข้อความ 1 (Prover - ซ้าย) */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-start", maxWidth: "88%" }}>
+            <div
+              style={{
+                backgroundColor: "#f5f3ff",
+                border: "1px solid #ede9fe",
+                borderRadius: "1rem",
+                padding: "0.875rem 1rem",
+                flex: 1,
+              }}
+            >
+              <p style={{ fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600, margin: "0 0 0.25rem" }}>
+                คุณ → Verifier
+              </p>
+              <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.5rem" }}>
+                ออร์เดอร์ B ของฉันอยู่ใต้ Root นี้
+              </p>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.375rem",
+                  backgroundColor: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  borderRadius: "0.5rem",
+                  padding: "0.25rem 0.625rem",
+                  fontSize: "0.75rem",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  color: "#059669",
+                }}
+              >
+                <span>Root {rootHash ? TruncateHash(rootHash, 6) : "592ed5ae..."}</span>
+              </div>
+            </div>
+            <div
+              style={{
+                width: "1.75rem",
+                height: "1.75rem",
+                borderRadius: "9999px",
+                backgroundColor: "#7c3aed",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ArrowRight style={{ width: "0.875rem", height: "0.875rem" }} />
+            </div>
+          </div>
 
-      {isRootBuilt && (
-        <FeedbackCard variant="correct" title="ต้นไม้สมบูรณ์แล้ว">
-          <p>
-            Root คือ Hash เดียวที่สรุปข้อมูลทั้งหมดในต้นไม้ — เราเรียกมันว่า{" "}
-            <span className="lab5-font-semibold">Root (Merkle Root)</span> ถ้าข้อมูลใบใดใบหนึ่งเปลี่ยน Root ก็จะ
-            เปลี่ยนตามทันที
-          </p>
-          <p className="lab5-mt-2 lab5-font-mono lab5-text-xs lab5-text-foreground-60">
-            Order → Hash → จับเป็นคู่ → Hash ใหม่ → รวมต่อ → Root
-          </p>
-        </FeedbackCard>
+          {/* ข้อความ 2 (Verifier - ขวา) */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-end", maxWidth: "88%" }}>
+            <div
+              style={{
+                width: "1.75rem",
+                height: "1.75rem",
+                borderRadius: "9999px",
+                backgroundColor: "#10b981",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ArrowLeft style={{ width: "0.875rem", height: "0.875rem" }} />
+            </div>
+            <div
+              style={{
+                backgroundColor: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: "1rem",
+                padding: "0.875rem 1rem",
+                flex: 1,
+              }}
+            >
+              <p style={{ fontSize: "0.6875rem", color: "#16a34a", fontWeight: 600, margin: "0 0 0.25rem" }}>
+                Verifier → คุณ
+              </p>
+              <p style={{ fontSize: "0.8125rem", color: "#1e293b", margin: 0, lineHeight: 1.5 }}>
+                ผมมี Root นี้อยู่แล้ว (เว็บเทรดประกาศไว้) — พิสูจน์มาสิครับ คุณจะส่งอะไรให้ผมเริ่มคำนวณ?
+              </p>
+            </div>
+          </div>
+
+          {/* ข้อความ 3 (Prover - ซ้าย) */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-start", maxWidth: "88%" }}>
+            <div
+              style={{
+                backgroundColor: "#f5f3ff",
+                border: "1px solid #ede9fe",
+                borderRadius: "1rem",
+                padding: "0.875rem 1rem",
+                flex: 1,
+              }}
+            >
+              <p style={{ fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600, margin: "0 0 0.25rem" }}>
+                คุณ → Verifier
+              </p>
+              <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.5rem" }}>
+                รหัสลับของออร์เดอร์ B
+              </p>
+              <div
+                style={{
+                  display: "inline-block",
+                  backgroundColor: "#5850ec",
+                  color: "#ffffff",
+                  borderRadius: "9999px",
+                  padding: "0.25rem 0.75rem",
+                  fontSize: "0.75rem",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                }}
+              >
+                secret-B-q92m
+              </div>
+            </div>
+            <div
+              style={{
+                width: "1.75rem",
+                height: "1.75rem",
+                borderRadius: "9999px",
+                backgroundColor: "#7c3aed",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ArrowRight style={{ width: "0.875rem", height: "0.875rem" }} />
+            </div>
+          </div>
+
+          {/* ข้อความ 4 (Verifier - ขวา) */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-end", maxWidth: "88%" }}>
+            <div
+              style={{
+                width: "1.75rem",
+                height: "1.75rem",
+                borderRadius: "9999px",
+                backgroundColor: "#10b981",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ArrowLeft style={{ width: "0.875rem", height: "0.875rem" }} />
+            </div>
+            <div
+              style={{
+                backgroundColor: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: "1rem",
+                padding: "0.875rem 1rem",
+                flex: 1,
+              }}
+            >
+              <p style={{ fontSize: "0.6875rem", color: "#16a34a", fontWeight: 600, margin: "0 0 0.25rem" }}>
+                Verifier → คุณ
+              </p>
+              <p style={{ fontSize: "0.8125rem", color: "#1e293b", margin: 0, lineHeight: 1.5 }}>
+                ได้แล้ว ผม Hash เองได้ H(B) = {TruncateHash(leafHashB, 8)} แต่ยังขึ้นไปไม่ถึง Root ครับ — ถ้าจะสร้าง H(A+B) ผมต้องรู้ Hash ตัวไหนเพิ่ม? (คลิกโหนดบนต้นไม้เพื่อส่ง)
+              </p>
+            </div>
+          </div>
+
+          {/* ข้อความ 5 & 6 (เมื่อส่ง Sibling 1: H(A)) */}
+          {isLeaf0Found && (
+            <>
+              <div className="lab5-animate-merge-up" style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-start", maxWidth: "88%" }}>
+                <div style={{ backgroundColor: "#f5f3ff", border: "1px solid #ede9fe", borderRadius: "1rem", padding: "0.875rem 1rem", flex: 1 }}>
+                  <p style={{ fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600, margin: "0 0 0.25rem" }}>คุณ → Verifier</p>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.5rem" }}>ส่ง H(A) (อยู่ฝั่งซ้าย)</p>
+                  <div style={{ display: "inline-block", backgroundColor: "#f5f3ff", border: "1px solid #ede9fe", color: "#6d4bd8", borderRadius: "0.5rem", padding: "0.25rem 0.75rem", fontSize: "0.75rem", fontFamily: "monospace", fontWeight: 600 }}>
+                    H(A) {TruncateHash(leafHashA, 8)}
+                  </div>
+                </div>
+                <div style={{ width: "1.75rem", height: "1.75rem", borderRadius: "9999px", backgroundColor: "#7c3aed", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ArrowRight style={{ width: "0.875rem", height: "0.875rem" }} />
+                </div>
+              </div>
+
+              <div className="lab5-animate-merge-up" style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-end", maxWidth: "88%" }}>
+                <div style={{ width: "1.75rem", height: "1.75rem", borderRadius: "9999px", backgroundColor: "#10b981", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ArrowLeft style={{ width: "0.875rem", height: "0.875rem" }} />
+                </div>
+                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "1rem", padding: "0.875rem 1rem", flex: 1 }}>
+                  <p style={{ fontSize: "0.6875rem", color: "#16a34a", fontWeight: 600, margin: "0 0 0.25rem" }}>Verifier → คุณ</p>
+                  <p style={{ fontSize: "0.8125rem", color: "#1e293b", margin: 0, lineHeight: 1.5 }}>
+                    ได้ H(A+B) = {TruncateHash(tree?.midHashes?.[0] || "f619facc", 8)} แล้ว แต่ยังขาดอีกขั้นครับ — ต้องใช้ Hash ตัวไหนต่อเพื่อไปถึง Root?
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ข้อความ 7 & 8 (เมื่อส่ง Sibling 2: H(C+D)) */}
+          {isMid1Found && (
+            <>
+              <div className="lab5-animate-merge-up" style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-start", maxWidth: "88%" }}>
+                <div style={{ backgroundColor: "#f5f3ff", border: "1px solid #ede9fe", borderRadius: "1rem", padding: "0.875rem 1rem", flex: 1 }}>
+                  <p style={{ fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600, margin: "0 0 0.25rem" }}>คุณ → Verifier</p>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.5rem" }}>ส่ง H(C+D) (อยู่ฝั่งขวา)</p>
+                  <div style={{ display: "inline-block", backgroundColor: "#f5f3ff", border: "1px solid #ede9fe", color: "#6d4bd8", borderRadius: "0.5rem", padding: "0.25rem 0.75rem", fontSize: "0.75rem", fontFamily: "monospace", fontWeight: 600 }}>
+                    H(C+D) {TruncateHash(midHashCD, 8)}
+                  </div>
+                </div>
+                <div style={{ width: "1.75rem", height: "1.75rem", borderRadius: "9999px", backgroundColor: "#7c3aed", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ArrowRight style={{ width: "0.875rem", height: "0.875rem" }} />
+                </div>
+              </div>
+
+              {/* ข้อความ 8: Verifier ตรวจเอง (กล่องกรอบประสีเขียว) */}
+              <div
+                className="lab5-animate-merge-up"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  alignSelf: "flex-end",
+                  maxWidth: "92%",
+                }}
+              >
+                <div
+                  style={{
+                    width: "1.75rem",
+                    height: "1.75rem",
+                    borderRadius: "9999px",
+                    backgroundColor: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                    color: "#16a34a",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <ShieldCheck style={{ width: "1rem", height: "1rem" }} />
+                </div>
+                <div
+                  style={{
+                    backgroundColor: "#f0fdf4",
+                    border: "1px dashed #86efac",
+                    borderRadius: "1rem",
+                    padding: "0.875rem 1rem",
+                    flex: 1,
+                  }}
+                >
+                  <p style={{ fontSize: "0.6875rem", color: "#16a34a", fontWeight: 700, margin: "0 0 0.25rem" }}>
+                    Verifier ตรวจเอง
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", color: "#1e293b", margin: "0 0 0.5rem", lineHeight: 1.4 }}>
+                    ครบแล้ว ผมคำนวณย้อนกลับเอง — ได้ Root ตรงกันที่ประกาศไว้ ✅ ยอมรับ
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      gap: "0.375rem",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span
+                      style={{
+                        backgroundColor: "#ede9fe",
+                        color: "#6d4bd8",
+                        padding: "0.2rem 0.625rem",
+                        borderRadius: "0.5rem",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      H(A)
+                    </span>
+                    <span style={{ color: "#64748b" }}>+</span>
+                    <span
+                      style={{
+                        backgroundColor: "#ede9fe",
+                        color: "#6d4bd8",
+                        padding: "0.2rem 0.625rem",
+                        borderRadius: "0.5rem",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      H(B)
+                    </span>
+                    <span style={{ color: "#64748b" }}>→</span>
+                    <span
+                      style={{
+                        backgroundColor: "#d1fae5",
+                        color: "#059669",
+                        padding: "0.2rem 0.625rem",
+                        borderRadius: "0.5rem",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      H(A+B)
+                    </span>
+                    <span style={{ color: "#64748b" }}>+</span>
+                    <span
+                      style={{
+                        backgroundColor: "#ede9fe",
+                        color: "#6d4bd8",
+                        padding: "0.2rem 0.625rem",
+                        borderRadius: "0.5rem",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      H(C+D)
+                    </span>
+                    <span style={{ color: "#64748b" }}>→</span>
+                    <span
+                      style={{
+                        backgroundColor: "#d1fae5",
+                        border: "1px solid #a7f3d0",
+                        color: "#059669",
+                        padding: "0.2rem 0.625rem",
+                        borderRadius: "0.5rem",
+                        fontFamily: "monospace",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Root {rootHash ? TruncateHash(rootHash, 6) : "592ed5ae"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* แถบคำแนะนำด้านล่าง */}
+        <div
+          style={{
+            backgroundColor: "#f8fafc",
+            borderTop: "1px solid #e2e8f0",
+            padding: "0.75rem 1.25rem",
+            fontSize: "0.75rem",
+            color: "#6d4bd8",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <ArrowDown style={{ width: "0.875rem", height: "0.875rem", color: "#6d4bd8" }} />
+          <span>
+            {!isLeaf0Found && "คลิกโหนดบนต้นไม้ด้านบน เพื่อส่ง Hash ข้าง ๆ (Sibling Hash) ให้ Verifier · ส่งแล้ว 0/2"}
+            {isLeaf0Found && !isMid1Found && "คลิกโหนดบนต้นไม้ด้านบน เพื่อส่ง Hash ข้าง ๆ (Sibling Hash) ให้ Verifier · ส่งแล้ว 1/2"}
+            {isAllFound && "ส่งครบแล้ว 2/2 · Verifier ยืนยันความถูกต้องเรียบร้อยแล้ว"}
+          </span>
+        </div>
+
+        {/* แถบสถานะ Footer: สิ่งที่ Verifier ได้รับ */}
+        <div
+          style={{
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid #e2e8f0",
+            padding: "0.75rem 1.25rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Eye style={{ width: "1rem", height: "1rem", color: "#64748b" }} />
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1e293b" }}>
+              สิ่งที่ Verifier ได้รับ
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.25rem",
+                backgroundColor: "#ecfdf5",
+                border: "1px solid #a7f3d0",
+                color: "#059669",
+                fontSize: "0.6875rem",
+                fontWeight: 600,
+                borderRadius: "9999px",
+                padding: "0.2rem 0.625rem",
+              }}
+            >
+              <Check style={{ width: "0.75rem", height: "0.75rem" }} />
+              Root
+            </span>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.25rem",
+                backgroundColor: "#ecfdf5",
+                border: "1px solid #a7f3d0",
+                color: "#059669",
+                fontSize: "0.6875rem",
+                fontWeight: 600,
+                borderRadius: "9999px",
+                padding: "0.2rem 0.625rem",
+              }}
+            >
+              <Check style={{ width: "0.75rem", height: "0.75rem" }} />
+              รหัสลับของออร์เดอร์ B
+            </span>
+            {isLeaf0Found && (
+              <span
+                className="lab5-animate-merge-up"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  backgroundColor: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  color: "#059669",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                  borderRadius: "9999px",
+                  padding: "0.2rem 0.625rem",
+                }}
+              >
+                <Check style={{ width: "0.75rem", height: "0.75rem" }} />
+                H(A) + ฝั่งซ้าย
+              </span>
+            )}
+            {isMid1Found && (
+              <span
+                className="lab5-animate-merge-up"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  backgroundColor: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  color: "#059669",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                  borderRadius: "9999px",
+                  padding: "0.2rem 0.625rem",
+                }}
+              >
+                <Check style={{ width: "0.75rem", height: "0.75rem" }} />
+                H(C+D) + ฝั่งขวา
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ส่วนสรุปผลลัพธ์ (แสดงเมื่อคลิกส่ง Sibling ครบแล้ว) */}
+      {isAllFound && (
+        <>
+          {/* Card 1: เส้นทางตรวจสอบสิทธิ์ (Authentication Path) ที่คุณส่งไป */}
+          <div
+            className="lab5-animate-merge-up lab5-rounded-2xl lab5-border"
+            style={{
+              backgroundColor: "#ffffff",
+              borderColor: "#e2e8f0",
+              padding: "1.25rem",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
+              <Key style={{ width: "1.125rem", height: "1.125rem", color: "#7c3aed" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "#0f172a" }}>
+                เส้นทางตรวจสอบสิทธิ์ (Authentication Path) ที่คุณส่งไป
+              </span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+              {/* รายการที่ 1 */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                <span
+                  style={{
+                    width: "1.5rem",
+                    height: "1.5rem",
+                    borderRadius: "9999px",
+                    backgroundColor: "#6d4bd8",
+                    color: "#ffffff",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  1
+                </span>
+                <div
+                  style={{
+                    backgroundColor: "#f5f3ff",
+                    border: "1px solid #ede9fe",
+                    borderRadius: "0.5rem",
+                    padding: "0.375rem 0.875rem",
+                    fontSize: "0.75rem",
+                    fontFamily: "monospace",
+                    fontWeight: 600,
+                    color: "#6d4bd8",
+                  }}
+                >
+                  H(A) = {TruncateHash(leafHashA, 8)}
+                </div>
+                <span
+                  style={{
+                    backgroundColor: "#ede9fe",
+                    color: "#6d4bd8",
+                    borderRadius: "9999px",
+                    padding: "0.2rem 0.625rem",
+                    fontSize: "0.6875rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  อยู่ฝั่งซ้าย
+                </span>
+              </div>
+
+              {/* รายการที่ 2 */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                <span
+                  style={{
+                    width: "1.5rem",
+                    height: "1.5rem",
+                    borderRadius: "9999px",
+                    backgroundColor: "#6d4bd8",
+                    color: "#ffffff",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  2
+                </span>
+                <div
+                  style={{
+                    backgroundColor: "#f5f3ff",
+                    border: "1px solid #ede9fe",
+                    borderRadius: "0.5rem",
+                    padding: "0.375rem 0.875rem",
+                    fontSize: "0.75rem",
+                    fontFamily: "monospace",
+                    fontWeight: 600,
+                    color: "#6d4bd8",
+                  }}
+                >
+                  H(C+D) = {TruncateHash(midHashCD, 8)}
+                </div>
+                <span
+                  style={{
+                    backgroundColor: "#ede9fe",
+                    color: "#6d4bd8",
+                    borderRadius: "9999px",
+                    padding: "0.2rem 0.625rem",
+                    fontSize: "0.6875rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  อยู่ฝั่งขวา
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Two-column Root Comparison Cards */}
+          <div
+            className="lab5-animate-merge-up"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+            }}
+          >
+            {/* ซ้าย: Root ที่เว็บเทรดประกาศไว้ */}
+            <div
+              className="lab5-rounded-2xl lab5-border"
+              style={{
+                backgroundColor: "#f0fdf4",
+                borderColor: "#bbf7d0",
+                padding: "1rem 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.625rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <ShieldCheck style={{ width: "1rem", height: "1rem", color: "#16a34a" }} />
+                <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#065f46" }}>
+                  Root ที่เว็บเทรดประกาศไว้
+                </span>
+              </div>
+              <div
+                style={{
+                  backgroundColor: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  borderRadius: "9999px",
+                  padding: "0.375rem 0.875rem",
+                  fontSize: "0.75rem",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  color: "#047857",
+                }}
+              >
+                {rootHash ? TruncateHash(rootHash, 8) : "592ed5ae..."}
+              </div>
+            </div>
+
+            {/* ขวา: Root ที่ Verifier คำนวณจากหลักฐาน */}
+            <div
+              className="lab5-rounded-2xl lab5-border"
+              style={{
+                backgroundColor: "#f0fdf4",
+                borderColor: "#bbf7d0",
+                padding: "1rem 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.625rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Zap style={{ width: "1rem", height: "1rem", color: "#16a34a" }} />
+                <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#065f46" }}>
+                  Root ที่ Verifier คำนวณจากหลักฐาน
+                </span>
+              </div>
+              <div
+                style={{
+                  backgroundColor: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  borderRadius: "9999px",
+                  padding: "0.375rem 0.875rem",
+                  fontSize: "0.75rem",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  color: "#047857",
+                }}
+              >
+                {rootHash ? TruncateHash(rootHash, 8) : "592ed5ae..."}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Success Feedback Card: ตรวจสอบผ่าน: Root ตรงกัน */}
+          <div
+            className="lab5-animate-merge-up lab5-rounded-2xl lab5-border"
+            style={{
+              backgroundColor: "#ecfdf5",
+              borderColor: "#a7f3d0",
+              padding: "1.125rem 1.25rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5rem",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <CheckCircle2 style={{ width: "1.125rem", height: "1.125rem", color: "#16a34a" }} />
+              <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "#047857" }}>
+                ตรวจสอบผ่าน: Root ตรงกัน
+              </span>
+            </div>
+            <p style={{ fontSize: "0.8125rem", color: "#065f46", margin: 0, lineHeight: 1.5 }}>
+              ยืนยันได้ว่า <strong>ออร์เดอร์ B</strong> อยู่ในชุดข้อมูลจริง โดย Verifier ไม่ต้องเห็นรหัสลับของออร์เดอร์อีก 3 ใบเลย
+            </p>
+            <p style={{ fontSize: "0.75rem", color: "#047857", margin: 0, opacity: 0.85 }}>
+              ใช้ Hash แค่ 2 ตัวแทนการส่งข้อมูลทั้ง 4 ใบ — ถ้ามี 1 ล้านออร์เดอร์ ก็ใช้แค่ประมาณ 20 ตัวเท่านั้น
+            </p>
+          </div>
+
+          {/* Card 4: ปุ่ม ? ทำไม? */}
+          <div style={{ marginTop: "0.25rem" }}>
+            <button
+              type="button"
+              onClick={() => setShowWhyHint((previous) => !previous)}
+              className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-text-xs lab5-font-semibold lab5-transition-colors"
+              style={{
+                backgroundColor: "#f5f3ff",
+                color: "#6d4bd8",
+                padding: "0.375rem 0.875rem",
+                gap: "0.375rem",
+                border: "1px solid #ede9fe",
+                cursor: "pointer",
+              }}
+            >
+              <HelpCircle style={{ width: "0.75rem", height: "0.75rem" }} />
+              <span>? ทำไม?</span>
+            </button>
+
+            {showWhyHint && (
+              <div
+                className="lab5-animate-merge-up lab5-rounded-xl lab5-border lab5-text-xs"
+                style={{
+                  backgroundColor: "#f8fafc",
+                  borderColor: "#e2e8f0",
+                  color: "#475569",
+                  lineHeight: 1.6,
+                  padding: "0.875rem 1rem",
+                  marginTop: "0.5rem",
+                }}
+              >
+                <strong style={{ color: "#0f172a" }}>ทำไม Verifier ถึงเชื่อ?</strong> เพราะ Merkle Root คือผลลัพธ์ของการ Hash ต่อเนื่องมาจากข้อมูลทั้งหมด การเปลี่ยนแม้แต่ตัวอักษรเดียวจะทำให้ Root เปลี่ยนไปอย่างสิ้นเชิง เมื่อ Verifier นำ H(B) + Sibling Hash มารวมแล้วได้ Root ตรงกับที่เว็บเทรดประกาศไว้ จึงพิสูจน์ได้ว่าออร์เดอร์ B อยู่ในระบบจริง 100% โดยไม่ต้องเปิดเผยข้อมูลของออร์เดอร์อื่นเลย
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   )
@@ -1718,346 +3196,60 @@ function Step3BuildTree() {
  * @return {JSX.Element} เนื้อหาขั้นที่ 4
  * @author StealthTrade Team
  */
-function Step4SelectTarget() {
-  const { selectedLeaf, selectLeaf } = useLab05()
+function Step4Tamper() {
+  const { tree, selectedLeaf, selectLeaf, tamperedProof, isTamperMode, toggleTamper } = useLab05()
+  const [showWhy, setShowWhy] = useState(false)
 
-  const nodeStateMap = selectedLeaf !== null ? { [`leaf-${selectedLeaf}`]: "target" } : {}
-
-  return (
-    <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="เลือกสิ่งที่จะพิสูจน์"
-        title="ตอนนี้เราจะลองพิสูจน์ Order หนึ่งรายการ"
-        description="เลือก Order หนึ่งรายการที่คุณอยากพิสูจน์ว่า “อยู่ในต้นไม้นี้จริง”"
-      />
-
-      <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3 lab5-sm:grid-cols-4">
-        {orders.map((order, index) => (
-          <ChoiceCard key={order.id} isSelected={selectedLeaf === index} onClick={() => selectLeaf(index)} className="lab5-text-center">
-            <div className="lab5-flex lab5-flex-col lab5-items-center lab5-gap-1">
-              <Target className={JoinClassNames("lab5-size-5", selectedLeaf === index ? "lab5-text-primary" : "lab5-text-muted-foreground")} />
-              <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">{order.label}</span>
-              <span className="lab5-font-mono lab5-text-10 lab5-leading-tight lab5-text-muted-foreground">{order.value}</span>
-            </div>
-          </ChoiceCard>
-        ))}
-      </div>
-
-      {selectedLeaf !== null && (
-        <div className="lab5-animate-merge-up lab5-space-y-2 lab5-text-center">
-          <p className="lab5-text-sm lab5-font-semibold lab5-text-primary">
-            คุณเลือก {orders[selectedLeaf].label} — ต่อไปเราจะหาหลักฐานที่จำเป็นเพื่อเดินจาก{" "}
-            {orders[selectedLeaf].label} กลับไปหา Root
-          </p>
-          <div className="lab5-mx-auto lab5-inline-flex lab5-flex-col lab5-items-center lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-4 lab5-py-2">
-            <span className="lab5-text-xs lab5-text-muted-foreground">ข้อมูลที่เรากำลังพิสูจน์</span>
-            <span className="lab5-text-xs lab5-font-semibold lab5-text-foreground">Target: {orders[selectedLeaf].label}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-4">
-        <MerkleTreeDiagram nodeStateMap={nodeStateMap} />
-      </div>
-    </div>
-  )
-}
-
-/**
- * ขั้นที่ 5: สร้างและตรวจ Proof (หา Sibling Hash และคำนวณย้อนกลับหา Root)
- *
- * @return {JSX.Element|null} เนื้อหาขั้นที่ 5
- * @author StealthTrade Team
- */
-function Step5AuthPath() {
-  const {
-    tree,
-    selectedLeaf,
-    authPathSteps,
-    foundSiblings,
-    findSibling,
-    isRootComputed,
-    computeRootStep,
-    resetRootStep,
-  } = useLab05()
-  const [wrongNodeId, setWrongNodeId] = useState(null)
-  const [flash, setFlash] = useState("idle")
-  const [showDetails, setShowDetails] = useState(false)
-
-  const currentLeaf = selectedLeaf ?? 0
-  const targetLabel = orders[currentLeaf]?.label || "ออร์เดอร์ A"
-
-  // เรียงตามลำดับที่คลิกจริง (ไม่ใช่ลำดับใน authPathSteps)
-  const orderedFoundSiblings = foundSiblings
-    .map((nodeId) => authPathSteps.find((pathStep) => pathStep.nodeId === nodeId))
-    .filter(Boolean)
-
-  const isAllSiblingsFound = foundSiblings.length >= 2
-
-  const nodeStateMap = {
-    [`leaf-${currentLeaf}`]: "target",
-  }
-  for (const nodeId of foundSiblings) nodeStateMap[nodeId] = "path"
-  if (isRootComputed) {
-    nodeStateMap["mid-0"] = "path"
-    nodeStateMap.root = "path"
-  }
-  if (wrongNodeId) nodeStateMap[wrongNodeId] = "error"
-
-  const clickableNodeIds = ["leaf-0", "leaf-1", "leaf-2", "leaf-3", "mid-0", "mid-1"].filter(
-    (nodeId) => nodeId !== `leaf-${currentLeaf}` && !foundSiblings.includes(nodeId) && !isRootComputed,
-  )
-
-  const handleClick = (nodeId) => {
-    const result = findSibling(nodeId)
-    if (result === "wrong") {
-      setWrongNodeId(nodeId)
-      setFlash("wrong")
-      setTimeout(() => setWrongNodeId(null), 700)
-    } else if (result === "correct") {
-      setFlash("correct")
-    }
-  }
-
-  return (
-    <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="สร้างและตรวจ PROOF"
-        title={`พิสูจน์ว่า ${targetLabel} อยู่ในชุดข้อมูลจริง`}
-        description="เลือก Hash ที่อยู่ข้าง ๆ ตามเส้นทางจริง แล้วคำนวณย้อนกลับจาก Leaf ไปจนถึง Root ที่เชื่อถือได้"
-      />
-
-      {/* แถบคำใบ้สีม่วงด้านบน (แสดงตามสถานะ) */}
-      {!isAllSiblingsFound && (
-        <div className="lab5-animate-merge-up lab5-flex lab5-items-center lab5-justify-between lab5-gap-2 lab5-rounded-2xl lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-4 lab5-py-3 lab5-text-xs">
-          <div className="lab5-flex lab5-items-center lab5-gap-2">
-            <HelpCircle className="lab5-size-4 lab5-shrink-0 lab5-text-primary" />
-            <span className="lab5-font-bold lab5-text-primary">
-              {foundSiblings.length === 0
-                ? "ถ้าจะสร้าง H(A+B) เราต้องรู้อะไรเพิ่ม?"
-                : "เมื่อได้ H(A+B) แล้ว ต้องใช้อะไรต่อเพื่อไปยัง Root?"}
-            </span>
-          </div>
-          <span className="lab5-text-primary-80 lab5-shrink-0">คลิกบนต้นไม้เพื่อเลือก Sibling Hash</span>
-        </div>
-      )}
-
-      {/* Interactive Merkle Tree Box */}
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-4">
-        <div className="lab5-flex lab5-items-center lab5-justify-between">
-          <div>
-            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">Interactive Merkle Tree</p>
-            <p className="lab5-text-xs lab5-text-muted-foreground">Leaf → Parent Hash → Root</p>
-          </div>
-          <span className="lab5-rounded-full lab5-bg-primary-soft lab5-px-3 lab5-py-1 lab5-text-xs lab5-font-bold lab5-text-primary">
-            {foundSiblings.length}/2 Sibling Hash
-          </span>
-        </div>
-
-        <MerkleTreeDiagram
-          nodeStateMap={nodeStateMap}
-          clickableNodeIds={clickableNodeIds}
-          onNodeClick={handleClick}
-        />
-      </div>
-
-      {/* เส้นทางตรวจสอบสิทธิ์ (Authentication Path) */}
-      {foundSiblings.length > 0 && (
-        <div className="lab5-animate-merge-up lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-3">
-          <p className="lab5-text-xs lab5-font-bold lab5-text-foreground">
-            เส้นทางตรวจสอบสิทธิ์ (Authentication Path)
-          </p>
-          <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
-            {orderedFoundSiblings.map((sibling, index) => (
-              <div
-                key={sibling.nodeId}
-                className="lab5-flex lab5-items-center lab5-justify-between lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface-soft lab5-p-2.5"
-              >
-                <div className="lab5-flex lab5-items-center lab5-gap-2">
-                  <span className="lab5-flex lab5-size-5 lab5-items-center lab5-justify-center lab5-rounded-full lab5-bg-primary-soft lab5-text-xs lab5-font-bold lab5-text-primary">
-                    {index + 1}
-                  </span>
-                  <HashChip tone="primary" label={`${sibling.label} =`} hash={sibling.hash} />
-                </div>
-                <span className="lab5-text-xs lab5-text-muted-foreground">
-                  {sibling.position === "right" ? "ขวา" : "ซ้าย"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* แจ้งเตือนเมื่อคลิกผิด */}
-      {flash === "wrong" && !isAllSiblingsFound && (
-        <FeedbackCard variant="incorrect" title="ลองอีกครั้ง">
-          ลองดูตำแหน่งของ Order ที่เรากำลังพิสูจน์อีกครั้ง เราต้องหา Hash ที่อยู่ “ข้าง ๆ เส้นทาง” ของมัน
-        </FeedbackCard>
-      )}
-
-      {/* แจ้งเตือนเมื่อพบ Sibling แรก */}
-      {foundSiblings.length === 1 && !isAllSiblingsFound && (
-        <FeedbackCard variant="correct" title="ถูกต้อง">
-          พบ Sibling Hash ที่จำเป็นแล้ว ลองเดินตามเส้นทางขึ้นไปอีกระดับ
-        </FeedbackCard>
-      )}
-
-      {/* Root Reconstruction Box */}
-      {isAllSiblingsFound && (
-        <div className="lab5-animate-merge-up lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-4">
-          <div className="lab5-flex lab5-items-start lab5-justify-between">
-            <div>
-              <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">Root Reconstruction</p>
-              <p className="lab5-text-xs lab5-text-muted-foreground">
-                คำนวณจากข้อมูลจริงทีละขั้นตามลำดับของ Authentication Path
-              </p>
-            </div>
-            {isRootComputed && (
-              <span className="lab5-text-success">
-                <Check className="lab5-size-5" />
-              </span>
-            )}
-          </div>
-
-          {/* สมการคำนวณ */}
-          <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-2 lab5-py-2 lab5-text-xs">
-            <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
-              H(A)
-            </span>
-            <span className="lab5-font-bold lab5-text-muted-foreground">+</span>
-            <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
-              H(B)
-            </span>
-            <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
-            {isRootComputed ? (
-              <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
-                H(A+B)
-              </span>
-            ) : (
-              <span className="lab5-rounded-lg lab5-border lab5-border-border lab5-bg-surface-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-muted-foreground">
-                ?
-              </span>
-            )}
-            <span className="lab5-font-bold lab5-text-muted-foreground">+</span>
-            <span className="lab5-rounded-lg lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-primary">
-              H(C+D)
-            </span>
-            <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
-            <span className="lab5-rounded-lg lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-px-2.5 lab5-py-1 lab5-font-mono lab5-font-bold lab5-text-success">
-              Root
-            </span>
-          </div>
-
-          {!isRootComputed ? (
-            <div className="lab5-flex lab5-justify-center">
-              <button
-                type="button"
-                onClick={computeRootStep}
-                className="lab5-inline-flex lab5-items-center lab5-gap-2 lab5-rounded-full lab5-bg-primary lab5-px-6 lab5-py-2.5 lab5-text-sm lab5-font-semibold lab5-text-primary-foreground lab5-transition-all lab5-hover-brightness"
-              >
-                คำนวณ Hash สู่ Root
-              </button>
-            </div>
-          ) : (
-            <div className="lab5-space-y-3">
-              <div className="lab5-flex lab5-justify-center">
-                <button
-                  type="button"
-                  onClick={resetRootStep}
-                  className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-border-border lab5-bg-surface lab5-px-3 lab5-py-1 lab5-text-xs lab5-text-muted-foreground lab5-transition-colors lab5-hover-surface-soft"
-                >
-                  <RotateCcw className="lab5-size-3.5" />
-                  คำนวณใหม่
-                </button>
-              </div>
-              <div className="lab5-flex lab5-items-center lab5-justify-center lab5-gap-2 lab5-rounded-xl lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-p-3 lab5-text-xs lab5-font-semibold lab5-text-success">
-                <span>ตรวจสอบผ่าน: ข้อมูลถูกต้อง Root ที่คำนวณได้ ตรงกับ ค่า Root ดั้งเดิมที่อ้างอิง</span>
-                <Check className="lab5-size-4" />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ผลลัพธ์สุดท้ายเมื่อคำนวณ Root เสร็จสิ้น */}
-      {isRootComputed && (
-        <FeedbackCard variant="correct" title="ตรวจสอบผ่าน">
-          Root ตรงกัน เป็นการ Hash ที่คุณคำนวณยืนยันได้ว่า ออร์เดอร์ A เป็นออร์เดอร์ของชุดข้อมูล โดยไม่ต้องเปิดเผย Leaf อื่นทั้งหมด
-        </FeedbackCard>
-      )}
-
-      {/* ส่วนท้าย Accordion */}
-      <div className="lab5-space-y-3">
-        <HintButton>
-          เราต้องการเฉพาะ Hash ที่อยู่ข้าง ๆ เส้นทางที่เดินจาก {targetLabel} ไปหา Root ไม่ใช่ทุก Hash ในต้นไม้
-        </HintButton>
-
-        <div className="lab5-rounded-xl lab5-border lab5-border-border lab5-bg-surface">
-          <button
-            type="button"
-            onClick={() => setShowDetails(!showDetails)}
-            className="lab5-flex lab5-w-full lab5-items-center lab5-justify-between lab5-p-3 lab5-text-xs lab5-font-semibold lab5-text-foreground"
-          >
-            <span>ดูรายละเอียดการคำนวณและหลักการ</span>
-            <ChevronDown className={JoinClassNames("lab5-size-4 lab5-transition-transform", showDetails && "lab5-rotate-180")} />
-          </button>
-          {showDetails && (
-            <div className="lab5-animate-merge-up lab5-border-t lab5-border-border lab5-bg-surface-soft lab5-p-4 lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground lab5-space-y-2">
-              <p><strong>Authentication Path:</strong> คือชุดของ Sibling Hash ที่จำเป็นต้องใช้ในการคำนวณย้อนกลับไปหา Merkle Root</p>
-              <p><strong>ทำไมถึงเป็นส่วนตัว?</strong> เพราะผู้พิสูจน์ไม่จำเป็นต้องส่งข้อมูลของ Order อื่นๆ ทั้งหมด ส่งเพียง Hash ของฝั่งตรงข้ามในแต่ละระดับต้นไม้เท่านั้น ผู้ตรวจสอบก็สามารถหา Root และยืนยันได้ทันที</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * ขั้นที่ 6: คำนวณจาก Order กลับไปหา Root ทีละขั้น
- *
- * @return {JSX.Element|null} เนื้อหาขั้นที่ 6 หรือ null ถ้ายังไม่พร้อมแสดง
- * @author StealthTrade Team
- */
-
-
-/**
- * ขั้นที่ 6: ทดสอบการแก้ไขข้อมูล (แอบแก้ข้อมูลแล้วดูว่า Root เปลี่ยนตามไหม)
- *
- * @return {JSX.Element|null} เนื้อหาขั้นที่ 6
- * @author StealthTrade Team
- */
-function Step7Tamper() {
-  const { tree, selectedLeaf, tamperedProof, isTamperMode, toggleTamper } = useLab05()
-  const [isExplanationOpen, setIsExplanationOpen] = useState(false)
-
-  const currentLeaf = selectedLeaf ?? 0
-  const targetLabel = orders[currentLeaf]?.label || "ออร์เดอร์ A"
-
+  // เลือก Order B (index 1) ตามบทเรียน
   useEffect(() => {
-    setIsExplanationOpen(isTamperMode)
-  }, [isTamperMode])
+    if (selectedLeaf !== 1) {
+      selectLeaf(1)
+    }
+  }, [selectedLeaf, selectLeaf])
 
   if (!tree) return null
 
   const isMatching = !isTamperMode
+
+  const nodeStateMap = isMatching
+    ? {
+      root: "success",
+      "mid-0": "success",
+      "leaf-1": "target",
+    }
+    : {
+      root: "error",
+      "mid-0": "error",
+      "leaf-1": "error",
+    }
+
+  const customHashes = !isMatching
+    ? {
+      "leaf-1": tamperedProof?.leafHash,
+      "mid-0": tamperedProof?.steps?.[0],
+      root: tamperedProof?.root,
+    }
+    : {}
+
+  const allNodeIds = ["root", "mid-0", "mid-1", "leaf-0", "leaf-1", "leaf-2", "leaf-3"]
 
   return (
     <div className="lab5-space-y-6">
       <LessonHeading
         sectionLabel="ทดสอบการแก้ข้อมูล"
         title="ถ้าข้อมูลคำสั่งซื้อถูกเปลี่ยน จะเกิดอะไรขึ้น?"
-        description={`ลองแก้ไขข้อมูลของ ${targetLabel} แล้วใช้ Authentication Path ชุดเดิมมาตรวจสอบอีกครั้ง`}
+        description="ลองแก้ข้อมูลของออร์เดอร์ B แล้วใช้ Authentication Path ชุดเดิมตรวจอีกครั้ง"
       />
 
       {/* Switch Toggle Card */}
-      <div className="lab5-flex lab5-items-center lab5-justify-between lab5-gap-4 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4">
+      <div
+        className="lab5-flex lab5-items-center lab5-justify-between lab5-gap-4 lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4"
+        style={{ borderRadius: "1rem" }}
+      >
         <div>
-          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">จำลองการแก้ไขข้อมูลของ {targetLabel}</p>
-          <p className="lab5-text-xs lab5-text-muted-foreground">
-            {isTamperMode
-              ? `ระบบจะแก้ข้อมูลคำสั่งซื้อเล็กน้อย (${orders[currentLeaf].value} → ${orders[currentLeaf].tamperedValue}) แล้วคำนวณ Leaf Hash และ Root ใหม่จากข้อมูลจริงทันที`
-              : "ระบบจะคำนวณ Leaf Hash และ Root ใหม่จากข้อมูลจริงทันที"}
+          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">จำลองการแก้ไขข้อมูลของออร์เดอร์ B</p>
+          <p className="lab5-text-xs lab5-text-muted-foreground lab5-mt-0.5">
+            ระบบจะคำนวณ Leaf Hash และ Root ใหม่จากข้อมูลจริงทันที
           </p>
         </div>
         <button
@@ -2071,169 +3263,178 @@ function Step7Tamper() {
         </button>
       </div>
 
-      {/* ผลการตรวจสอบ Banner */}
+      {/* Result Status Banner */}
       {isMatching ? (
-        <div className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-p-4">
-          <Check className="lab5-size-5 lab5-shrink-0 lab5-text-success lab5-mt-0.5" />
+        <div
+          className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3"
+          style={{
+            backgroundColor: "#ecfdf5",
+            border: "1.5px solid #a7f3d0",
+            borderRadius: "1rem",
+            padding: "1rem 1.25rem",
+          }}
+        >
+          <CheckCircle2 className="lab5-size-5 lab5-shrink-0" style={{ color: "#16a34a", marginTop: "2px" }} />
           <div className="lab5-space-y-0.5">
-            <p className="lab5-text-base lab5-font-bold lab5-text-success">ตรวจสอบผ่าน: ข้อมูลถูกต้อง</p>
-            <p className="lab5-text-xs lab5-text-success">ข้อมูลเดิมยังตรงกับค่า Root ดั้งเดิมที่อ้างอิง</p>
+            <p className="lab5-text-sm lab5-font-bold" style={{ color: "#065f46" }}>
+              ตรวจสอบผ่าน: ข้อมูลถูกต้อง
+            </p>
+            <p className="lab5-text-xs" style={{ color: "#047857" }}>
+              ข้อมูลเดิมยังให้ Root ตรงกับค่าที่ประกาศไว้
+            </p>
           </div>
         </div>
       ) : (
-        <div className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3 lab5-rounded-2xl lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-p-4">
-          <AlertTriangle className="lab5-size-5 lab5-shrink-0 lab5-text-danger lab5-mt-0.5" />
-          <div className="lab5-space-y-1">
-            <p className="lab5-text-base lab5-font-bold lab5-text-danger">ปฏิเสธ: ตรวจพบการแก้ไขข้อมูล</p>
-            <p className="lab5-text-xs lab5-text-danger">
-              ค่า Root ไม่ตรงกัน เพราะข้อมูลที่ใช้ตรวจสอบไม่ตรงกับชุดข้อมูลที่อ้างอิง
+        <div
+          className="lab5-animate-merge-up lab5-flex lab5-items-start lab5-gap-3"
+          style={{
+            backgroundColor: "#fff1f2",
+            border: "1.5px solid #fecdd3",
+            borderRadius: "1rem",
+            padding: "1rem 1.25rem",
+          }}
+        >
+          <AlertTriangle className="lab5-size-5 lab5-shrink-0" style={{ color: "#ef4444", marginTop: "2px" }} />
+          <div className="lab5-space-y-0.5">
+            <p className="lab5-text-sm lab5-font-bold" style={{ color: "#b91c1c" }}>
+              ปฏิเสธ: ตรวจพบการแก้ไขข้อมูล
             </p>
-            <p className="lab5-text-xs lab5-text-danger" style={{ opacity: 0.85 }}>
-              ธุรกรรมถูกปฏิเสธโดยกลไกจำลองของ Lab เท่านั้น ไม่ได้เชื่อมต่อหรือบล็อกธุรกรรมบน Blockchain จริง
+            <p className="lab5-text-xs" style={{ color: "#991b1b" }}>
+              ค่า Root ไม่ตรงกัน เพราะข้อมูลถูกแก้ไขเพียงตัวอักษรเดียว ทำให้ Root เปลี่ยนไปทั้งหมด Verifier ปฏิเสธหลักฐานทันที
             </p>
           </div>
         </div>
       )}
 
-      {/* กล่องรวม Flow Pills และ Root Comparison */}
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-4 lab5-space-y-5">
-        {/* Flow Pills */}
-        <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-2 lab5-text-xs">
-          {isMatching ? (
-            <>
-              <span className="lab5-rounded-full lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-success">
-                ข้อมูล เดิม
-              </span>
-              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
-              <span className="lab5-rounded-full lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-primary">
-                Leaf Hash เดิม
-              </span>
-              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
-              <span className="lab5-rounded-full lab5-border lab5-border-success-30 lab5-bg-success-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-success">
-                Root ตรงกัน
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="lab5-rounded-full lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-danger">
-                ข้อมูล เปลี่ยน
-              </span>
-              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
-              <span className="lab5-rounded-full lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-danger">
-                Leaf Hash เปลี่ยน
-              </span>
-              <span className="lab5-font-bold lab5-text-muted-foreground">→</span>
-              <span className="lab5-rounded-full lab5-border lab5-border-danger-30 lab5-bg-danger-soft lab5-px-3 lab5-py-1 lab5-font-semibold lab5-text-danger">
-                Root เปลี่ยน
-              </span>
-            </>
-          )}
+      {/* Merkle Tree Diagram Card */}
+      <div
+        className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-p-6"
+        style={{ borderRadius: "1.25rem" }}
+      >
+        <MerkleTreeDiagram
+          nodeStateMap={nodeStateMap}
+          hashNodeIds={allNodeIds}
+          customHashes={customHashes}
+        />
+      </div>
+
+      {/* Root Comparison Boxes */}
+      <div className="lab5-grid lab5-grid-cols-1 lab5-sm:grid-cols-2 lab5-gap-4">
+        {/* Left Box: Root ที่ประกาศไว้ */}
+        <div
+          style={{
+            backgroundColor: "#f0fdf4",
+            border: "1.5px solid #bbf7d0",
+            borderRadius: "1rem",
+            padding: "1rem 1.25rem",
+          }}
+        >
+          <div className="lab5-flex lab5-items-center lab5-gap-2">
+            <ShieldCheck className="lab5-size-4" style={{ color: "#16a34a" }} />
+            <span className="lab5-text-xs lab5-font-semibold" style={{ color: "#16a34a" }}>
+              Root ที่ประกาศไว้
+            </span>
+          </div>
+          <div
+            className="lab5-mt-3 lab5-w-full"
+            style={{
+              backgroundColor: "#ffffff",
+              border: "1px solid #86efac",
+              borderRadius: "9999px",
+              padding: "0.45rem 1rem",
+            }}
+          >
+            <span
+              className="lab5-font-mono lab5-text-xs lab5-font-medium"
+              style={{ color: "#15803d" }}
+            >
+              {tree.root ? TruncateHash(tree.root, 8) : "592ed5ae..."}
+            </span>
+          </div>
         </div>
 
-        {/* Two Root Cards with Center Icon */}
-        <div className="lab5-relative lab5-grid lab5-grid-cols-2" style={{ gap: "2.75rem" }}>
-          {/* Left Box */}
-          <div
-            className="lab5-flex lab5-flex-col lab5-justify-between lab5-rounded-2xl lab5-border"
-            style={{
-              borderColor: "rgba(22, 169, 121, 0.4)",
-              backgroundColor: "rgba(234, 248, 242, 0.75)",
-              minHeight: "100px",
-              padding: "1.25rem 1.5rem",
-            }}
-          >
-            <div className="lab5-flex lab5-items-center lab5-gap-2 lab5-text-xs lab5-font-semibold lab5-text-success">
-              <ShieldCheck className="lab5-size-4 lab5-shrink-0" />
-              <span className="lab5-leading-snug">ค่า Root ดั้งเดิมที่อ้างอิง</span>
-            </div>
-            <div style={{ marginTop: "0.75rem" }}>
-              <HashChip tone="success" hash={tree.root} className="lab5-hash-chip--onsoft" />
-            </div>
+        {/* Right Box: Root ที่คำนวณได้ */}
+        <div
+          style={{
+            backgroundColor: isMatching ? "#f0fdf4" : "#fff1f2",
+            border: isMatching ? "1.5px solid #bbf7d0" : "1.5px solid #fecdd3",
+            borderRadius: "1rem",
+            padding: "1rem 1.25rem",
+          }}
+        >
+          <div className="lab5-flex lab5-items-center lab5-gap-2">
+            <Zap className="lab5-size-4" style={{ color: isMatching ? "#16a34a" : "#ef4444" }} />
+            <span
+              className="lab5-text-xs lab5-font-semibold"
+              style={{ color: isMatching ? "#16a34a" : "#b91c1c" }}
+            >
+              Root ที่คำนวณได้
+            </span>
           </div>
-
-          {/* Center Indicator */}
           <div
-            className="lab5-absolute lab5-z-10 lab5-flex lab5-items-center lab5-justify-center"
+            className="lab5-mt-3 lab5-w-full"
             style={{
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              pointerEvents: "none",
+              backgroundColor: "#ffffff",
+              border: isMatching ? "1px solid #86efac" : "1px solid #fca5a5",
+              borderRadius: "9999px",
+              padding: "0.45rem 1rem",
             }}
           >
-            {isMatching ? (
-              <div
-                className="lab5-flex lab5-size-8 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-md"
-                style={{ backgroundColor: "#16a979" }}
-              >
-                <Check className="lab5-size-4" strokeWidth={2.8} />
-              </div>
-            ) : (
-              <div
-                className="lab5-flex lab5-size-8 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-md"
-                style={{ backgroundColor: "#e5485d" }}
-              >
-                <X className="lab5-size-4" strokeWidth={2.8} />
-              </div>
-            )}
-          </div>
-
-          {/* Right Box */}
-          <div
-            className="lab5-flex lab5-flex-col lab5-justify-between lab5-rounded-2xl lab5-border"
-            style={{
-              borderColor: isMatching ? "rgba(22, 169, 121, 0.4)" : "rgba(229, 72, 93, 0.4)",
-              backgroundColor: isMatching ? "rgba(234, 248, 242, 0.75)" : "rgba(255, 240, 242, 0.75)",
-              minHeight: "100px",
-              padding: "1.25rem 1.5rem",
-            }}
-          >
-            <div className={JoinClassNames("lab5-text-xs lab5-font-semibold lab5-leading-snug", isMatching ? "lab5-text-success" : "lab5-text-danger")}>
-              Root คำนวณได้
-            </div>
-            <div style={{ marginTop: "0.75rem" }}>
-              <HashChip
-                key={isMatching ? "match" : "tamper"}
-                tone={isMatching ? "success" : "danger"}
-                hash={isMatching ? tree.root : tamperedProof?.root}
-                className="lab5-hash-chip--onsoft"
-              />
-            </div>
+            <span
+              className="lab5-font-mono lab5-text-xs lab5-font-medium"
+              style={{ color: isMatching ? "#15803d" : "#b91c1c" }}
+            >
+              {isMatching
+                ? tree.root
+                  ? TruncateHash(tree.root, 8)
+                  : "592ed5ae..."
+                : tamperedProof?.root
+                  ? TruncateHash(tamperedProof.root, 8)
+                  : "e8910b4c..."}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Accordion */}
-      <div className="lab5-rounded-2xl lab5-border lab5-border-border lab5-bg-surface lab5-shadow-sm lab5-overflow-hidden">
+      {/* Button ? ทำไม? */}
+      <div>
         <button
           type="button"
-          onClick={() => setIsExplanationOpen((prev) => !prev)}
-          className="lab5-flex lab5-w-full lab5-items-center lab5-justify-between lab5-px-5 lab5-py-4 lab5-text-xs lab5-font-semibold lab5-text-foreground lab5-transition-colors"
+          onClick={() => setShowWhy((previous) => !previous)}
+          className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-border lab5-px-3.5 lab5-py-1.5 lab5-text-xs lab5-font-semibold lab5-transition-colors"
+          style={{
+            backgroundColor: "#f5f3ff",
+            borderColor: "#ddd6fe",
+            color: "#7c3aed",
+          }}
         >
-          <span className="lab5-text-sm lab5-font-medium">ทำไม Root ถึงเปลี่ยน?</span>
-          <ChevronDown className={JoinClassNames("lab5-size-4 lab5-text-muted-foreground lab5-transition-transform", isExplanationOpen && "lab5-rotate-180")} />
+          <HelpCircle className="lab5-size-4" />
+          <span>ทำไม?</span>
         </button>
-        {isExplanationOpen && (
-          <div className="lab5-animate-merge-up lab5-zk-explain">
-            <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
-              <div className="lab5-zk-explain-card">
-                <p className="lab5-zk-field-label">Original Data</p>
-                <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">{orders[currentLeaf].value}</p>
-                <p className="lab5-zk-field-label lab5-mt-2">Original Leaf Hash</p>
-                <HashChip tone="success" hash={tree.leafHashes[currentLeaf]} />
-              </div>
-              <div className="lab5-zk-explain-card">
-                <p className="lab5-zk-field-label">Modified Data</p>
-                <p className="lab5-font-mono lab5-text-xs lab5-text-muted-foreground">{tamperedProof?.value} (แก้ไข)</p>
-                <p className="lab5-zk-field-label lab5-mt-2">Modified Leaf Hash</p>
-                <HashChip tone="danger" hash={tamperedProof?.leafHash} />
-              </div>
-            </div>
-            <p className="lab5-zk-explain-text">
-              เมื่อข้อมูลต้นทางเปลี่ยน Leaf Hash จึงเปลี่ยน และผลลัพธ์ของ Parent Hash ต่อเนื่องไปจนถึง Root เปลี่ยนตาม แม้จะแก้เพียงจุดเดียว
+
+        {showWhy && (
+          <div
+            className="lab5-animate-merge-up lab5-mt-3 lab5-rounded-2xl lab5-border lab5-p-4.5 lab5-space-y-2.5"
+            style={{
+              backgroundColor: "#f8fafc",
+              borderColor: "#e2e8f0",
+              borderRadius: "1rem",
+              padding: "1rem 1.25rem",
+            }}
+          >
+            <p className="lab5-text-xs lab5-font-bold" style={{ color: "#6d28d9" }}>
+              💡 ปรากฏการณ์ Avalanche Effect (ผลกระทบแบบหิมะถล่ม)
             </p>
-            <p className="lab5-break-all lab5-font-mono lab5-text-11 lab5-leading-relaxed lab5-text-muted-foreground">
-              Parent Hashes: {tamperedProof?.steps.join(" → ")}
+            <p className="lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground">
+              ในฟังก์ชันแฮชทางวิทยาการรหัสลับ (Cryptographic Hash Function เช่น SHA-256) แม้จะเปลี่ยนข้อมูลนำเข้าเพียงบิตเดียว หรือตัวอักษรเดียว (เช่น{" "}
+              <code className="lab5-font-mono lab5-text-foreground">secret-B-q92m</code> →{" "}
+              <code className="lab5-font-mono lab5-text-foreground">secret-B-q93n</code>) ผลลัพธ์ของ Leaf Hash จะเปลี่ยนไปอย่างสิ้นเชิงแบบสุ่ม
+            </p>
+            <p className="lab5-text-xs lab5-leading-relaxed lab5-text-muted-foreground">
+              และเนื่องจาก Merkle Tree สร้างขึ้นจากการนำ Hash คู่ล่างมาต่อกันแล้วแฮชขึ้นไปเรื่อยๆ เมื่อ Leaf Hash ของออร์เดอร์ B เปลี่ยน จึงส่งผลให้ <strong className="lab5-text-foreground">H(A+B)</strong> และ <strong className="lab5-text-foreground">ROOT</strong> เปลี่ยนตามไปด้วย
+            </p>
+            <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#16a34a" }}>
+              ✨ <strong>ผลลัพธ์:</strong> Verifier ตรวจพบได้ทันทีว่าค่า Root ที่คำนวณใหม่ไม่ตรงกับค่า Root ที่บันทึกไว้ และปฏิเสธการยืนยันทันที โดยที่ Verifier ไม่จำเป็นต้องรู้เลยว่าข้อมูลของออร์เดอร์อื่นๆ คืออะไร!
             </p>
           </div>
         )}
@@ -2241,6 +3442,2184 @@ function Step7Tamper() {
     </div>
   )
 }
+
+/**
+ * ขั้นที่ 5: Merkle Proof ยังเผยอะไร
+ * ทบทวนบทสนทนาการพิสูจน์เพื่อแสดงให้เห็นข้อจำกัดของ Merkle Proof (ความเป็นส่วนตัว)
+ *
+ * @return {JSX.Element|null} คอมโพเนนต์ขั้นที่ 5
+ * @author StealthTrade Team
+ */
+function Step5MerkleExposed() {
+  const { tree, markComplete } = useLab05()
+  const [selectedAnswer, setSelectedAnswer] = useState(null)
+  const [showWhy, setShowWhy] = useState(false)
+
+  const handleSelectAnswer = (ans) => {
+    setSelectedAnswer(ans)
+    if (ans === "know") {
+      if (typeof markComplete === "function") {
+        markComplete(5)
+      }
+    }
+  }
+
+  const rootHash = tree?.root ? TruncateHash(tree.root, 8) : "592ed5ae.."
+  const haHash = tree?.leafHashes?.[0] ? TruncateHash(tree.leafHashes[0], 8) : "966a2cef.."
+  const hcdHash = tree?.midHashes?.[1] ? TruncateHash(tree.midHashes[1], 8) : "bc6a6e07.."
+
+  return (
+    <div className="lab5-space-y-6">
+      <LessonHeading
+        sectionLabel="MERKLE PROOF ยังเผยอะไร"
+        title="Verifier เห็นอะไรบ้างในบทสนทนา?"
+        description="อ่านทุกข้อความที่ข้ามเส้นไปฝั่ง Verifier"
+      />
+
+      {/* Chat Container Card */}
+      <div
+        className="lab5-bg-surface lab5-shadow-sm"
+        style={{
+          border: "1px solid #e2e8f0",
+          borderRadius: "1rem",
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        {/* Header Bar */}
+        <div
+          className="lab5-flex lab5-items-center lab5-justify-between lab5-px-6 lab5-py-4"
+          style={{
+            borderBottom: "1px solid #f1f5f9",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          {/* Prover side (Left) */}
+          <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+            <div
+              className="lab5-flex lab5-size-10 lab5-items-center lab5-justify-center lab5-rounded-full"
+              style={{ backgroundColor: "#f5f3ff", border: "1px solid #ede9fe" }}
+            >
+              <User className="lab5-size-5" style={{ color: "#7c3aed" }} />
+            </div>
+            <div>
+              <p className="lab5-text-sm lab5-font-bold" style={{ color: "#7c3aed", margin: 0 }}>
+                คุณ
+              </p>
+              <p className="lab5-text-xs lab5-font-medium" style={{ color: "#64748b", margin: 0 }}>
+                Prover
+              </p>
+            </div>
+          </div>
+
+          {/* Verifier side (Right) */}
+          <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+            <div className="lab5-text-right">
+              <p className="lab5-text-sm lab5-font-bold" style={{ color: "#059669", margin: 0 }}>
+                ผู้ตรวจ
+              </p>
+              <p className="lab5-text-xs lab5-font-medium" style={{ color: "#10b981", margin: 0 }}>
+                Verifier
+              </p>
+            </div>
+            <div
+              className="lab5-flex lab5-size-10 lab5-items-center lab5-justify-center lab5-rounded-full"
+              style={{ backgroundColor: "#ecfdf5", border: "1px solid #a7f3d0" }}
+            >
+              <Shield className="lab5-size-5" style={{ color: "#059669" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Messages Body (2-Column Grid) */}
+        <div className="lab5-space-y-4 lab5-p-6" style={{ backgroundColor: "#ffffff" }}>
+          {/* Row 1: Prover message (Left) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl lab5-p-4"
+                style={{
+                  backgroundColor: "#f5f3ff",
+                  border: "1px solid #ede9fe",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-medium" style={{ color: "#7c3aed", margin: 0 }}>
+                  คุณ → Verifier
+                </p>
+                <p className="lab5-mt-1 lab5-text-sm lab5-font-semibold lab5-text-foreground" style={{ margin: "0.25rem 0 0 0" }}>
+                  ออร์เดอร์ B ของฉันอยู่ใต้ Root นี้
+                </p>
+                <div
+                  className="lab5-mt-2.5 lab5-inline-flex lab5-items-center lab5-rounded-full lab5-px-3 lab5-py-0.5"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #86efac",
+                  }}
+                >
+                  <span className="lab5-font-mono lab5-text-xs lab5-font-medium" style={{ color: "#15803d" }}>
+                    Root {rootHash}
+                  </span>
+                </div>
+              </div>
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-sm"
+                style={{ backgroundColor: "#7c3aed" }}
+              >
+                <ArrowRight className="lab5-size-4" />
+              </div>
+            </div>
+            <div />
+          </div>
+
+          {/* Row 2: Verifier message (Right) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div />
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-sm"
+                style={{ backgroundColor: "#10b981" }}
+              >
+                <ArrowLeft className="lab5-size-4" />
+              </div>
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl lab5-p-4"
+                style={{
+                  backgroundColor: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-medium" style={{ color: "#059669", margin: 0 }}>
+                  Verifier → คุณ
+                </p>
+                <p className="lab5-mt-1 lab5-text-sm lab5-font-semibold lab5-text-foreground" style={{ margin: "0.25rem 0 0 0" }}>
+                  พิสูจน์มาสิครับ ส่งอะไรให้ผมเริ่มคำนวณ?
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 3: Prover message (Left) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl"
+                style={{
+                  backgroundColor: "#f5f3ff",
+                  border: "1px solid #ede9fe",
+                  padding: "1rem 1.25rem",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-semibold" style={{ color: "#7c3aed", margin: 0 }}>
+                  คุณ → Verifier
+                </p>
+                <p className="lab5-text-sm lab5-font-bold lab5-text-foreground" style={{ margin: "0.35rem 0 0.5rem 0" }}>
+                  รหัสลับของออร์เดอร์ B
+                </p>
+                <div>
+                  <div
+                    className="lab5-inline-flex lab5-items-center lab5-justify-center lab5-rounded-full"
+                    style={{
+                      backgroundColor: "#6d4bd8",
+                      padding: "4px 14px",
+                    }}
+                  >
+                    <span
+                      className="lab5-font-mono lab5-text-xs lab5-font-bold lab5-text-white"
+                      style={{ letterSpacing: "0.02em" }}
+                    >
+                      secret-B-q92m
+                    </span>
+                  </div>
+                </div>
+                {selectedAnswer === "know" && (
+                  <div className="lab5-mt-2.5">
+                    <div
+                      className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full"
+                      style={{
+                        backgroundColor: "#fff1f2",
+                        border: "1px solid #fecaca",
+                        padding: "2px 10px",
+                      }}
+                    >
+                      <AlertTriangle className="lab5-size-3" style={{ color: "#ef4444" }} />
+                      <span className="lab5-font-semibold" style={{ color: "#ef4444", fontSize: "0.6875rem" }}>
+                        รั่ว: รหัสลับ
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-sm"
+                style={{ backgroundColor: "#7c3aed" }}
+              >
+                <ArrowRight className="lab5-size-4" />
+              </div>
+            </div>
+            <div />
+          </div>
+
+          {/* Row 4: Verifier message (Right) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div />
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-sm"
+                style={{ backgroundColor: "#10b981" }}
+              >
+                <ArrowLeft className="lab5-size-4" />
+              </div>
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl lab5-p-4"
+                style={{
+                  backgroundColor: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-medium" style={{ color: "#059669", margin: 0 }}>
+                  Verifier → คุณ
+                </p>
+                <p className="lab5-mt-1 lab5-text-sm lab5-font-semibold lab5-text-foreground" style={{ margin: "0.25rem 0 0 0" }}>
+                  ได้ Leaf แล้ว ต้องการ Hash ข้าง ๆ ต่อ
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 5: Prover message (Left) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl"
+                style={{
+                  backgroundColor: "#f5f3ff",
+                  border: "1px solid #ede9fe",
+                  padding: "1rem 1.25rem",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-medium" style={{ color: "#7c3aed", margin: 0 }}>
+                  คุณ → Verifier
+                </p>
+                <p className="lab5-mt-1 lab5-text-sm lab5-font-semibold lab5-text-foreground" style={{ margin: "0.25rem 0 0 0" }}>
+                  ส่ง H(A) (อยู่ฝั่งซ้าย)
+                </p>
+                <div>
+                  <div
+                    className="lab5-mt-2.5 lab5-inline-flex lab5-items-center lab5-rounded-full lab5-px-3 lab5-py-0.5"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #ddd6fe",
+                    }}
+                  >
+                    <span className="lab5-font-mono lab5-text-xs lab5-font-medium" style={{ color: "#7c3aed" }}>
+                      H(A) {haHash}
+                    </span>
+                  </div>
+                </div>
+                {selectedAnswer === "know" && (
+                  <div className="lab5-mt-2.5">
+                    <div
+                      className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full"
+                      style={{
+                        backgroundColor: "#fff1f2",
+                        border: "1px solid #fecaca",
+                        padding: "2px 10px",
+                      }}
+                    >
+                      <AlertTriangle className="lab5-size-3" style={{ color: "#ef4444" }} />
+                      <span className="lab5-font-semibold" style={{ color: "#ef4444", fontSize: "0.6875rem" }}>
+                        รั่ว: ตำแหน่ง → ใบของคุณอยู่ขวาของคู่
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-sm"
+                style={{ backgroundColor: "#7c3aed" }}
+              >
+                <ArrowRight className="lab5-size-4" />
+              </div>
+            </div>
+            <div />
+          </div>
+
+          {/* Row 6: Prover message (Left) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl"
+                style={{
+                  backgroundColor: "#f5f3ff",
+                  border: "1px solid #ede9fe",
+                  padding: "1rem 1.25rem",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-medium" style={{ color: "#7c3aed", margin: 0 }}>
+                  คุณ → Verifier
+                </p>
+                <p className="lab5-mt-1 lab5-text-sm lab5-font-semibold lab5-text-foreground" style={{ margin: "0.25rem 0 0 0" }}>
+                  ส่ง H(C+D) (อยู่ฝั่งขวา)
+                </p>
+                <div>
+                  <div
+                    className="lab5-mt-2.5 lab5-inline-flex lab5-items-center lab5-rounded-full lab5-px-3 lab5-py-0.5"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #ddd6fe",
+                    }}
+                  >
+                    <span className="lab5-font-mono lab5-text-xs lab5-font-medium" style={{ color: "#7c3aed" }}>
+                      H(C+D) {hcdHash}
+                    </span>
+                  </div>
+                </div>
+                {selectedAnswer === "know" && (
+                  <div className="lab5-mt-2.5">
+                    <div
+                      className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full"
+                      style={{
+                        backgroundColor: "#fff1f2",
+                        border: "1px solid #fecaca",
+                        padding: "2px 10px",
+                      }}
+                    >
+                      <AlertTriangle className="lab5-size-3" style={{ color: "#ef4444" }} />
+                      <span className="lab5-font-semibold" style={{ color: "#ef4444", fontSize: "0.6875rem" }}>
+                        รั่ว: ตำแหน่ง → อยู่ครึ่งซ้ายของต้นไม้
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full lab5-text-white lab5-shadow-sm"
+                style={{ backgroundColor: "#7c3aed" }}
+              >
+                <ArrowRight className="lab5-size-4" />
+              </div>
+            </div>
+            <div />
+          </div>
+
+          {/* Row 7: Final Verification: Verifier (Right) */}
+          <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center">
+            <div />
+            <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+              <div
+                className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1.5px dashed #86efac",
+                }}
+              >
+                <Shield className="lab5-size-4" style={{ color: "#16a34a" }} />
+              </div>
+              <div
+                className="lab5-flex-1 lab5-rounded-2xl lab5-p-4"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1.5px dashed #86efac",
+                }}
+              >
+                <p className="lab5-text-xs lab5-font-bold" style={{ color: "#059669", margin: 0 }}>
+                  Verifier ตรวจเอง
+                </p>
+                <p className="lab5-mt-1 lab5-text-xs lab5-font-medium lab5-text-foreground" style={{ margin: "0.25rem 0 0 0" }}>
+                  คำนวณย้อนกลับได้ Root ตรงกับที่ประกาศไว้ ✅ ยอมรับ
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 8: Verifier คิดในใจ (Right) */}
+          {selectedAnswer === "know" && (
+            <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3.5 lab5-items-center lab5-animate-merge-up">
+              <div />
+              <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+                <div
+                  className="lab5-flex lab5-size-8 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-full"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: "1.5px dashed #86efac",
+                  }}
+                >
+                  <Shield className="lab5-size-4" style={{ color: "#10b981" }} />
+                </div>
+                <div
+                  className="lab5-flex-1 lab5-rounded-2xl lab5-p-4"
+                  style={{
+                    backgroundColor: "#fff5f5",
+                    border: "1.5px dashed #fca5a5",
+                  }}
+                >
+                  <p className="lab5-text-xs lab5-font-bold" style={{ color: "#ef4444", margin: 0 }}>
+                    Verifier คิดในใจ
+                  </p>
+                  <p className="lab5-mt-1.5 lab5-text-xs lab5-font-medium" style={{ margin: "0.35rem 0 0 0", color: "#334155" }}>
+                    &quot;อ๋อ... คนนี้คือเจ้าของ <strong>ออร์เดอร์ B</strong> (ใบที่ 2 จาก 4) และรหัสลับคือ secret-B-q92m&quot;
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer info bar */}
+        <div
+          className="lab5-flex lab5-items-center lab5-justify-between lab5-flex-wrap lab5-gap-2.5 lab5-px-6 lab5-py-3.5"
+          style={{ borderTop: "1px solid #f1f5f9", backgroundColor: "#ffffff" }}
+        >
+          {selectedAnswer === "know" ? (
+            <div className="lab5-flex lab5-items-center lab5-flex-wrap lab5-gap-2 lab5-animate-merge-up">
+              <div className="lab5-flex lab5-items-center lab5-gap-1.5 lab5-mr-1">
+                <Eye className="lab5-size-4" style={{ color: "#059669" }} />
+                <span className="lab5-text-xs lab5-font-bold lab5-text-foreground">
+                  สิ่งที่ Verifier รู้หลังคุยจบ
+                </span>
+              </div>
+              <span
+                className="lab5-inline-flex lab5-items-center lab5-rounded-full lab5-px-2.5 lab5-py-0.5"
+                style={{
+                  backgroundColor: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  color: "#059669",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                }}
+              >
+                ✓ Root
+              </span>
+              <span
+                className="lab5-inline-flex lab5-items-center lab5-gap-1 lab5-rounded-full lab5-px-2.5 lab5-py-0.5"
+                style={{
+                  backgroundColor: "#fff1f2",
+                  border: "1px solid #fecaca",
+                  color: "#ef4444",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                }}
+              >
+                <AlertTriangle className="lab5-size-2.5" /> รหัสลับ
+              </span>
+              <span
+                className="lab5-inline-flex lab5-items-center lab5-gap-1 lab5-rounded-full lab5-px-2.5 lab5-py-0.5"
+                style={{
+                  backgroundColor: "#fff1f2",
+                  border: "1px solid #fecaca",
+                  color: "#ef4444",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                }}
+              >
+                <AlertTriangle className="lab5-size-2.5" /> ว่าคุณคือออร์เดอร์ B
+              </span>
+              <span
+                className="lab5-inline-flex lab5-items-center lab5-gap-1 lab5-rounded-full lab5-px-2.5 lab5-py-0.5"
+                style={{
+                  backgroundColor: "#fff1f2",
+                  border: "1px solid #fecaca",
+                  color: "#ef4444",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                }}
+              >
+                <AlertTriangle className="lab5-size-2.5" /> Hash ข้าง ๆ + ตำแหน่ง
+              </span>
+            </div>
+          ) : (
+            <div />
+          )}
+
+          <div className="lab5-flex lab5-items-center lab5-gap-1.5 lab5-ml-auto">
+            <RotateCcw className="lab5-size-3.5" style={{ color: "#94a3b8" }} />
+            <span className="lab5-text-xs lab5-font-medium" style={{ color: "#64748b" }}>
+              ข้อความที่ข้ามเส้น: <strong style={{ color: "#1e293b" }}>6</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Question & Choices */}
+      <div className="lab5-space-y-3">
+        <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">
+          จากบทสนทนานี้ Verifier รู้ไหมว่าคุณเป็นเจ้าของออร์เดอร์ใบไหน?
+        </p>
+
+        <div className="lab5-space-y-3">
+          {/* Option 1: ไม่รู้ */}
+          <button
+            type="button"
+            onClick={() => handleSelectAnswer("unknown")}
+            className="lab5-w-full lab5-text-left lab5-rounded-2xl lab5-transition-all"
+            style={{
+              padding: "1rem 1.25rem",
+              border: selectedAnswer === "unknown" ? "2px solid #ef4444" : "1px solid #e2e8f0",
+              backgroundColor: "#ffffff",
+              cursor: "pointer",
+            }}
+          >
+            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+              ไม่รู้
+            </p>
+            <p
+              className="lab5-text-xs"
+              style={{
+                margin: "0.25rem 0 0 0",
+                color: selectedAnswer === "unknown" ? "#ef4444" : "#64748b",
+              }}
+            >
+              — เพราะส่วนใหญ่เป็นแค่ Hash
+            </p>
+          </button>
+
+          {/* Option 2: รู้ */}
+          <button
+            type="button"
+            onClick={() => handleSelectAnswer("know")}
+            className="lab5-w-full lab5-text-left lab5-rounded-2xl lab5-transition-all"
+            style={{
+              padding: "1rem 1.25rem",
+              border: selectedAnswer === "know" ? "2px solid #10b981" : "1px solid #e2e8f0",
+              backgroundColor: selectedAnswer === "know" ? "#ecfdf5" : "#ffffff",
+              cursor: "pointer",
+            }}
+          >
+            <p className="lab5-text-sm lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+              รู้
+            </p>
+            <p
+              className="lab5-text-xs"
+              style={{
+                margin: "0.25rem 0 0 0",
+                color: selectedAnswer === "know" ? "#059669" : "#64748b",
+              }}
+            >
+              — เพราะเห็นรหัสลับและตำแหน่งชัดเจน
+            </p>
+          </button>
+        </div>
+
+        {/* Feedback Display */}
+        {selectedAnswer === "unknown" && (
+          <div className="lab5-space-y-3 lab5-animate-merge-up">
+            <div
+              className="lab5-rounded-2xl"
+              style={{
+                backgroundColor: "#fff5f5",
+                border: "1px solid #fecaca",
+                padding: "1.1rem 1.25rem",
+              }}
+            >
+              <div className="lab5-flex lab5-items-center lab5-gap-2">
+                <XCircle className="lab5-size-5 lab5-shrink-0" style={{ color: "#ef4444" }} />
+                <span className="lab5-text-sm lab5-font-bold" style={{ color: "#ef4444" }}>
+                  ลองอ่านบทสนทนาอีกครั้ง
+                </span>
+              </div>
+              <p
+                className="lab5-text-xs lab5-leading-relaxed"
+                style={{ color: "#334155", margin: "0.5rem 0 0 0" }}
+              >
+                คุณส่ง <strong>รหัสลับของออร์เดอร์ B</strong> ไปตรง ๆ และบอกตำแหน่ง "ซ้าย/ขวา" ของ Hash ข้าง ๆ ด้วย — แค่นี้ก็พอให้รู้ว่าเป็นใบที่เท่าไหร่ในต้นไม้
+              </p>
+            </div>
+
+            {/* Hint / Why Button */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowWhy((prev) => !prev)}
+                className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-px-3.5 lab5-py-1.5 lab5-transition-all"
+                style={{
+                  backgroundColor: "#faf5ff",
+                  border: "1px solid #e9d5ff",
+                  color: "#9333ea",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                <HelpCircle className="lab5-size-3.5" />
+                <span>ทำไม?</span>
+              </button>
+            </div>
+
+            {showWhy && (
+              <div
+                className="lab5-animate-merge-up lab5-rounded-2xl lab5-p-4"
+                style={{
+                  backgroundColor: "#faf5ff",
+                  border: "1px solid #ede9fe",
+                }}
+              >
+                <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#6d4bd8", margin: 0 }}>
+                  💡 <strong>คำอธิบาย:</strong> ใน Merkle Tree แบบปกติ เราจำเป็นต้องเปิดเผยข้อมูลใบ (Leaf) ของเราพร้อมกับส่ง Hash ข้างเคียง (Auth Path) เพื่อให้ผู้ตรวจ (Verifier) สามารถคำนวณย้อนกลับขึ้นไปหา Root ได้ ซึ่งทำให้ Verifier รู้ได้ทันทีว่าเราคือเจ้าของออร์เดอร์ใบนี้
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedAnswer === "know" && (
+          <div className="lab5-space-y-4 lab5-animate-merge-up">
+            {/* Green Success Card */}
+            <div
+              className="lab5-rounded-2xl lab5-p-4"
+              style={{
+                backgroundColor: "#ecfdf5",
+                border: "1px solid #a7f3d0",
+              }}
+            >
+              <div className="lab5-flex lab5-items-center lab5-gap-2.5">
+                <CheckCircle2 className="lab5-size-5 lab5-shrink-0" style={{ color: "#10b981" }} />
+                <span className="lab5-text-sm lab5-font-bold" style={{ color: "#059669" }}>
+                  ถูกต้อง — Verifier รู้ว่าเป็นออร์เดอร์ไหน
+                </span>
+              </div>
+              <p
+                className="lab5-mt-2 lab5-text-xs lab5-leading-relaxed"
+                style={{ color: "#334155", margin: "0.5rem 0 0 0" }}
+              >
+                Merkle proof พิสูจน์ว่า &ldquo;อยู่ในชุดข้อมูล&rdquo; ได้จริง แต่ระหว่างคุยกัน คุณต้องส่งข้อมูลของตัวเองข้ามเส้นไปให้ Verifier เห็นด้วย
+              </p>
+            </div>
+
+            {/* Target of Part 2 Card */}
+            <div
+              className="lab5-rounded-2xl lab5-space-y-4"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #e2e8f0",
+                padding: "1.5rem",
+              }}
+            >
+              {/* Card Header */}
+              <div className="lab5-flex lab5-items-center lab5-gap-3">
+                <div
+                  className="lab5-flex lab5-size-10 lab5-shrink-0 lab5-items-center lab5-justify-center lab5-rounded-2xl"
+                  style={{ backgroundColor: "#f5f3ff", color: "#7c3aed" }}
+                >
+                  <Sparkles className="lab5-size-5" />
+                </div>
+                <div>
+                  <p className="lab5-text-base lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                    เป้าหมายใหม่ของภาค 2
+                  </p>
+                  <p className="lab5-text-xs lab5-text-muted-foreground" style={{ margin: "0.2rem 0 0 0" }}>
+                    พิสูจน์ประโยคนี้ให้ Verifier เชื่อ โดยไม่ส่งข้อความที่มีป้ายแดงข้ามเส้นไปเลยแม้แต่ชิ้นเดียว
+                  </p>
+                </div>
+              </div>
+
+              {/* Quote Box */}
+              <div
+                className="lab5-rounded-2xl lab5-text-center"
+                style={{
+                  border: "1px solid #ede9fe",
+                  backgroundColor: "#ffffff",
+                  padding: "1.25rem 1rem",
+                }}
+              >
+                <p className="lab5-text-sm lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                  &ldquo;ฉันรู้รหัสลับของออร์เดอร์ <strong>1 ใบ</strong> ที่อยู่ใต้ Root{" "}
+                  <span className="lab5-font-mono" style={{ color: "#7c3aed" }}>
+                    {rootHash}
+                  </span>{" "}
+                  นี้&rdquo;
+                </p>
+                <p className="lab5-text-xs lab5-text-muted-foreground" style={{ margin: "0.35rem 0 0 0" }}>
+                  — โดยไม่บอกว่าใบไหน และไม่บอกรหัสลับ
+                </p>
+              </div>
+
+              {/* zk-SNARK intro */}
+              <div>
+                <p className="lab5-text-xs lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                  เครื่องมือที่ทำได้คือ <span style={{ color: "#7c3aed" }}>zk-SNARK</span> — ชื่อยาวแต่แปลตรงตัวแบบนี้:
+                </p>
+              </div>
+
+              {/* 4 Cards (2x2 Grid) */}
+              <div className="lab5-grid lab5-grid-cols-2 lab5-gap-3">
+                {/* zk */}
+                <div
+                  className="lab5-rounded-2xl lab5-p-3.5"
+                  style={{ backgroundColor: "#f8fafc" }}
+                >
+                  <p className="lab5-text-xs lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                    <span style={{ color: "#7c3aed" }}>zk</span> · Zero-Knowledge
+                  </p>
+                  <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b", margin: "0.35rem 0 0 0" }}>
+                    Verifier ไม่ได้ความรู้อะไรเพิ่ม นอกจาก &ldquo;จริง&rdquo; หรือ &ldquo;ไม่จริง&rdquo;
+                  </p>
+                </div>
+
+                {/* S */}
+                <div
+                  className="lab5-rounded-2xl lab5-p-3.5"
+                  style={{ backgroundColor: "#f8fafc" }}
+                >
+                  <p className="lab5-text-xs lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                    <span style={{ color: "#7c3aed" }}>S</span> · Succinct (กระชับ)
+                  </p>
+                  <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b", margin: "0.35rem 0 0 0" }}>
+                    หลักฐานเล็กมาก ตรวจได้เร็ว ไม่ว่าเรื่องที่พิสูจน์จะซับซ้อนแค่ไหน
+                  </p>
+                </div>
+
+                {/* N */}
+                <div
+                  className="lab5-rounded-2xl lab5-p-3.5"
+                  style={{ backgroundColor: "#f8fafc" }}
+                >
+                  <p className="lab5-text-xs lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                    <span style={{ color: "#7c3aed" }}>N</span> · Non-Interactive
+                  </p>
+                  <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b", margin: "0.35rem 0 0 0" }}>
+                    ส่งหลักฐานข้ามเส้นครั้งเดียวจบ ไม่ต้องถาม-ตอบกันไปมาแบบขั้นที่ 3
+                  </p>
+                </div>
+
+                {/* ARK */}
+                <div
+                  className="lab5-rounded-2xl lab5-p-3.5"
+                  style={{ backgroundColor: "#f8fafc" }}
+                >
+                  <p className="lab5-text-xs lab5-font-bold lab5-text-foreground" style={{ margin: 0 }}>
+                    <span style={{ color: "#7c3aed" }}>ARK</span> · ARgument of Knowledge
+                  </p>
+                  <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#64748b", margin: "0.35rem 0 0 0" }}>
+                    พิสูจน์ว่า &ldquo;รู้&rdquo; ข้อมูลลับจริง ไม่ใช่แค่เดาถูก
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Hint / Why Button */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowWhy((prev) => !prev)}
+                className="lab5-inline-flex lab5-items-center lab5-gap-1.5 lab5-rounded-full lab5-px-3.5 lab5-py-1.5 lab5-transition-all"
+                style={{
+                  backgroundColor: "#faf5ff",
+                  border: "1px solid #e9d5ff",
+                  color: "#9333ea",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                <HelpCircle className="lab5-size-3.5" />
+                <span>ทำไม?</span>
+              </button>
+            </div>
+
+            {showWhy && (
+              <div
+                className="lab5-animate-merge-up lab5-rounded-2xl lab5-p-4"
+                style={{
+                  backgroundColor: "#faf5ff",
+                  border: "1px solid #ede9fe",
+                }}
+              >
+                <p className="lab5-text-xs lab5-leading-relaxed" style={{ color: "#6d4bd8", margin: 0 }}>
+                  💡 <strong>คำอธิบาย:</strong> Merkle Proof ช่วยให้ Verifier ตรวจสอบได้ว่าข้อมูลอยู่ในชุดข้อมูลจริง แต่จำเป็นต้องเปิดเผยตำแหน่งและค่าของใบ จึงไม่สามารถรักษาความเป็นส่วนตัวได้แบบ 100% — ดังนั้นในภาคที่ 2 เราจึงนำ <strong>Zero-Knowledge Proofs (ZKP)</strong> มาผสานกับ Merkle Tree เพื่อแก้ข้อจำกัดนี้
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+
+
+/**
+ * ขั้นที่ 6: ไปป์ไลน์ zk-SNARK (เดินผ่าน 5 ชิ้นส่วนของ zk-SNARK ทีละขั้น จนผู้ตรวจยอมรับ)
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 6
+ * @author StealthTrade Team
+ */
+function Step6ZkPipeline() {
+  const { tree, selectedLeaf, markComplete } = useLab05()
+  const [currentStage, setCurrentStage] = useState(1) // 1 to 5
+  const [completedStages, setCompletedStages] = useState([]) // [1, 2, 3, 4, 5]
+  const [sendChoice, setSendChoice] = useState("with_witness") // "with_witness" | "zk_only"
+  const [isWhyOpen, setIsWhyOpen] = useState(false)
+
+  const rootHash = tree?.root || "592ed5ae966a2cefe7485d1e4ff0b016ef3ff5b9ef18fe580325f187a4128509"
+  const targetIndex = selectedLeaf ?? 1
+  const targetOrder = orders[targetIndex] || orders[1]
+
+  const PIPELINE_PARTS = [
+    { id: 1, title: "Statement", sub: "โจทย์ที่จะประกาศ", action: "เขียน Statement (คำอ้างที่จะประกาศ)" },
+    { id: 2, title: "Circuit", sub: "กติกาตรวจ", action: "กำหนด Circuit (กติกาตรวจ)" },
+    { id: 3, title: "Witness", sub: "ข้อมูลลับ", action: "ป้อน Witness (ข้อมูลลับในเครื่อง)" },
+    { id: 4, title: "Proof", sub: "หลักฐาน", action: "สร้าง Proof π (ในกล่องปิด)" },
+    { id: 5, title: "Verify", sub: "ตรวจหลักฐาน", action: "ส่งข้ามเส้นไปให้ Verifier" },
+  ]
+
+  const handleNextAction = () => {
+    if (currentStage === 1) {
+      setCompletedStages([1])
+      setCurrentStage(2)
+    } else if (currentStage === 2) {
+      setCompletedStages([1, 2])
+      setCurrentStage(3)
+    } else if (currentStage === 3) {
+      setCompletedStages([1, 2, 3])
+      setCurrentStage(4)
+    } else if (currentStage === 4) {
+      setCompletedStages([1, 2, 3, 4])
+      setCurrentStage(5)
+      setSendChoice("with_witness") // ขึ้นข้อความสีแดงตามภาพ 1 ก่อน
+    }
+  }
+
+  const handleSendStatement = () => {
+    setSendChoice("zk_only")
+    setCompletedStages([1, 2, 3, 4, 5])
+    if (typeof markComplete === "function") {
+      markComplete(6)
+    }
+  }
+
+  const handleReset = () => {
+    setCurrentStage(1)
+    setCompletedStages([])
+    setSendChoice("with_witness")
+  }
+
+  const hasStarted = completedStages.length > 0
+  const isZkAccepted = sendChoice === "zk_only"
+  const crossedCount = isZkAccepted ? 1 : 2
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <LessonHeading
+        sectionLabel="ไปป์ไลน์ ZK-SNARK (จำลอง)"
+        title="พิสูจน์ว่าอยู่ในชุดข้อมูล โดยไม่บอกว่าเป็นใบไหน"
+        description="ใช้ต้นไม้ชุดเดิมจากภาค 1 เป็นตัวอย่าง — Root เป็นข้อมูลสาธารณะ ส่วนรหัสลับและเส้นทางเป็นความลับ"
+      />
+
+      {/* 5-Step Pipeline Card */}
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          border: "1px solid #e2e8f0",
+          borderRadius: "1rem",
+          padding: "1.25rem 1rem",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "1rem",
+          }}
+        >
+          <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b" }}>
+            ชิ้นที่ {currentStage} จาก 5 : {PIPELINE_PARTS[currentStage - 1].title}
+          </span>
+          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+            เป้าหมาย: Verifier เชื่อ โดยไม่เห็นข้อมูลลับ
+          </span>
+        </div>
+
+        {/* 5 Steps Grid — Strictly 5 Columns Side by Side */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+            gap: "0.5rem",
+          }}
+        >
+          {PIPELINE_PARTS.map((part) => {
+            const isActive = currentStage === part.id
+            const isDone = completedStages.includes(part.id)
+
+            return (
+              <button
+                key={part.id}
+                type="button"
+                onClick={() => {
+                  if (completedStages.includes(part.id) || completedStages.includes(part.id - 1) || part.id === 1) {
+                    setCurrentStage(part.id)
+                  }
+                }}
+                disabled={!isDone && part.id > currentStage}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0.75rem 0.375rem",
+                  borderRadius: "1rem",
+                  backgroundColor: isActive ? "#f5f3ff" : "transparent",
+                  border: isActive ? "1px solid #ddd6fe" : "1px solid transparent",
+                  cursor: (isDone || part.id <= currentStage) ? "pointer" : "default",
+                  transition: "all 0.15s ease",
+                  textAlign: "center",
+                  outline: "none",
+                }}
+              >
+                <div
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    minWidth: "28px",
+                    minHeight: "28px",
+                    maxWidth: "28px",
+                    maxHeight: "28px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    marginBottom: "0.375rem",
+                    backgroundColor: isActive ? "#7c3aed" : isDone ? "#10b981" : "#ffffff",
+                    color: isActive || isDone ? "#ffffff" : "#64748b",
+                    border: isActive || isDone ? "none" : "1px solid #cbd5e1",
+                    flexShrink: 0,
+                  }}
+                >
+                  {isDone && !isActive ? (
+                    <Check style={{ width: "14px", height: "14px" }} />
+                  ) : (
+                    part.id
+                  )}
+                </div>
+                <span
+                  style={{
+                    fontSize: "0.8125rem",
+                    fontWeight: 700,
+                    color: isActive ? "#6d4bd8" : isDone ? "#1e293b" : "#475569",
+                    lineHeight: 1.25,
+                    display: "block",
+                  }}
+                >
+                  {part.title}
+                </span>
+                <span
+                  style={{
+                    fontSize: "0.6875rem",
+                    color: isActive ? "#7c3aed" : "#94a3b8",
+                    marginTop: "0.125rem",
+                    lineHeight: 1.2,
+                    display: "block",
+                  }}
+                >
+                  {part.sub}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Split Prover / Verifier Arena */}
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          border: "1px solid #e2e8f0",
+          borderRadius: "1.25rem",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Split Header */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            borderBottom: "1px solid #f1f5f9",
+          }}
+        >
+          {/* Prover Header (Left) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.625rem",
+              padding: "0.75rem 1rem",
+              backgroundColor: "rgba(124, 58, 237, 0.04)",
+              borderRight: "1px dashed #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                minWidth: "32px",
+                minHeight: "32px",
+                borderRadius: "50%",
+                backgroundColor: "#f5f3ff",
+                border: "1px solid #ddd6fe",
+                color: "#7c3aed",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <User style={{ width: "16px", height: "16px" }} />
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 700, color: "#6d4bd8", lineHeight: 1.2 }}>
+                คุณ
+              </p>
+              <p style={{ margin: 0, fontSize: "0.6875rem", color: "#7c3aed", lineHeight: 1.2 }}>
+                Prover
+              </p>
+            </div>
+          </div>
+
+          {/* Verifier Header (Right) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "0.625rem",
+              padding: "0.75rem 1rem",
+              backgroundColor: "rgba(16, 185, 129, 0.04)",
+            }}
+          >
+            <div style={{ textAlign: "right" }}>
+              <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 700, color: "#059669", lineHeight: 1.2 }}>
+                ผู้ตรวจ
+              </p>
+              <p style={{ margin: 0, fontSize: "0.6875rem", color: "#10b981", lineHeight: 1.2 }}>
+                Verifier
+              </p>
+            </div>
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                minWidth: "32px",
+                minHeight: "32px",
+                borderRadius: "50%",
+                backgroundColor: "#ecfdf5",
+                border: "1px solid #a7f3d0",
+                color: "#059669",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <ShieldCheck style={{ width: "18px", height: "18px" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div style={{ padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", gap: "1.25rem", minHeight: "140px" }}>
+          {!hasStarted ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "3rem 1rem",
+              }}
+            >
+              <span style={{ fontSize: "0.8125rem", color: "#94a3b8" }}>
+                ยังไม่มีข้อความ — เริ่มคุยจากปุ่มด้านล่าง
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* Card 1: Statement (Left aligned, dashed border) */}
+              {completedStages.includes(1) && (
+                <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                  <div
+                    style={{
+                      flex: "0 1 480px",
+                      border: "1px dashed #d8b4fe",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "1rem",
+                      padding: "1rem 1.125rem",
+                      boxShadow: "0 1px 2px rgba(124, 58, 237, 0.03)",
+                    }}
+                  >
+                    <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600 }}>
+                      ในเครื่องคุณ · เตรียมไว้ประกาศ
+                    </p>
+                    <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", lineHeight: 1.4 }}>
+                      ① Statement — คำอ้างที่ทุกคนจะอ่านได้ (Public):
+                    </p>
+                    <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.8125rem", color: "#1e293b", lineHeight: 1.5 }}>
+                      "มีออร์เดอร์ 1 ใบอยู่ใต้ Root{" "}
+                      <span
+                        style={{
+                          backgroundColor: "#f5f3ff",
+                          color: "#7c3aed",
+                          fontFamily: "monospace",
+                          padding: "0.125rem 0.375rem",
+                          borderRadius: "0.375rem",
+                          fontWeight: 600,
+                        }}
+                      >
+                        592ed5ae..
+                      </span>{" "}
+                      และฉันรู้รหัสลับของมัน"
+                    </p>
+                    <p style={{ margin: 0, fontSize: "0.6875rem", color: "#64748b", lineHeight: 1.4 }}>
+                      เปรียบเหมือนโจทย์ข้อสอบบนกระดาน — ทุกคนเห็นโจทย์ แต่ไม่มีใครเห็นคำตอบของคุณ
+                    </p>
+                  </div>
+
+                  {/* Dotted Lock Circle */}
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      minWidth: "28px",
+                      minHeight: "28px",
+                      borderRadius: "50%",
+                      border: "1px dashed #d8b4fe",
+                      backgroundColor: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#a855f7",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Lock style={{ width: "13px", height: "13px" }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Card 2: Circuit (Centered, solid light gray card) */}
+              {completedStages.includes(2) && (
+                <div style={{ display: "flex", justifyContent: "center", width: "100%", margin: "0.25rem 0" }} className="lab5-animate-merge-up">
+                  <div
+                    style={{
+                      width: "100%",
+                      maxWidth: "600px",
+                      backgroundColor: "#f8fafc",
+                      borderRadius: "1rem",
+                      padding: "1rem 1.25rem",
+                      textAlign: "center",
+                      border: "1px solid #f1f5f9",
+                    }}
+                  >
+                    <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", fontWeight: 700, color: "#64748b" }}>
+                      ข้อตกลงร่วม · Setup ครั้งเดียว
+                    </p>
+                    <p style={{ margin: "0 0 0.75rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", lineHeight: 1.4 }}>
+                      ② Circuit — กติกาตรวจที่ทั้งสองฝ่ายรู้เหมือนกัน (คือการคำนวณเดียวกับที่ Verifier ทำในขั้นที่ 3)
+                    </p>
+
+                    {/* 3 Pills in horizontal row */}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.5rem",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      <span
+                        style={{
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: "#334155",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+                        }}
+                      >
+                        1 · Hash(รหัสลับ) → Leaf
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: "#334155",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+                        }}
+                      >
+                        2 · รวมกับ Sibling ทีละขั้น
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: "#334155",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+                        }}
+                      >
+                        3 · ผลลัพธ์ต้อง = Root
+                      </span>
+                    </div>
+
+                    <p style={{ margin: 0, fontSize: "0.6875rem", color: "#64748b" }}>
+                      จาก Circuit ได้ Proving Key (ให้คุณ) และ Verification Key (ให้ Verifier) — ทั้งสองเป็นข้อมูลสาธารณะ
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Card 3: Witness (Left aligned, dashed border) */}
+              {completedStages.includes(3) && (
+                <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                  <div
+                    style={{
+                      flex: "0 1 480px",
+                      border: "1px dashed #d8b4fe",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "1rem",
+                      padding: "1rem 1.125rem",
+                      boxShadow: "0 1px 2px rgba(124, 58, 237, 0.03)",
+                    }}
+                  >
+                    <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600 }}>
+                      ในเครื่องคุณ · ไม่ส่งออก
+                    </p>
+                    <p style={{ margin: "0 0 0.625rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                      ③ Witness <span style={{ fontSize: "0.875rem" }}>🔒</span> ข้อมูลลับที่ทำให้กติกาเป็นจริง
+                    </p>
+
+                    {/* Witness Pills */}
+                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                      <span
+                        style={{
+                          backgroundColor: "#6d28d9",
+                          color: "#ffffff",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        secret-B-q92m
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: "#f5f3ff",
+                          border: "1px solid #ddd6fe",
+                          color: "#6d4bd8",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        H(A) 966a2cef.. · ฝั่งซ้าย
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: "#f5f3ff",
+                          border: "1px solid #ddd6fe",
+                          color: "#6d4bd8",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        H(C+D) bc6a6e07.. · ฝั่งขวา
+                      </span>
+                    </div>
+
+                    <p style={{ margin: 0, fontSize: "0.6875rem", color: "#64748b", lineHeight: 1.4 }}>
+                      นี่คือของชุดเดียวกับที่มีป้ายแดงในขั้นที่ 5 — คราวนี้มันจะไม่ข้ามเส้นไปหา Verifier เลย
+                    </p>
+                  </div>
+
+                  {/* Dotted Lock Circle */}
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      minWidth: "28px",
+                      minHeight: "28px",
+                      borderRadius: "50%",
+                      border: "1px dashed #d8b4fe",
+                      backgroundColor: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#a855f7",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Lock style={{ width: "13px", height: "13px" }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Card 4: Proof π (Left aligned, dashed border) */}
+              {completedStages.includes(4) && (
+                <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                  <div
+                    style={{
+                      flex: "0 1 480px",
+                      border: "1px dashed #d8b4fe",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "1rem",
+                      padding: "1rem 1.125rem",
+                      boxShadow: "0 1px 2px rgba(124, 58, 237, 0.03)",
+                    }}
+                  >
+                    <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", color: "#8b5cf6", fontWeight: 600 }}>
+                      ในเครื่องคุณ · ไม่ส่งออก
+                    </p>
+                    <p style={{ margin: "0 0 0.625rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", lineHeight: 1.4 }}>
+                      ④ Proof π ออกมาแล้ว — วงจรตรวจกติกาครบ 3 ข้อในกล่องปิด
+                    </p>
+
+                    {/* Proof Chip */}
+                    <div style={{ marginBottom: "0.625rem" }}>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          backgroundColor: "#ede9fe",
+                          color: "#6d4bd8",
+                          border: "1px solid #ddd6fe",
+                          borderRadius: "9999px",
+                          padding: "0.3125rem 0.75rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        π 6ac6cfa8c45750a7_
+                      </span>
+                    </div>
+
+                    <p style={{ margin: 0, fontSize: "0.6875rem", color: "#64748b", lineHeight: 1.4 }}>
+                      ในระบบจริงมีขนาดเล็กและคงที่ (ประมาณ 200 ไบต์) ไม่ว่าต้นไม้จะใหญ่แค่ไหน
+                    </p>
+                  </div>
+
+                  {/* Dotted Lock Circle */}
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      minWidth: "28px",
+                      minHeight: "28px",
+                      borderRadius: "50%",
+                      border: "1px dashed #d8b4fe",
+                      backgroundColor: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#a855f7",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Lock style={{ width: "13px", height: "13px" }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Card 5 & 6 (Only shown in Step 5) */}
+              {currentStage === 5 && (
+                <>
+                  {!isZkAccepted ? (
+                    /* RED REJECTED STATE (Image 1) */
+                    <>
+                      {/* Card 5: Prover sends Statement + π + Witness */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                        <div
+                          style={{
+                            flex: "0 1 420px",
+                            backgroundColor: "#fef2f2",
+                            border: "1px solid #fecaca",
+                            borderRadius: "1rem",
+                            padding: "1rem 1.125rem",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                          }}
+                        >
+                          <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", fontWeight: 700, color: "#dc2626" }}>
+                            คุณ → Verifier
+                          </p>
+                          <p style={{ margin: "0 0 0.625rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b" }}>
+                            Statement + π + Witness
+                          </p>
+
+                          {/* Pills */}
+                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                            <span
+                              style={{
+                                backgroundColor: "#ecfdf5",
+                                border: "1px solid #a7f3d0",
+                                color: "#059669",
+                                borderRadius: "9999px",
+                                padding: "0.25rem 0.625rem",
+                                fontSize: "0.6875rem",
+                                fontWeight: 700,
+                              }}
+                            >
+                              Statement
+                            </span>
+                            <span
+                              style={{
+                                backgroundColor: "#ede9fe",
+                                border: "1px solid #ddd6fe",
+                                color: "#6d4bd8",
+                                borderRadius: "9999px",
+                                padding: "0.25rem 0.625rem",
+                                fontSize: "0.6875rem",
+                                fontFamily: "monospace",
+                                fontWeight: 600,
+                              }}
+                            >
+                              π 6ac6cfa8c4..
+                            </span>
+                            <span
+                              style={{
+                                backgroundColor: "#6d28d9",
+                                color: "#ffffff",
+                                borderRadius: "9999px",
+                                padding: "0.25rem 0.625rem",
+                                fontSize: "0.6875rem",
+                                fontFamily: "monospace",
+                                fontWeight: 700,
+                              }}
+                            >
+                              secret-B-q92m
+                            </span>
+                          </div>
+
+                          {/* Status Badge */}
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.25rem",
+                              backgroundColor: "#fee2e2",
+                              border: "1px solid #fca5a5",
+                              color: "#dc2626",
+                              borderRadius: "9999px",
+                              padding: "0.1875rem 0.5rem",
+                              fontSize: "0.6875rem",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ⚠ ถูกตีกลับ
+                          </span>
+                        </div>
+
+                        {/* Right Arrow Circle (Purple) */}
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            minWidth: "28px",
+                            minHeight: "28px",
+                            borderRadius: "50%",
+                            backgroundColor: "#7c3aed",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#ffffff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ArrowRight style={{ width: "14px", height: "14px" }} />
+                        </div>
+                      </div>
+
+                      {/* Card 6: Verifier rejects */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                        {/* Left Arrow Circle (Green) */}
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            minWidth: "28px",
+                            minHeight: "28px",
+                            borderRadius: "50%",
+                            backgroundColor: "#10b981",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#ffffff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ArrowLeft style={{ width: "14px", height: "14px" }} />
+                        </div>
+
+                        <div
+                          style={{
+                            flex: "0 1 420px",
+                            backgroundColor: "#fef2f2",
+                            border: "1px solid #fecaca",
+                            borderRadius: "1rem",
+                            padding: "1rem 1.125rem",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                          }}
+                        >
+                          <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", fontWeight: 700, color: "#dc2626" }}>
+                            Verifier → คุณ
+                          </p>
+                          <p style={{ margin: 0, fontSize: "0.75rem", color: "#1e293b", lineHeight: 1.55 }}>
+                            หยุดก่อน! ผมไม่ต้องการ Witness ครับ — แค่ Statement + π กับ Verification Key ก็ตรวจได้แล้ว ถ้าผมเปิดดูผมจะเห็นรหัสลับของคุณทันที ผมขอไม่เปิดข้อความนี้ ส่งใหม่แค่ Statement + π พอ
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* GREEN ACCEPTED STATE (Image 2) */
+                    <>
+                      {/* Card 5: Prover sends Statement + Proof π */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                        <div
+                          style={{
+                            flex: "0 1 420px",
+                            backgroundColor: "#f8fafc",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "1rem",
+                            padding: "1rem 1.125rem",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                          }}
+                        >
+                          <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", fontWeight: 700, color: "#6d4bd8" }}>
+                            คุณ → Verifier
+                          </p>
+                          <p style={{ margin: "0 0 0.625rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b" }}>
+                            Statement + Proof π
+                          </p>
+
+                          {/* Pills */}
+                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" }}>
+                            <span
+                              style={{
+                                backgroundColor: "#ecfdf5",
+                                border: "1px solid #a7f3d0",
+                                color: "#059669",
+                                borderRadius: "9999px",
+                                padding: "0.25rem 0.625rem",
+                                fontSize: "0.6875rem",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Statement · Root 592ed5ae
+                            </span>
+                            <span
+                              style={{
+                                backgroundColor: "#f5f3ff",
+                                border: "1px solid #ddd6fe",
+                                color: "#6d4bd8",
+                                borderRadius: "9999px",
+                                padding: "0.25rem 0.625rem",
+                                fontSize: "0.6875rem",
+                                fontFamily: "monospace",
+                                fontWeight: 600,
+                              }}
+                            >
+                              π 57dd064b73..
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Right Arrow Circle (Purple) */}
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            minWidth: "28px",
+                            minHeight: "28px",
+                            borderRadius: "50%",
+                            backgroundColor: "#7c3aed",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#ffffff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ArrowRight style={{ width: "14px", height: "14px" }} />
+                        </div>
+                      </div>
+
+                      {/* Card 6: Verifier verifies (Dashed Green Card, Image 2) */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.875rem" }} className="lab5-animate-merge-up">
+                        {/* Green Dashed Circle with Shield */}
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            minWidth: "28px",
+                            minHeight: "28px",
+                            borderRadius: "50%",
+                            border: "1px dashed #6ee7b7",
+                            backgroundColor: "#ffffff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#059669",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ShieldCheck style={{ width: "14px", height: "14px" }} />
+                        </div>
+
+                        <div
+                          style={{
+                            flex: "0 1 420px",
+                            backgroundColor: "#ffffff",
+                            border: "1px dashed #6ee7b7",
+                            borderRadius: "1rem",
+                            padding: "1rem 1.125rem",
+                            boxShadow: "0 1px 2px rgba(16, 185, 129, 0.05)",
+                          }}
+                        >
+                          <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.6875rem", fontWeight: 700, color: "#059669" }}>
+                            Verifier ตรวจเอง
+                          </p>
+                          <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.8125rem", fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                            <span>⑤ Verify — ตรวจด้วย Verification Key...</span>
+                            <span style={{ color: "#059669" }}>✅ ยอมรับ</span>
+                          </p>
+                          <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.75rem", color: "#1e293b", lineHeight: 1.5 }}>
+                            ผมเชื่อว่ามีออร์เดอร์ใต้ Root นี้ที่เป็นของคุณ แต่ไม่รู้ว่าใบไหน และไม่เห็นรหัสลับเลย
+                          </p>
+                          <p style={{ margin: 0, fontSize: "0.6875rem", color: "#64748b" }}>
+                            ไม่ต้องถามกลับสักคำ — ข้อความข้ามเส้นแค่ 1 ครั้ง
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Action Bar (Stage 1-4: Next button | Stage 5: Choice buttons) */}
+        <div
+          style={{
+            borderTop: "1px solid #f1f5f9",
+            backgroundColor: "#f8fafc",
+            padding: "1rem 1.25rem",
+          }}
+        >
+          {currentStage < 5 ? (
+            <div>
+              <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.75rem", fontWeight: 600, color: "#64748b" }}>
+                ขั้นต่อไป:
+              </p>
+
+              <button
+                type="button"
+                onClick={handleNextAction}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1.25rem",
+                  borderRadius: "9999px",
+                  backgroundColor: "#7c3aed",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.625rem",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 4px rgba(124, 58, 237, 0.2)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <div
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    minWidth: "20px",
+                    minHeight: "20px",
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.6875rem",
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  {currentStage}
+                </div>
+                <span>{PIPELINE_PARTS[currentStage - 1].action}</span>
+                <ArrowRight style={{ width: "16px", height: "16px" }} />
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
+                <p style={{ margin: 0, fontSize: "0.75rem", fontWeight: 700, color: "#64748b" }}>
+                  พร้อมส่งแล้ว — คุณจะส่งอะไรข้ามเส้นไป?
+                </p>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    background: "none",
+                    border: "none",
+                    color: "#64748b",
+                    fontSize: "0.6875rem",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  <RotateCcw style={{ width: "11px", height: "11px" }} />
+                  เริ่มใหม่ตั้งแต่ขั้นที่ 1
+                </button>
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.625rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setSendChoice("with_witness")}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.375rem",
+                    borderRadius: "9999px",
+                    border: !isZkAccepted ? "1.5px solid #7c3aed" : "1px solid #ddd6fe",
+                    backgroundColor: !isZkAccepted ? "#f5f3ff" : "#ffffff",
+                    padding: "0.5rem 1rem",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    color: "#6d4bd8",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      minWidth: "18px",
+                      borderRadius: "50%",
+                      backgroundColor: !isZkAccepted ? "#7c3aed" : "rgba(109, 40, 217, 0.1)",
+                      color: !isZkAccepted ? "#ffffff" : "#6d4bd8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.625rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    ⑤
+                  </span>
+                  <span>ส่ง Statement + π + Witness (ให้ชัวร์)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSendStatement}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.375rem",
+                    borderRadius: "9999px",
+                    border: isZkAccepted ? "1.5px solid #10b981" : "1px solid #ddd6fe",
+                    backgroundColor: isZkAccepted ? "#ecfdf5" : "#ffffff",
+                    padding: "0.5rem 1rem",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    color: isZkAccepted ? "#059669" : "#6d4bd8",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      minWidth: "18px",
+                      borderRadius: "50%",
+                      backgroundColor: isZkAccepted ? "#10b981" : "rgba(109, 40, 217, 0.1)",
+                      color: isZkAccepted ? "#ffffff" : "#6d4bd8",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.625rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    ⑤
+                  </span>
+                  <span>ส่ง Statement + π</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Bar (Inside card) */}
+        <div
+          style={{
+            borderTop: "1px solid #f1f5f9",
+            backgroundColor: "#ffffff",
+            padding: "0.875rem 1.25rem",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {/* Line 1 Badges */}
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" }}>
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  color: "#1e293b",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.375rem",
+                  marginRight: "0.25rem",
+                }}
+              >
+                <Eye style={{ width: "14px", height: "14px", color: "#64748b" }} />
+                สิ่งที่ Verifier รู้ตอนนี้
+              </span>
+
+              {/* ✓ Root */}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  borderRadius: "9999px",
+                  border: "1px solid #a7f3d0",
+                  backgroundColor: "#ecfdf5",
+                  padding: "0.25rem 0.625rem",
+                  fontSize: "0.6875rem",
+                  fontWeight: 600,
+                  color: "#059669",
+                }}
+              >
+                <Check style={{ width: "12px", height: "12px" }} />
+                Root
+              </span>
+
+              {/* ✓ Circuit + Verification Key */}
+              {completedStages.includes(2) && (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    borderRadius: "9999px",
+                    border: "1px solid #a7f3d0",
+                    backgroundColor: "#ecfdf5",
+                    padding: "0.25rem 0.625rem",
+                    fontSize: "0.6875rem",
+                    fontWeight: 600,
+                    color: "#059669",
+                  }}
+                >
+                  <Check style={{ width: "12px", height: "12px" }} />
+                  Circuit + Verification Key
+                </span>
+              )}
+
+              {/* Badges that unlock when isZkAccepted (Image 2) */}
+              {isZkAccepted && (
+                <>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                      borderRadius: "9999px",
+                      border: "1px solid #a7f3d0",
+                      backgroundColor: "#ecfdf5",
+                      padding: "0.25rem 0.625rem",
+                      fontSize: "0.6875rem",
+                      fontWeight: 600,
+                      color: "#059669",
+                    }}
+                  >
+                    <Check style={{ width: "12px", height: "12px" }} />
+                    Statement
+                  </span>
+
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                      borderRadius: "9999px",
+                      border: "1px solid #a7f3d0",
+                      backgroundColor: "#ecfdf5",
+                      padding: "0.25rem 0.625rem",
+                      fontSize: "0.6875rem",
+                      fontWeight: 600,
+                      color: "#059669",
+                    }}
+                  >
+                    <Check style={{ width: "12px", height: "12px" }} />
+                    Proof π
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Line 2 Badges */}
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" }}>
+              {isZkAccepted && (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    borderRadius: "9999px",
+                    border: "1px solid #a7f3d0",
+                    backgroundColor: "#ecfdf5",
+                    padding: "0.25rem 0.625rem",
+                    fontSize: "0.6875rem",
+                    fontWeight: 600,
+                    color: "#059669",
+                  }}
+                >
+                  <Check style={{ width: "12px", height: "12px" }} />
+                  ผลลัพธ์: จริง
+                </span>
+              )}
+
+              {/* 🔒 รหัสลับ */}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  borderRadius: "9999px",
+                  border: "1px dashed #cbd5e1",
+                  backgroundColor: "#ffffff",
+                  padding: "0.25rem 0.625rem",
+                  fontSize: "0.6875rem",
+                  fontWeight: 500,
+                  color: "#64748b",
+                }}
+              >
+                <Lock style={{ width: "12px", height: "12px" }} />
+                รหัสลับ
+              </span>
+
+              {/* 🔒 ว่าเป็นใบไหน */}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  borderRadius: "9999px",
+                  border: "1px dashed #cbd5e1",
+                  backgroundColor: "#ffffff",
+                  padding: "0.25rem 0.625rem",
+                  fontSize: "0.6875rem",
+                  fontWeight: 500,
+                  color: "#64748b",
+                }}
+              >
+                <Lock style={{ width: "12px", height: "12px" }} />
+                ว่าเป็นใบไหน
+              </span>
+
+              {/* 🔒 Hash ข้าง ๆ + ตำแหน่ง */}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  borderRadius: "9999px",
+                  border: "1px dashed #cbd5e1",
+                  backgroundColor: "#ffffff",
+                  padding: "0.25rem 0.625rem",
+                  fontSize: "0.6875rem",
+                  fontWeight: 500,
+                  color: "#64748b",
+                }}
+              >
+                <Lock style={{ width: "12px", height: "12px" }} />
+                Hash ข้าง ๆ + ตำแหน่ง
+              </span>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              fontSize: "0.75rem",
+              color: "#64748b",
+            }}
+          >
+            <RotateCcw style={{ width: "13px", height: "13px", color: "#94a3b8" }} />
+            <span>
+              ข้อความที่ข้ามเส้น:{" "}
+              <strong style={{ color: "#1e293b", fontWeight: 700 }}>
+                {crossedCount}
+              </strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Green Success Banner (Appears below Arena when isZkAccepted — Matching Image 2) */}
+      {isZkAccepted && (
+        <div
+          style={{
+            borderRadius: "1rem",
+            border: "1px solid #a7f3d0",
+            backgroundColor: "#f0fdf4",
+            padding: "1rem 1.25rem",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "0.75rem",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.02)",
+          }}
+          className="lab5-animate-merge-up"
+        >
+          <CheckCircle2 style={{ width: "20px", height: "20px", color: "#059669", flexShrink: 0, marginTop: "2px" }} />
+          <div>
+            <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.875rem", fontWeight: 700, color: "#047857" }}>
+              Verifier ยอมรับ: Proof ถูกต้อง
+            </p>
+            <p style={{ margin: "0 0 0.375rem 0", fontSize: "0.75rem", fontWeight: 500, color: "#065f46", lineHeight: 1.5 }}>
+              Verifier เชื่อได้ว่า "มีออร์เดอร์หนึ่งใบใต้ Root นี้ที่เป็นของผู้ส่ง" — แต่ไม่รู้เลยว่าคือออร์เดอร์ B และไม่เห็นรหัสลับ
+            </p>
+            <p style={{ margin: 0, fontSize: "0.6875rem", color: "#047857", opacity: 0.85 }}>
+              เทียบกับขั้นที่ 5: ข้อความที่ข้ามเส้นเหลือแค่ 1 ข้อความ และไม่มีป้ายแดงเลย
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Disclaimer Banner */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.5rem",
+          borderRadius: "9999px",
+          border: "1px solid #e2e8f0",
+          backgroundColor: "#ffffff",
+          padding: "0.625rem 1rem",
+          textAlign: "center",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.03)",
+        }}
+      >
+        <AlertTriangle style={{ width: "15px", height: "15px", color: "#f59e0b", flexShrink: 0 }} />
+        <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+          แลปนี้จำลองขั้นตอนเพื่อการเรียนรู้ — ผลตรวจมาจากการคำนวณ Hash จริงเบื้องหลัง แต่ไม่ได้สร้าง zk-SNARK ด้วยคณิตศาสตร์จริง
+        </span>
+      </div>
+
+      {/* ? ทำไม? Button */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem" }}>
+        <button
+          type="button"
+          onClick={() => setIsWhyOpen(!isWhyOpen)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            borderRadius: "9999px",
+            border: "1px solid #ede9fe",
+            backgroundColor: "#f5f3ff",
+            padding: "0.5rem 1rem",
+            fontSize: "0.75rem",
+            fontWeight: 700,
+            color: "#6d4bd8",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+          }}
+        >
+          <HelpCircle style={{ width: "14px", height: "14px", color: "#7c3aed" }} />
+          <span>ทำไม?</span>
+          <ChevronDown
+            style={{
+              width: "14px",
+              height: "14px",
+              transform: isWhyOpen ? "rotate(180deg)" : "none",
+              transition: "transform 0.15s ease",
+            }}
+          />
+        </button>
+
+        {isWhyOpen && (
+          <div
+            style={{
+              width: "100%",
+              borderRadius: "1rem",
+              border: "1px solid #ede9fe",
+              backgroundColor: "rgba(245, 243, 255, 0.7)",
+              padding: "1rem",
+            }}
+          >
+            <h4
+              style={{
+                margin: "0 0 0.5rem 0",
+                fontSize: "0.875rem",
+                fontWeight: 700,
+                color: "#4c1d95",
+              }}
+            >
+              ทำไม zk-SNARK ถึงเรียกว่า "เครื่องตรวจปิดผนึก"?
+            </h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.75rem", color: "#5b21b6" }}>
+              <p style={{ margin: 0 }}>
+                <strong>1. Zero-Knowledge:</strong> ใน Merkle Proof แบบเดิม Verifier ต้องเห็นรหัสลับและ Sibling Hashes เพื่อคำนวณขึ้นไปหา Root แต่ zk-SNARK ให้เครื่องของคุณเป็นคนตรวจความถูกต้องเอง แล้วสร้าง <em>"หลักฐานทางคณิตศาสตร์"</em> ยืนยันว่าผลตรวจเป็นจริง โดยไม่ต้องส่งข้อมูลลับออกมา
+              </p>
+              <p style={{ margin: 0 }}>
+                <strong>2. Succinct (กะทัดรัด):</strong> ไม่ว่าต้นไม้จะมีกี่พันใบ ตัว Proof จะมีขนาดคงที่เล็กมาก (หลักร้อยไบต์) และ Verifier ใช้เวลาตรวจสั้นมากเพียงเสี้ยววินาที
+              </p>
+              <p style={{ margin: 0 }}>
+                <strong>3. Non-Interactive:</strong> ส่ง Proof ข้ามเส้นไปเพียงครั้งเดียว (1 ข้อความ) ผู้ตรวจก็ยืนยันได้ทันที ไม่ต้องมีการถาม-ตอบส่งกลับไปกลับมา
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 
 /** ขั้นย่อยของเวิร์กโฟลว์ ZKP (ขั้นที่ 7) */
 const zkpWorkflowStages = [
@@ -2372,565 +5751,1115 @@ function ZkCardHeader({ icon: Icon, tone = "primary", title, description, isComp
  * @author StealthTrade Team
  */
 function Step7ZkpWorkflow() {
-  const { tree, selectedLeaf, authPathSteps, tamperedProof, zkpWorkflowStage, goToZkpStage, goNext } = useLab05()
-  const [isWitnessVisible, setIsWitnessVisible] = useState(false)
-  const [isWitnessTampered, setIsWitnessTampered] = useState(false)
+  const { markComplete } = useLab05()
+  const [balance, setBalance] = useState(42)
+  const [purchaseAmount, setPurchaseAmount] = useState(10)
+  const [hasSubmitted, setHasSubmitted] = useState(true)
+  const [triedSufficient, setTriedSufficient] = useState(true)
+  const [triedInsufficient, setTriedInsufficient] = useState(false)
+  const [submissionLog, setSubmissionLog] = useState([
+    { id: 1, amount: 10, balance: 42, sufficient: true, proof: '3a05a60c..' },
+  ])
 
-  const targetIndex = selectedLeaf ?? 0
-  const targetOrder = orders[targetIndex] || orders[0]
-  const rootHash = tree?.root
-  const leafHash = tree?.leafHashes[targetIndex]
-  const computedRoot = isWitnessTampered ? tamperedProof?.root : rootHash
-  const stage = zkpWorkflowStage
-  const isNextBlocked = stage === 3 && isWitnessTampered
+  const isSufficient = balance >= purchaseAmount
+
+  const handleSubmit = () => {
+    setHasSubmitted(true)
+    const sufficient = balance >= purchaseAmount
+    const proofHash = sufficient ? '3a05a60c..' : null
+    setSubmissionLog((prev) => [
+      ...prev,
+      { id: prev.length + 1, amount: purchaseAmount, balance, sufficient, proof: proofHash },
+    ])
+    if (sufficient) {
+      setTriedSufficient(true)
+      if (triedInsufficient && typeof markComplete === 'function') {
+        markComplete(7)
+      }
+    } else {
+      setTriedInsufficient(true)
+      if (triedSufficient && typeof markComplete === 'function') {
+        markComplete(7)
+      }
+    }
+  }
+
+  const handleSelectCase = (b, p) => {
+    setBalance(b)
+    setPurchaseAmount(p)
+    setHasSubmitted(true)
+    const sufficient = b >= p
+    const proofHash = sufficient ? '3a05a60c..' : null
+    setSubmissionLog((prev) => {
+      const alreadyHas = prev.some((r) => r.amount === p && r.sufficient === sufficient)
+      if (alreadyHas) return prev
+      return [
+        ...prev,
+        { id: prev.length + 1, amount: p, balance: b, sufficient, proof: proofHash },
+      ]
+    })
+    if (sufficient) {
+      setTriedSufficient(true)
+      if (triedInsufficient && typeof markComplete === 'function') {
+        markComplete(7)
+      }
+    } else {
+      setTriedInsufficient(true)
+      if (triedSufficient && typeof markComplete === 'function') {
+        markComplete(7)
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (triedSufficient && triedInsufficient && typeof markComplete === 'function') {
+      markComplete(7)
+    }
+  }, [triedSufficient, triedInsufficient, markComplete])
 
   return (
-    <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="เวิร์กโฟลว์ ZKP (จำลอง)"
-        title="พิสูจน์ Order โดยไม่เปิดเผยข้อมูลทั้งหมด"
-        description="เว็บเทรดประกาศ Root ไว้ก่อน ผู้ใช้ใช้ Order และ Hash ข้างเคียงเป็นข้อมูลลับ แนวคิด ZKP ช่วยให้ผู้ตรวจสอบเช็กได้โดยไม่ต้องเห็นข้อมูลลับเหล่านี้"
-      />
-
-      <div className="lab5-zk-banner">
-        <Info className="lab5-size-4 lab5-shrink-0 lab5-text-primary" />
-        <span>แล็บนี้จำลองขั้นตอน ไม่ได้สร้างหรือ verify ZK Proof จริง</span>
+    <div className="lab5-s7-wrapper">
+      {/* Header */}
+      <div>
+        <div className="lab5-s7-tag">ลองสร้าง PROOF เอง</div>
+        <h2 className="lab5-s7-heading">พิสูจน์ว่ามีเงินพอ โดยไม่บอกยอดเงิน</h2>
+        <p className="lab5-s7-desc">
+          กรอกยอดเงินในกระเป๋า (ลับ) และจำนวนเงินที่จะใช้ซื้อ (สาธารณะ) แล้วกดส่ง — ลองให้ครบทั้งกรณีเงินพอและเงินไม่พอ
+        </p>
       </div>
 
-      {/* ตัวบอกขั้นย่อย */}
-      <div className="lab5-zk-card lab5-zk-stepper">
-        <div className="lab5-zk-stepper-head">
-          <span className="lab5-font-bold lab5-text-primary">
-            ขั้นที่ {stage} จาก 4 : {zkpWorkflowStages[stage - 1].title}
-          </span>
-          <span className="lab5-text-muted-foreground">เป้าหมาย: ตรวจสอบความถูกต้องโดยไม่เปิดเผยข้อมูลลับ</span>
-        </div>
-        <div className="lab5-zk-stepper-items">
-          {zkpWorkflowStages.map((workflowStage, index) => {
-            const stageNumber = index + 1
-            const isActive = stage === stageNumber
-            const isPast = stage > stageNumber
-            return (
-              <button
-                key={workflowStage.title}
-                type="button"
-                disabled={!isPast}
-                onClick={() => goToZkpStage(stageNumber)}
-                aria-current={isActive ? "step" : undefined}
-                className={JoinClassNames("lab5-zk-stepper-item", isActive && "lab5-zk-stepper-item--active")}
-              >
-                <span
-                  className={JoinClassNames(
-                    "lab5-zk-stepper-dot",
-                    isActive && "lab5-zk-stepper-dot--active",
-                    isPast && "lab5-zk-stepper-dot--done",
-                  )}
-                >
-                  {isPast ? <Check className="lab5-size-3" strokeWidth={3} /> : stageNumber}
-                </span>
-                <span className="lab5-zk-stepper-title">{workflowStage.title}</span>
-                <span className="lab5-zk-stepper-sub">{workflowStage.sub}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* ขั้นย่อยที่ 1: Root ที่ประกาศไว้ */}
-      {stage === 1 && (
-        <div key="stage-1" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded">
-          <ZkCardHeader
-            icon={ShieldCheck}
-            tone="success"
-            title="เว็บเทรดประกาศ Root ไว้แล้ว"
-            description="เว็บเทรดรวม Order ในรอบนี้ แล้วคำนวณ Root หนึ่งค่าไว้ใช้ตรวจสอบภายหลัง"
-          />
-          <div className="lab5-zk-commit-grid">
-            <div className="lab5-zk-box lab5-zk-box--soft">
-              <p className="lab5-zk-box-title">
-                <Layers className="lab5-size-4 lab5-text-muted-foreground" />
-                ชุด Order ของรอบนี้
-              </p>
-              <p className="lab5-zk-box-text">เว็บเทรดรวบรวม Order ทั้งหมดในรอบนี้ไว้ เพื่อคำนวณสรุปเป็น Root</p>
-              <div className="lab5-zk-secret-box">
-                <span aria-hidden="true">🔒</span> เนื้อหา Order ทุกรายการถูกเก็บเป็นความลับ ไม่ได้เปิดเผยต่อสาธารณะ
-              </div>
+      {/* Dual Input Cards with Center Circuit */}
+      <div className="lab5-s7-cards-grid">
+        {/* Left Card: Witness */}
+        <div className="lab5-s7-card lab5-s7-card--witness">
+          <div className="lab5-s7-card-header">
+            <div className="lab5-s7-card-icon lab5-s7-card-icon--purple">
+              <Wallet size={20} />
             </div>
-
-            <div className="lab5-zk-commit-arrow">
-              <ArrowRight className="lab5-size-4" />
-              <span>คำนวณเป็น Root</span>
-            </div>
-
-            <div className="lab5-zk-box lab5-zk-box--success">
-              <p className="lab5-zk-box-title lab5-text-success">
-                <Globe className="lab5-size-4" />
-                Root ที่ประกาศไว้
-                <span className="lab5-zk-badge lab5-zk-badge--success">ค่าอ้างอิงที่ผู้ตรวจสอบต้องเชื่อถือ</span>
-              </p>
-              <p className="lab5-zk-box-text">ค่าสรุปเพียงค่าเดียวที่ทุกคนสามารถใช้เป็นตัวอ้างอิงร่วมกัน</p>
-              <div>
-                <HashChip tone="success" label="Root ที่ประกาศไว้" hash={rootHash} />
-              </div>
+            <div>
+              <div className="lab5-s7-card-title">Witness — ในเครื่องคุณ</div>
+              <div className="lab5-s7-card-subtitle">ไม่ถูกส่งออกไปไหน</div>
             </div>
           </div>
-          <div className="lab5-zk-note lab5-zk-note--primary">
-            <Lightbulb className="lab5-size-3.5 lab5-shrink-0 lab5-text-muted-foreground" />
-            <span>
-              <strong>ข้อสังเกต:</strong> ผู้ตรวจต้องเชื่อถือ Root นี้ก่อน จึงจะใช้ตรวจข้อมูลภายหลังได้
+          <div>
+            <label className="lab5-s7-input-label">ยอดเงินในกระเป๋า (USDT)</label>
+            <input
+              type="number"
+              value={balance}
+              onChange={(e) => {
+                setBalance(Number(e.target.value) || 0)
+                setHasSubmitted(false)
+              }}
+              className="lab5-s7-input"
+            />
+          </div>
+          <div>
+            <span className="lab5-s7-badge--private">
+              <Lock size={12} /> PRIVATE · เห็นเฉพาะคุณ
             </span>
           </div>
         </div>
-      )}
 
-      {/* ขั้นย่อยที่ 2: ข้อมูลลับของผู้ใช้ */}
-      {stage === 2 && (
-        <div key="stage-2" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded lab5-zk-card--dashed">
-          <ZkCardHeader
-            icon={Lock}
-            title="ข้อมูลที่ใช้พิสูจน์ยังอยู่กับผู้ใช้"
-            description="ผู้ใช้มี Order ที่ต้องการพิสูจน์ และ Hash ข้างเคียงที่ใช้คำนวณกลับไปหา Root"
-          />
-          <div className="lab5-zk-witness">
-            <div className="lab5-zk-witness-head">
-              <p className="lab5-zk-witness-title">
-                <Lock className="lab5-size-4" />
-                ข้อมูลลับของผู้ใช้
-                <span className="lab5-zk-witness-tag">(Private Witness)</span>
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsWitnessVisible((previousIsVisible) => !previousIsVisible)}
-                className="lab5-zk-btn lab5-zk-btn--outline-primary"
-              >
-                {isWitnessVisible ? <EyeOff className="lab5-size-3.5" /> : <Eye className="lab5-size-3.5" />}
-                {isWitnessVisible ? "ซ่อนข้อมูลของผู้ใช้" : "ดูข้อมูลของผู้ใช้"}
-              </button>
+        {/* Center: Circuit */}
+        <div className="lab5-s7-circuit">
+          <div className="lab5-s7-circuit-icon">
+            <Cpu size={20} />
+          </div>
+          <div className="lab5-s7-circuit-label">Circuit</div>
+          <div className="lab5-s7-circuit-cond">ยอดเงิน ≥ จำนวนซื้อ</div>
+        </div>
+
+        {/* Right Card: Statement */}
+        <div className="lab5-s7-card lab5-s7-card--statement">
+          <div className="lab5-s7-card-header">
+            <div className="lab5-s7-card-icon lab5-s7-card-icon--green">
+              <FileText size={20} />
             </div>
-            <p className="lab5-zk-box-text">ข้อมูลที่คุณถือไว้ ได้แก่ Order ของตนเอง และ Hash ข้างเคียงเพื่อใช้คำนวณกลับไปหา Root</p>
+            <div>
+              <div className="lab5-s7-card-title">Statement — ส่งให้เว็บเทรด</div>
+              <div className="lab5-s7-card-subtitle">ทุกคนเห็นได้</div>
+            </div>
+          </div>
+          <div>
+            <label className="lab5-s7-input-label">จำนวนเงินที่จะใช้ซื้อ (USDT)</label>
+            <input
+              type="number"
+              value={purchaseAmount}
+              onChange={(e) => {
+                setPurchaseAmount(Number(e.target.value) || 0)
+                setHasSubmitted(false)
+              }}
+              className="lab5-s7-input"
+            />
+          </div>
+          <div>
+            <span className="lab5-s7-badge--public">
+              <Eye size={12} /> PUBLIC · ทุกคนเห็น
+            </span>
+          </div>
+        </div>
+      </div>
 
-            {isWitnessVisible ? (
-              <div className="lab5-animate-merge-up lab5-zk-witness-detail">
-                <div>
-                  <p className="lab5-zk-field-label">Order ที่เลือก</p>
-                  <div className="lab5-zk-order-line">
-                    <ZkChip tone="primary">
-                      <span className="lab5-zk-chip-label">{targetOrder.label}</span>
-                    </ZkChip>
-                    <span className="lab5-font-mono lab5-text-xs lab5-text-foreground">{targetOrder.value}</span>
+      {/* Presets Row */}
+      <div className="lab5-s7-presets">
+        <span className="lab5-s7-presets-label">ลองเร็ว ๆ:</span>
+        {[
+          { label: 'มี 42 · ซื้อ 10', b: 42, p: 10 },
+          { label: 'มี 5 · ซื้อ 10', b: 5, p: 10 },
+          { label: 'มี 10 · ซื้อ 10', b: 10, p: 10 },
+        ].map((item) => {
+          const isSelected = balance === item.b && purchaseAmount === item.p
+          return (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => handleSelectCase(item.b, item.p)}
+              className={`lab5-s7-preset-btn${isSelected ? ' lab5-s7-preset-btn--active' : ''}`}
+            >
+              {item.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Arena card */}
+      <div className="lab5-s7-arena">
+        {/* Header: Prover / Verifier */}
+        <div className="lab5-s7-arena-header">
+          <div className="lab5-s7-arena-party">
+            <div className="lab5-s7-arena-avatar lab5-s7-arena-avatar--prover">
+              <User size={18} />
+            </div>
+            <div>
+              <div className="lab5-s7-arena-name">คุณ</div>
+              <div className="lab5-s7-arena-role">Prover</div>
+            </div>
+          </div>
+          <div className="lab5-s7-arena-party">
+            <div style={{ textAlign: 'right' }}>
+              <div className="lab5-s7-arena-name lab5-s7-arena-name--verifier">ผู้ตรวจ</div>
+              <div className="lab5-s7-arena-role">Verifier</div>
+            </div>
+            <div className="lab5-s7-arena-avatar lab5-s7-arena-avatar--verifier">
+              <ShieldCheck size={18} />
+            </div>
+          </div>
+        </div>
+
+        {/* Arena Body — Swimlane Sequence (Matches media_1792536608390.png) */}
+        <div className="lab5-s7-swimlane">
+          {/* Row 1: Prover Private Local Check */}
+          <div className="lab5-s7-swim-row">
+            <div className="lab5-s7-swim-col--left">
+              <div className={`lab5-s7-bubble-private ${!isSufficient && hasSubmitted ? 'lab5-s7-bubble-private--fail' : ''}`}>
+                <div className={`lab5-s7-bubble-tag ${!isSufficient && hasSubmitted ? 'lab5-s7-bubble-tag--fail' : ''}`}>
+                  ในเครื่องคุณ · ไม่ส่งออก
+                </div>
+                <div className="lab5-s7-bubble-text">
+                  {isSufficient ? (
+                    <>
+                      <Lock size={13} className="lab5-s7-inline-icon" /> วงจรตรวจในเครื่อง: ยอดเงิน {balance} ≥ {purchaseAmount} ✓ → ได้ Proof π
+                    </>
+                  ) : (
+                    <>
+                      <XCircle size={13} className="lab5-s7-inline-icon lab5-s7-text-fail" /> ยอดเงิน {balance} &lt; {purchaseAmount} → สร้าง Proof ไม่ได้!
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="lab5-s7-swim-col--mid">
+              <div className={`lab5-s7-mid-icon-circle ${!isSufficient && hasSubmitted ? 'lab5-s7-mid-icon-circle--fail' : 'lab5-s7-mid-icon-circle--purple'}`}>
+                <Lock size={15} />
+              </div>
+            </div>
+            <div className="lab5-s7-swim-col--right" />
+          </div>
+
+          {/* Row 2: Send Statement & Proof across boundary */}
+          <div className="lab5-s7-swim-row">
+            <div className="lab5-s7-swim-col--left">
+              <div className="lab5-s7-bubble-send">
+                <div className="lab5-s7-send-header">คุณ → Verifier</div>
+                <div className="lab5-s7-send-title">ขอซื้อ {purchaseAmount} USDT</div>
+                <div className="lab5-s7-send-chips">
+                  <span className="lab5-s7-chip-statement">
+                    Statement: จ่าย {purchaseAmount} USDT
+                  </span>
+                  {isSufficient ? (
+                    <span className="lab5-s7-chip-proof">
+                      π 3a05a60c..
+                    </span>
+                  ) : (
+                    <span className="lab5-s7-chip-proof-fail">
+                      ไม่มี Proof
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="lab5-s7-swim-col--mid">
+              <div className={`lab5-s7-mid-btn-arrow ${!isSufficient && hasSubmitted ? 'lab5-s7-mid-btn-arrow--fail' : ''}`}>
+                {isSufficient ? '→' : '✖'}
+              </div>
+            </div>
+            <div className="lab5-s7-swim-col--right" />
+          </div>
+
+          {/* Row 3: Verifier Verification on Right */}
+          <div className="lab5-s7-swim-row">
+            <div className="lab5-s7-swim-col--left" />
+            <div className="lab5-s7-swim-col--mid">
+              <div className={`lab5-s7-mid-icon-circle ${!isSufficient && hasSubmitted ? 'lab5-s7-mid-icon-circle--fail' : 'lab5-s7-mid-icon-circle--green'}`}>
+                {isSufficient ? <ShieldCheck size={16} /> : <Shield size={16} />}
+              </div>
+            </div>
+            <div className="lab5-s7-swim-col--right">
+              <div className={`lab5-s7-bubble-verifier ${!isSufficient && hasSubmitted ? 'lab5-s7-bubble-verifier--fail' : ''}`}>
+                <div className={`lab5-s7-verifier-tag ${!isSufficient && hasSubmitted ? 'lab5-s7-verifier-tag--fail' : ''}`}>
+                  Verifier ตรวจเอง
+                </div>
+                <div className="lab5-s7-verifier-text">
+                  {isSufficient ? (
+                    <>
+                      ตรวจ π แล้ว <span className="lab5-s7-mark-accept">✅ ยอมรับคำสั่งซื้อ</span> — ผมรู้แค่ว่า &quot;เงินพอ&quot; ไม่รู้ว่าคุณมีเท่าไหร่
+                    </>
+                  ) : (
+                    <>
+                      ไม่ได้รับ Proof → <span className="lab5-s7-mark-reject">❌ ปฏิเสธคำสั่งซื้อ</span> — ต้องมีหลักฐานยืนยันยอดเงิน
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="lab5-s7-action-wrap">
+          <button type="button" onClick={handleSubmit} className="lab5-s7-submit-btn">
+            <Sparkles size={16} /> สร้าง Proof แล้วส่งคำสั่งซื้อ
+          </button>
+        </div>
+
+        {/* Footer */}
+        <div className="lab5-s7-footer">
+          <div className="lab5-s7-footer-left">
+            <span className="lab5-s7-footer-label">
+              <Eye size={14} color="#16a34a" /> สิ่งที่ Verifier รู้ตอนนี้
+            </span>
+            <span className="lab5-s7-footer-badge--secret">
+              <Lock size={12} /> ยอดเงินจริงในกระเป๋า
+            </span>
+            <span className="lab5-s7-footer-badge--public">
+              <Check size={12} strokeWidth={2.5} /> จำนวนเงินที่จะซื้อ
+            </span>
+          </div>
+          <div>
+            <span className="lab5-s7-footer-counter">
+              <RotateCcw size={13} /> ข้อความที่ข้ามเส้น: {hasSubmitted && isSufficient ? 1 : 0}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Checklist (Matches media_1792536621314.png) */}
+      <div className="lab5-s7-checklist">
+        <button
+          type="button"
+          onClick={() => handleSelectCase(42, 10)}
+          className={`lab5-s7-check-btn ${isSufficient ? 'lab5-s7-check-btn--done' : 'lab5-s7-check-btn--idle'}`}
+        >
+          {isSufficient ? <Check size={13} strokeWidth={2.5} /> : <span className="lab5-s7-check-circle" />}
+          ลองกรณีเงินพอ
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSelectCase(5, 10)}
+          className={`lab5-s7-check-btn ${!isSufficient ? 'lab5-s7-check-btn--done' : 'lab5-s7-check-btn--idle'}`}
+        >
+          {!isSufficient ? <Check size={13} strokeWidth={2.5} /> : <span className="lab5-s7-check-circle" />}
+          ลองกรณีเงินไม่พอ
+        </button>
+      </div>
+
+      {/* Verifier Order Log Table (Directly below checklist, matches media_1792536621314.png) */}
+      {submissionLog.length > 0 && (
+        <div className="lab5-s7-verifier-table-wrap">
+          <div className="lab5-s7-verifier-table-header">
+            <div className="lab5-s7-verifier-table-title">มุมมองของเว็บเทรด (Verifier)</div>
+            <div className="lab5-s7-verifier-table-subtitle">นี่คือทุกอย่างที่ฝั่งเว็บเทรดเห็นและบันทึกไว้</div>
+          </div>
+          <table className="lab5-s7-verifier-table">
+            <thead>
+              <tr>
+                <th>คำสั่งซื้อที่ได้รับ</th>
+                <th>ยอดเงินจริง</th>
+                <th>ผล</th>
+              </tr>
+            </thead>
+            <tbody>
+              {submissionLog.map((row) => (
+                <tr key={row.id}>
+                  <td>
+                    <span className="lab5-s7-verifier-order-text">
+                      #{row.id} ซื้อ {row.amount} USDT
+                      {row.proof && <span className="lab5-s7-verifier-proof-chip"> · Proof {row.proof}</span>}
+                      {!row.proof && <span style={{ color: '#94a3b8', fontSize: '11px' }}> · ไม่มี Proof</span>}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="lab5-s7-verifier-hidden">
+                      <Lock size={12} /> ซ่อน
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`lab5-s7-verifier-result ${row.sufficient ? 'lab5-s7-verifier-result--accept' : 'lab5-s7-verifier-result--reject'}`}>
+                      {row.sufficient ? 'ยอมรับ' : 'ปฏิเสธ'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+/**
+ * ขั้นที่ 8: ทำไม zk-SNARK ถึงเหมาะกับเว็บเทรด? (เทียบ Interactive Lab 03 กับ Non-Interactive zk-SNARK)
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 8
+ * @author StealthTrade Team
+ */
+const S8_INTERACTIVE_ITEMS = [
+  {
+    id: 1,
+    side: "prover",
+    header: "คุณ → Verifier",
+    title: "Commit รอบที่ 1 — ล็อกคำตอบไว้ก่อน แก้ทีหลังไม่ได้",
+    badge: "c1 = 27366c0f..",
+    badgeType: "purple",
+    centerType: "arrow-purple",
+  },
+  {
+    id: 2,
+    side: "verifier",
+    header: "Verifier → คุณ",
+    title: (
+      <>
+        Challenge: ผมสุ่มได้ — ขอให้เปิดฝั่ง<strong>ซ้าย</strong>
+      </>
+    ),
+    cardType: "challenge",
+    centerType: "arrow-green",
+  },
+  {
+    id: 3,
+    side: "prover",
+    header: "คุณ → Verifier",
+    title: "Response: เปิดฝั่งซ้าย",
+    badge: "คำตอบที่ล็อกไว้ใน c1",
+    badgeType: "white",
+    centerType: "arrow-purple",
+  },
+  {
+    id: 4,
+    side: "verifier",
+    header: "Verifier ตรวจเอง",
+    title: "✓ ตรงกับ Commit — รอบที่ 1 ผ่าน · ความมั่นใจ 50%",
+    cardType: "check",
+    centerType: "shield",
+  },
+  {
+    id: 5,
+    side: "prover",
+    header: "คุณ → Verifier",
+    title: "Commit รอบที่ 2 — ล็อกคำตอบไว้ก่อน แก้ทีหลังไม่ได้",
+    badge: "c2 = ef0692ac..",
+    badgeType: "purple",
+    centerType: "arrow-purple",
+  },
+  {
+    id: 6,
+    side: "verifier",
+    header: "Verifier → คุณ",
+    title: (
+      <>
+        Challenge: ผมสุ่มได้ — ขอให้เปิดฝั่ง<strong>ขวา</strong>
+      </>
+    ),
+    cardType: "challenge",
+    centerType: "arrow-green",
+  },
+  {
+    id: 7,
+    side: "prover",
+    header: "คุณ → Verifier",
+    title: "Response: เปิดฝั่งขวา",
+    badge: "คำตอบที่ล็อกไว้ใน c2",
+    badgeType: "white",
+    centerType: "arrow-purple",
+  },
+  {
+    id: 8,
+    side: "verifier",
+    header: "Verifier ตรวจเอง",
+    title: "✓ ตรงกับ Commit — รอบที่ 2 ผ่าน · ความมั่นใจ 75%",
+    cardType: "check",
+    centerType: "shield",
+  },
+]
+
+/**
+ * ขั้นที่ 8: ทำไม zk-SNARK ถึงเหมาะกับเว็บเทรด? (เทียบ Interactive Lab 03 กับ Non-Interactive zk-SNARK)
+ *
+ * @return {JSX.Element} เนื้อหาขั้นที่ 8
+ * @author StealthTrade Team
+ */
+function Step8MerkleZkp() {
+  const { markComplete } = useLab05()
+  const [activeTab, setActiveTab] = useState("interactive") // "interactive" | "snark"
+  const isInteractive = activeTab === "interactive"
+
+  // Interactive mode states
+  const [itemsCount, setItemsCount] = useState(0) // 0 to 8
+  const [isFastForwarded, setIsFastForwarded] = useState(false)
+  const timerRef = useRef(null)
+
+  // zk-SNARK mode states
+  const [snarkKey, setSnarkKey] = useState(0)
+
+  const [triedInteractive, setTriedInteractive] = useState(false)
+  const [triedSnark, setTriedSnark] = useState(false)
+
+  // Quiz states
+  const [quizAnswer, setQuizAnswer] = useState(null)
+  const [showHint, setShowHint] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  const handleQuizAnswer = (ans) => {
+    setQuizAnswer(ans)
+    if (ans === "snark" && typeof markComplete === "function") {
+      markComplete(8)
+    }
+  }
+
+  // Interactive handler: เผยทีละอัน (Prover ส่ง -> Verifier ตอบรับ)
+  const handleInteractiveNext = () => {
+    if (itemsCount === 0) {
+      setItemsCount(1)
+      timerRef.current = setTimeout(() => {
+        setItemsCount(2)
+      }, 350)
+    } else if (itemsCount === 2) {
+      setItemsCount(3)
+      timerRef.current = setTimeout(() => {
+        setItemsCount(4)
+      }, 350)
+    } else if (itemsCount === 4) {
+      setItemsCount(5)
+      timerRef.current = setTimeout(() => {
+        setItemsCount(6)
+      }, 350)
+    } else if (itemsCount === 6) {
+      setItemsCount(7)
+      timerRef.current = setTimeout(() => {
+        setItemsCount(8)
+      }, 350)
+    }
+  }
+
+  const handleFastForward = () => {
+    setIsFastForwarded(true)
+    setTriedInteractive(true)
+    if (triedSnark && typeof markComplete === "function") {
+      markComplete(8)
+    }
+  }
+
+  const handleResetInteractive = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setItemsCount(0)
+    setIsFastForwarded(false)
+  }
+
+  // SNARK replay handler (Matches media_1792538943991.png)
+  const handleSnarkReplay = () => {
+    setSnarkKey((k) => k + 1)
+    setTriedSnark(true)
+    if (triedInteractive && typeof markComplete === "function") {
+      markComplete(8)
+    }
+  }
+
+  useEffect(() => {
+    if (!isInteractive) {
+      setTriedSnark(true)
+    }
+  }, [isInteractive])
+
+  useEffect(() => {
+    if (triedInteractive && triedSnark && typeof markComplete === "function") {
+      markComplete(8)
+    }
+  }, [triedInteractive, triedSnark, markComplete])
+
+  let crossingCount = 0
+  let currentConfidence = 0
+
+  if (isInteractive) {
+    if (isFastForwarded) {
+      crossingCount = 30
+      currentConfidence = 99.9
+    } else if (itemsCount >= 8) {
+      crossingCount = 6
+      currentConfidence = 75
+    } else if (itemsCount >= 6) {
+      crossingCount = 5
+      currentConfidence = 50
+    } else if (itemsCount >= 4) {
+      crossingCount = 3
+      currentConfidence = 50
+    } else if (itemsCount >= 2) {
+      crossingCount = 2
+      currentConfidence = 0
+    } else if (itemsCount >= 1) {
+      crossingCount = 1
+      currentConfidence = 0
+    }
+  } else {
+    crossingCount = 1
+    currentConfidence = 100
+  }
+
+  return (
+    <div className="lab5-s8-wrapper">
+      {/* Header */}
+      <div className="lab5-s8-header">
+        <span className="lab5-s8-tag">โต้ตอบหลายรอบ VS ส่งครั้งเดียว</span>
+        <h2 className="lab5-s8-title">ทำไม zk-SNARK ถึงเหมาะกับเว็บเทรด?</h2>
+        <p className="lab5-s8-subtitle">กดสลับเล่นทั้งสองแบบ</p>
+      </div>
+
+      {/* Mode Selector Tabs */}
+      <div className="lab5-s8-tabs-grid">
+        <button
+          type="button"
+          onClick={() => setActiveTab("interactive")}
+          className={`lab5-s8-tab-btn ${isInteractive ? "lab5-s8-tab-btn--interactive-active" : "lab5-s8-tab-btn--idle"}`}
+        >
+          <span className={`lab5-s8-tab-title ${isInteractive ? "lab5-s8-tab-title--rose" : "lab5-s8-tab-title--slate"}`}>
+            Interactive (Lab 03)
+          </span>
+          <span className="lab5-s8-tab-sub">ถาม-ตอบกันหลายรอบ</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("snark")}
+          className={`lab5-s8-tab-btn ${!isInteractive ? "lab5-s8-tab-btn--snark-active" : "lab5-s8-tab-btn--idle"}`}
+        >
+          <span className={`lab5-s8-tab-title ${!isInteractive ? "lab5-s8-tab-title--green" : "lab5-s8-tab-title--slate"}`}>
+            Non-Interactive (zk-SNARK)
+          </span>
+          <span className="lab5-s8-tab-sub">ส่ง Proof ครั้งเดียวจบ</span>
+        </button>
+      </div>
+
+      {/* Arena Card */}
+      <div className="lab5-s8-arena">
+        {/* Header */}
+        <div className="lab5-s8-arena-header">
+          <div className="lab5-s8-arena-party">
+            <div className="lab5-s8-avatar--prover">
+              <User size={16} />
+            </div>
+            <div>
+              <div className="lab5-s8-name">คุณ</div>
+              <div className="lab5-s8-role">Prover</div>
+            </div>
+          </div>
+          <div className="lab5-s8-arena-party">
+            <div style={{ textAlign: "right" }}>
+              <div className="lab5-s8-name lab5-s8-name--verifier">ผู้ตรวจ</div>
+              <div className="lab5-s8-role">Verifier</div>
+            </div>
+            <div className="lab5-s8-avatar--verifier">
+              <ShieldCheck size={16} />
+            </div>
+          </div>
+        </div>
+
+        {/* Body Messages / Swimlane (Matches media_1792538195368.png and media_1792538943991.png) */}
+        {isInteractive ? (
+          itemsCount === 0 ? (
+            <div className="lab5-s8-placeholder" style={{ padding: "40px 20px" }}>
+              ยังไม่มีข้อความ — เริ่มส่ง Commit รอบที่ 1 จากปุ่มด้านล่าง
+            </div>
+          ) : (
+            <div className="lab5-s8-swimlane">
+              {S8_INTERACTIVE_ITEMS.slice(0, itemsCount).map((item) => (
+                <div key={item.id} className="lab5-animate-merge-up lab5-s8-swim-row">
+                  {/* Left Column (Prover) */}
+                  <div className="lab5-s8-swim-left">
+                    {item.side === "prover" ? (
+                      <div className="lab5-s8-card-prover">
+                        <div className="lab5-s8-header-prover">{item.header}</div>
+                        <div className="lab5-s8-card-title">{item.title}</div>
+                        {item.badge && (
+                          <div className={item.badgeType === "purple" ? "lab5-s8-chip-purple" : "lab5-s8-chip-white"}>
+                            {item.badge}
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Center Column (Icons) */}
+                  <div className="lab5-s8-swim-mid">
+                    {item.centerType === "arrow-purple" && (
+                      <div className="lab5-s8-circle-arrow-purple">
+                        <ArrowRight size={15} strokeWidth={2.5} />
+                      </div>
+                    )}
+                    {item.centerType === "arrow-green" && (
+                      <div className="lab5-s8-circle-arrow-green">
+                        <ArrowLeft size={15} strokeWidth={2.5} />
+                      </div>
+                    )}
+                    {item.centerType === "shield" && (
+                      <div className="lab5-s8-circle-shield">
+                        <ShieldCheck size={16} strokeWidth={2} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column (Verifier) */}
+                  <div className="lab5-s8-swim-right">
+                    {item.side === "verifier" ? (
+                      <div
+                        className={
+                          item.cardType === "check"
+                            ? "lab5-s8-card-verifier-check"
+                            : "lab5-s8-card-verifier-challenge"
+                        }
+                      >
+                        <div className="lab5-s8-header-verifier">{item.header}</div>
+                        <div className="lab5-s8-card-title">{item.title}</div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
-                <div>
-                  <p className="lab5-zk-field-label">Leaf Hash</p>
-                  <HashChip tone="primary" label={`H(${targetOrder.id})`} hash={leafHash} />
-                </div>
-                <div>
-                  <p className="lab5-zk-field-label">
-                    Hash ข้างเคียงที่ติดกัน <span className="lab5-font-medium lab5-text-muted-foreground">(Sibling Hash)</span>
-                  </p>
-                  <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
-                    {authPathSteps.map((pathStep) => (
-                      <HashChip key={pathStep.nodeId} tone="primary" label={pathStep.label} hash={pathStep.hash} />
-                    ))}
+              ))}
+            </div>
+          )
+        ) : (
+          <div key={snarkKey} className="lab5-animate-merge-up lab5-s8-swimlane">
+            {/* Row 1: Prover Statement + Proof (Matches media_1792538943991.png) */}
+            <div className="lab5-animate-merge-up lab5-s8-swim-row">
+              <div className="lab5-s8-swim-left">
+                <div className="lab5-s8-card-prover">
+                  <div className="lab5-s8-header-prover">คุณ → Verifier</div>
+                  <div className="lab5-s8-card-title">📦 Statement + Proof π</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    <div className="lab5-s8-chip-green">Statement</div>
+                    <div className="lab5-s8-chip-purple">π dfc4268059..</div>
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="lab5-zk-witness-hidden">
-                <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
-                  <ZkChip tone="primary" className="lab5-font-mono">
-                    <Lock className="lab5-size-3" />
-                    Order ที่เลือก: {targetOrder.label}
-                  </ZkChip>
-                  <ZkChip tone="primary" className="lab5-font-mono">
-                    <Lock className="lab5-size-3" />
-                    Hash ข้างเคียงที่ติดกัน
-                  </ZkChip>
+              <div className="lab5-s8-swim-mid">
+                <div className="lab5-s8-circle-arrow-purple">
+                  <ArrowRight size={15} strokeWidth={2.5} />
                 </div>
-                <span className="lab5-text-11 lab5-text-muted-foreground">(กด "ดูข้อมูลของผู้ใช้" เพื่อเปิดรายละเอียด)</span>
+              </div>
+              <div className="lab5-s8-swim-right" />
+            </div>
+
+            {/* Row 2: Verifier Check (Matches media_1792538943991.png) */}
+            <div className="lab5-animate-merge-up lab5-s8-swim-row">
+              <div className="lab5-s8-swim-left" />
+              <div className="lab5-s8-swim-mid">
+                <div className="lab5-s8-circle-shield">
+                  <ShieldCheck size={16} strokeWidth={2} />
+                </div>
+              </div>
+              <div className="lab5-s8-swim-right">
+                <div className="lab5-s8-card-verifier-check">
+                  <div className="lab5-s8-header-verifier">Verifier ตรวจเอง</div>
+                  <div className="lab5-s8-card-title">
+                    ตรวจด้วย Verification Key ได้ทันที ✅ ยอมรับ
+                  </div>
+                  <div className="lab5-s8-card-subtext">
+                    ไม่ต้องถามกลับ ไม่ต้องออนไลน์พร้อมกัน<br />
+                    และเก็บไว้ให้ใครตรวจซ้ำย้อนหลังก็ได้
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fast-forward simulated banner */}
+        {isInteractive && isFastForwarded && (
+          <div className="lab5-animate-merge-up lab5-s8-fastforward-banner">
+            <Zap size={16} color="#7c3aed" />
+            <span>⚡ จำลองการถาม-ตอบรอบที่ 3 ถึง 10 จนครบ 10 รอบ (ส่งข้อความข้ามเส้นรวม 30 ครั้ง) → ได้ความมั่นใจ 99.9%</span>
+          </div>
+        )}
+
+        {/* Action Section (Matches media_1792538195368.png and media_1792538943991.png) */}
+        <div className="lab5-s8-action-section">
+          <div className="lab5-s8-action-label">ตาของคุณ:</div>
+          <div className="lab5-s8-action-btn-row">
+            {isInteractive ? (
+              <>
+                {itemsCount === 0 && (
+                  <button type="button" onClick={handleInteractiveNext} className="lab5-s8-btn-submit">
+                    รอบที่ 1: ส่ง Commit (ล็อกคำตอบ)
+                  </button>
+                )}
+                {itemsCount === 2 && (
+                  <button type="button" onClick={handleInteractiveNext} className="lab5-s8-btn-submit">
+                    รอบที่ 1: ส่ง Response (เปิดฝั่งซ้าย)
+                  </button>
+                )}
+                {itemsCount === 4 && (
+                  <button type="button" onClick={handleInteractiveNext} className="lab5-s8-btn-submit">
+                    รอบที่ 2: ส่ง Commit (ล็อกคำตอบ)
+                  </button>
+                )}
+                {itemsCount === 6 && (
+                  <button type="button" onClick={handleInteractiveNext} className="lab5-s8-btn-submit">
+                    รอบที่ 2: ส่ง Response (เปิดฝั่งขวา)
+                  </button>
+                )}
+                {itemsCount === 8 && !isFastForwarded && (
+                  <button type="button" onClick={handleFastForward} className="lab5-s8-btn-submit">
+                    <FastForward size={14} fill="currentColor" /> เร่งเวลา: ทำอีก 8 รอบที่เหลือ
+                  </button>
+                )}
+                {(itemsCount === 1 || itemsCount === 3 || itemsCount === 5 || itemsCount === 7) && (
+                  <button type="button" disabled className="lab5-s8-btn-submit" style={{ opacity: 0.75 }}>
+                    กำลังรอคำตอบจาก Verifier...
+                  </button>
+                )}
+                {isFastForwarded && (
+                  <button type="button" disabled className="lab5-s8-btn-submit" style={{ opacity: 0.85, cursor: "default" }}>
+                    <Check size={14} strokeWidth={2.5} /> ทำครบ 10 รอบแล้ว (ข้ามเส้น 30 ครั้ง)
+                  </button>
+                )}
+                {itemsCount > 0 && (
+                  <button type="button" onClick={handleResetInteractive} className="lab5-s8-btn-reset">
+                    <RotateCcw size={13} /> รีเซ็ต
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSnarkReplay}
+                className="lab5-s8-btn-snark-replay"
+              >
+                <RotateCcw size={13} /> ส่งใหม่อีกครั้ง
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="lab5-s8-footer">
+          <div className="lab5-s8-footer-left">
+            <span className="lab5-s8-footer-title">
+              <Eye size={13} color="#16a34a" /> ผลตอนนี้
+            </span>
+            {isInteractive ? (
+              <>
+                <span className="lab5-s8-badge--confidence">
+                  <Check size={12} strokeWidth={2.5} /> ความมั่นใจตอนนี้ {currentConfidence}%
+                </span>
+                <span className="lab5-s8-badge--online">
+                  {currentConfidence >= 99 ? (
+                    <>
+                      <Check size={12} color="#16a34a" /> ตรวจสอบสำเร็จ (ไม่ต้องคุยต่อแล้ว)
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={12} /> ยังต้องออนไลน์คุยกันต่อ
+                    </>
+                  )}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="lab5-s8-badge--confidence">
+                  <Check size={12} strokeWidth={2.5} /> ความมั่นใจ ~100% จากข้อความเดียว
+                </span>
+                <span className="lab5-s8-badge--confidence">
+                  <Check size={12} strokeWidth={2.5} /> ใครก็ตรวจซ้ำได้
+                </span>
+              </>
+            )}
+          </div>
+          <div>
+            <span className="lab5-s8-footer-counter">
+              <RotateCcw size={12} /> ข้อความที่ข้ามเส้น: {isInteractive ? crossingCount : 1}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Pill for zk-SNARK (Matches media_1792538943991.png) */}
+      {!isInteractive && (
+        <div className="lab5-animate-merge-up lab5-s8-snark-summary-pill">
+          <Check size={14} color="#16a34a" strokeWidth={2.5} />
+          <span>
+            รวม <strong>1 ข้อความ</strong> · ไม่ต้องออนไลน์พร้อมกัน · ใครก็ตรวจซ้ำได้
+          </span>
+        </div>
+      )}
+
+      {/* Comparison Table Card */}
+      <div className="lab5-s8-table-card">
+        <div className="lab5-s8-table-header">ตารางเปรียบเทียบ</div>
+        <table className="lab5-s8-table">
+          <thead>
+            <tr>
+              <th>หัวข้อ</th>
+              <th>Interactive (Lab 03)</th>
+              <th>zk-SNARK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ต้องคุยกันกี่ครั้ง</td>
+              <td>หลายรอบ (เช่น 10 รอบ = 30 ข้อความ)</td>
+              <td className="lab5-s8-cell-green">1 ข้อความ</td>
+            </tr>
+            <tr>
+              <td>ต้องออนไลน์พร้อมกันไหม</td>
+              <td>ต้อง</td>
+              <td className="lab5-s8-cell-green">ไม่ต้อง</td>
+            </tr>
+            <tr>
+              <td>ขนาดหลักฐาน</td>
+              <td>โตตามจำนวนรอบ</td>
+              <td className="lab5-s8-cell-green">เล็กและคงที่</td>
+            </tr>
+            <tr>
+              <td>ความเร็วในการตรวจ</td>
+              <td>ช้าตามจำนวนรอบ</td>
+              <td className="lab5-s8-cell-green">เร็วมาก (เสี้ยววินาที)</td>
+            </tr>
+            <tr>
+              <td>คนอื่นตรวจซ้ำได้ไหม</td>
+              <td>ไม่ได้ — เชื่อได้เฉพาะคนที่ถามเอง</td>
+              <td className="lab5-s8-cell-green">ได้ — ใครก็ตรวจได้</td>
+            </tr>
+            <tr>
+              <td>เหมาะกับ</td>
+              <td>สอนแนวคิด, ระบบที่คุยกันสด ๆ</td>
+              <td>ระบบจริงอย่างเว็บเทรด, blockchain</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Quiz Section (Matches media_1792537959400.png and media_1792538943991.png) */}
+      <div className="lab5-s8-quiz-section">
+        <div className="lab5-s8-quiz-question">
+          ถ้าเว็บเทรดต้องรับคำสั่งซื้อ 100 รายการต่อวินาที แบบไหนเหมาะกว่า?
+        </div>
+        <div className="lab5-s8-quiz-options">
+          <button
+            type="button"
+            onClick={() => handleQuizAnswer("interactive")}
+            className={`lab5-s8-quiz-opt ${quizAnswer === "interactive" ? "lab5-s8-quiz-opt--wrong" : ""}`}
+          >
+            <span className={`lab5-s8-quiz-opt-title ${quizAnswer === "interactive" ? "lab5-s8-quiz-opt-title--wrong" : ""}`}>
+              Interactive
+            </span>
+            <span className="lab5-s8-quiz-opt-desc">
+              — ถาม-ตอบกับผู้ใช้ทีละคน ทีละรอบ
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuizAnswer("snark")}
+            className={`lab5-s8-quiz-opt ${quizAnswer === "snark" ? "lab5-s8-quiz-opt--correct" : ""}`}
+          >
+            <span className={`lab5-s8-quiz-opt-title ${quizAnswer === "snark" ? "lab5-s8-quiz-opt-title--correct" : ""}`}>
+              zk-SNARK (Non-Interactive)
+            </span>
+            <span className="lab5-s8-quiz-opt-desc">
+              — แนบ Proof มากับคำสั่งซื้อเลย
+            </span>
+          </button>
+        </div>
+
+        {/* Correct Feedback Box (Matches media_1792538943991.png) */}
+        {quizAnswer === "snark" && (
+          <div className="lab5-animate-merge-up lab5-s8-quiz-correct-box">
+            <div className="lab5-s8-quiz-correct-header">
+              <CheckCircle2 size={16} color="#16a34a" strokeWidth={2.5} />
+              <span>ถูกต้อง</span>
+            </div>
+            <div className="lab5-s8-quiz-correct-text">
+              แนบ Proof มากับคำสั่งซื้อได้ทันที เว็บเทรดตรวจได้เร็ว ไม่ต้องรอโต้ตอบ และยังเก็บไว้ให้คนอื่นตรวจย้อนหลังได้ด้วย
+            </div>
+          </div>
+        )}
+
+        {/* Hint Button (Shown when not answered correctly) */}
+        {quizAnswer !== "snark" && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowHint((prev) => !prev)}
+              className="lab5-s8-quiz-hint-btn"
+            >
+              <HelpCircle size={14} />
+              <span>ทำไม?</span>
+            </button>
+            {showHint && (
+              <div className="lab5-animate-merge-up lab5-s8-quiz-hint-box" style={{ marginTop: 8 }}>
+                <strong style={{ color: "#0f172a" }}>คำอธิบาย:</strong> ระบบจริงอย่างเว็บเทรดที่ต้องประมวลผลคำสั่งซื้อปริมาณมาก (High Throughput) ไม่สามารถรอคุยโต้ตอบหลายรอบกับผู้ใช้ทีละคนได้ เพราะเซิร์ฟเวอร์จะค้างและช้ามาก การใช้ zk-SNARK (Non-Interactive) ทำให้ผู้ใช้สามารถสร้าง Proof ไว้ล่วงหน้าแล้วแนบส่งมาพร้อมคำสั่งซื้อได้ทันที เว็บเทรดแค่ตรวจ Proof ครั้งเดียวในเสี้ยววินาที จึงรองรับการสเกลได้ดีกว่ามหาศาล
               </div>
             )}
           </div>
-          <div className="lab5-zk-note lab5-zk-note--soft">
-            <Contrast className="lab5-size-3.5 lab5-shrink-0" />
-            <span>
-              <strong>ข้อสังเกต:</strong> ในแนวคิด ZKP ข้อมูลเหล่านี้ใช้ตรวจอยู่ภายในวงจร แต่ไม่เปิดเผยให้ผู้ตรวจเห็น
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* ขั้นย่อยที่ 3: สร้าง Proof */}
-      {stage === 3 && (
-        <div key="stage-3" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded">
-          <ZkCardHeader
-            icon={Cpu}
-            title="ใช้ข้อมูลลับสร้าง Proof"
-            description="ผู้ใช้ใช้ Order และ Hash ข้างเคียงเป็นข้อมูลลับ ส่วน ZK circuit กำหนดว่าข้อมูลต้องคำนวณไปถึง Root ที่ประกาศไว้ได้"
-          />
-          <div className="lab5-zk-banner lab5-zk-banner--box">
-            <Info className="lab5-size-4 lab5-shrink-0 lab5-text-primary" />
-            <span>ขั้นนี้เป็นภาพจำลอง ใช้การคำนวณ Merkle เพื่อสาธิตเงื่อนไข แต่ไม่ได้สร้าง ZK Proof จริง</span>
-          </div>
-          <div className="lab5-zk-note lab5-zk-note--soft lab5-zk-note--block">
-            <Lightbulb className="lab5-size-3.5 lab5-shrink-0" />
-            <span>
-              <strong>บทบาทของแต่ละส่วน:</strong> ZK circuit เป็นกติกาที่กำหนดเงื่อนไข — ถ้าข้อมูลผ่านเงื่อนไข Prover จะสร้าง Proof
-              เพื่อส่งให้ผู้ตรวจ (Verifier ในขั้นที่ 5) โดยไม่ต้องส่ง Order และ Hash ข้างเคียงทั้งหมด
-            </span>
-          </div>
-
-          <div className="lab5-zk-box lab5-zk-box--soft lab5-zk-toggle-row">
-            <div>
-              <p className="lab5-text-xs lab5-font-bold lab5-text-foreground">ทดลองเปลี่ยนสถานะข้อมูล</p>
-              <p className="lab5-text-11 lab5-text-muted-foreground">
-                ลองดูว่าถ้าใช้ข้อมูลผิดหรือไม่ตรงกับชุดข้อมูล การสร้าง Proof ตัวอย่างจะเป็นอย่างไร
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsWitnessTampered((previousIsTampered) => !previousIsTampered)}
-              className={JoinClassNames("lab5-zk-btn", isWitnessTampered ? "lab5-zk-btn--outline-danger" : "lab5-zk-btn--outline")}
-            >
-              <AlertTriangle className="lab5-size-3.5" />
-              {isWitnessTampered ? "คืนข้อมูลเดิม" : "ลองใช้ข้อมูลผิด"}
-            </button>
-          </div>
-
-          <div className="lab5-zk-box lab5-zk-box--soft lab5-zk-flow">
-            <p className="lab5-zk-flow-title">
-              ขั้นตอนการสร้าง Proof: ข้อมูลลับ + Root/เงื่อนไข → ZK circuit (กติกา) → Prover สร้าง Proof ตัวอย่าง
-            </p>
-            <div className="lab5-zk-flow-grid">
-              <div className="lab5-zk-flow-col lab5-zk-flow-col--secret">
-                <p className="lab5-zk-flow-col-title lab5-text-primary">
-                  <Lock className="lab5-size-3.5" />
-                  ข้อมูลลับ + Root/เงื่อนไข
-                </p>
-                <div className="lab5-zk-flow-sub">
-                  <strong className="lab5-text-primary">ข้อมูลลับ:</strong>{" "}
-                  {isWitnessTampered ? "⚠️ ข้อมูลถูกแก้ไข (ไม่ถูกต้อง)" : `Order ${targetOrder.label} + Hash ข้างเคียงที่ติดกัน`}
-                </div>
-                <div className="lab5-zk-flow-sub">
-                  <strong className="lab5-text-success">Root ที่ประกาศไว้:</strong> เปรียบเทียบเป็น Public Input
-                </div>
-              </div>
-              <ArrowRight className="lab5-zk-flow-arrow" />
-              <div className="lab5-zk-flow-col">
-                <p className="lab5-zk-flow-col-title lab5-text-foreground">
-                  <Cpu className="lab5-size-3.5 lab5-text-primary" />
-                  ZK circuit (กติกา)
-                </p>
-                <p className="lab5-zk-flow-text">กำหนดเงื่อนไขว่า Order และ Hash ข้างเคียงต้องคำนวณไปถึง Root ที่ประกาศไว้ได้</p>
-                <p className="lab5-zk-flow-hint">(วงจรเป็นกติกา ไม่ใช่ผู้สร้างหรือตรวจ proof เอง)</p>
-              </div>
-              <ArrowRight className="lab5-zk-flow-arrow" />
-              {isWitnessTampered ? (
-                <div className="lab5-zk-flow-col lab5-zk-flow-col--danger">
-                  <p className="lab5-zk-flow-col-title lab5-text-danger">
-                    <AlertTriangle className="lab5-size-3.5" />
-                    Prover สร้าง Proof ตัวอย่าง
-                  </p>
-                  <p className="lab5-zk-flow-strong lab5-text-danger">ข้อมูลไม่ตรงกับ Root จึงสร้าง Proof ตัวอย่างที่ผ่านเงื่อนไขไม่ได้</p>
-                  <p className="lab5-zk-flow-text lab5-text-danger">Order หรือ Hash ข้างเคียงไม่ตรงกับ Root จึงไม่ผ่านเงื่อนไขของ circuit</p>
-                </div>
-              ) : (
-                <div className="lab5-zk-flow-col lab5-zk-flow-col--success">
-                  <p className="lab5-zk-flow-col-title lab5-text-success">
-                    <Check className="lab5-size-3.5" strokeWidth={3} />
-                    Prover สร้าง Proof ตัวอย่าง
-                  </p>
-                  <p className="lab5-zk-flow-strong lab5-text-success">ข้อมูลผ่านเงื่อนไข — พร้อมแสดง Proof ตัวอย่างในขั้นถัดไป</p>
-                  <p className="lab5-zk-flow-text lab5-text-success">
-                    Prover สามารถสร้าง Proof เพื่อส่งให้ Verifier ตรวจในหน้าถัดไป โดยไม่ต้องเปิดเผยข้อมูลลับ
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="lab5-zk-root-row">
-              <div className="lab5-space-y-1">
-                <p className="lab5-zk-field-label">Root ที่คำนวณได้จากข้อมูล:</p>
-                <HashChip key={isWitnessTampered ? "tamper" : "match"} tone={isWitnessTampered ? "danger" : "success"} hash={computedRoot} />
-              </div>
-              <div className="lab5-space-y-1 lab5-zk-root-row-end">
-                <p className="lab5-zk-field-label">Root ที่ประกาศไว้ (Public Reference):</p>
-                <HashChip tone="success" hash={rootHash} />
-              </div>
-            </div>
-          </div>
-
-          {isWitnessTampered && (
-            <div className="lab5-animate-merge-up lab5-zk-reject">
-              <span>ข้อมูลไม่ตรงกับ Root จึงสร้าง Proof ตัวอย่างที่ผ่านเงื่อนไขไม่ได้</span>
-              <button type="button" onClick={() => setIsWitnessTampered(false)} className="lab5-zk-reject-btn">
-                คืนข้อมูลเดิม
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ขั้นย่อยที่ 4: หลักฐาน */}
-      {stage === 4 && (
-        <div key="stage-4" className="lab5-animate-merge-up lab5-zk-card lab5-zk-card--padded">
-          <ZkCardHeader
-            icon={Sparkles}
-            title="ส่งหลักฐาน แทนการส่งข้อมูลลับ"
-            description="ในระบบ ZKP จริง ผู้ใช้ส่ง Proof ให้ผู้ตรวจ โดยไม่ต้องส่ง Order และ Hash ข้างเคียงไปด้วย"
-          />
-          <div className="lab5-zk-box lab5-zk-box--soft lab5-zk-proof-strip">
-            <ZkChip tone="primary">ข้อมูลลับ</ZkChip>
-            <span className="lab5-text-muted-foreground">+</span>
-            <ZkChip tone="success">Root ที่ประกาศไว้</ZkChip>
-            <span className="lab5-text-muted-foreground">→</span>
-            <ZkChip tone="outline">ZK circuit (แนวคิด)</ZkChip>
-            <span className="lab5-text-muted-foreground">→</span>
-            <ZkChip tone="solid">Proof ตัวอย่าง</ZkChip>
-          </div>
-
-          <div className="lab5-zk-package">
-            <div className="lab5-zk-package-head">
-              <div>
-                <p className="lab5-text-xs lab5-font-bold lab5-text-primary">สิ่งที่ส่งให้ผู้ตรวจสอบ</p>
-                <p className="lab5-text-11 lab5-text-muted-foreground">แพ็กเกจนี้ประกอบด้วยข้อมูลสาธารณะและหลักฐานเท่านั้น</p>
-              </div>
-              <span className="lab5-zk-badge lab5-zk-badge--primary">ตัวอย่างจำลอง</span>
-            </div>
-            <div className="lab5-zk-package-item">
-              <p className="lab5-zk-field-label">1. Root ที่ประกาศไว้</p>
-              <HashChip tone="success" label="Root ที่ประกาศไว้" hash={rootHash} />
-            </div>
-            <div className="lab5-zk-package-item lab5-zk-package-item--proof">
-              <p className="lab5-zk-field-label lab5-text-primary lab5-flex lab5-items-center lab5-gap-1.5">
-                <ShieldCheck className="lab5-size-3.5" />
-                2. Proof ตัวอย่าง (จำลอง)
-              </p>
-              <div className="lab5-zk-proof-box">
-                <p className="lab5-text-lg lab5-font-medium lab5-text-foreground">หลักฐานขนาดสั้นที่ใช้ยืนยันความถูกต้อง</p>
-                <p className="lab5-text-11 lab5-text-muted-foreground">ไม่เปิดเผย Order หรือ Hash ข้างเคียงออกมาในหลักฐานนี้</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="lab5-zk-banner lab5-zk-banner--center lab5-font-semibold">
-            นี่คือตัวอย่างสิ่งที่ผู้ใช้ส่งต่อ โดยไม่แนบ Order และ Hash ข้างเคียงทั้งหมด
-          </div>
-          <div className="lab5-zk-disclaimer">⚠️ หมายเหตุ: นี่เป็นภาพจำลองเพื่อการเรียนรู้ ไม่ได้สร้างหรือ verify ZK Proof จริง</div>
-        </div>
-      )}
-
-      {/* ปุ่มนำทางขั้นย่อย */}
-      <div className="lab5-zk-subnav">
-        <button type="button" onClick={() => goToZkpStage(1)} className="lab5-zk-subnav-reset">
-          <RotateCcw className="lab5-size-3.5" />
-          เริ่มใหม่ (ขั้นตอนที่ 1)
-        </button>
-        <div className="lab5-flex lab5-items-center lab5-gap-2">
-          {stage > 1 && (
-            <button type="button" onClick={() => goToZkpStage(stage - 1)} className="lab5-zk-btn lab5-zk-btn--outline lab5-zk-btn--nav">
-              <ArrowLeft className="lab5-size-3.5" />
-              ย้อนกลับ
-            </button>
-          )}
-          {stage < 4 ? (
-            <button
-              type="button"
-              disabled={isNextBlocked}
-              onClick={() => goToZkpStage(stage + 1)}
-              className="lab5-zk-btn lab5-zk-btn--primary lab5-zk-btn--nav"
-            >
-              ขั้นถัดไป
-              <ArrowRight className="lab5-size-3.5" />
-            </button>
-          ) : (
-            <button type="button" onClick={goNext} className="lab5-zk-btn lab5-zk-btn--primary lab5-zk-btn--nav">
-              ไปด่านถัดไป: เปรียบเทียบกับ ZKP
-              <ArrowRight className="lab5-size-3.5" />
-            </button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )
 }
 
 /**
- * ขั้นที่ 8: Merkle กับ ZKP (เปรียบเทียบสิ่งที่ผู้ตรวจสอบเห็นระหว่าง Merkle proof กับ Merkle + ZKP)
+ * ขั้นที่ 9: Merkle Tree + zk-SNARK ช่วยอะไรเรา? (สรุป Visibility Matrix)
  *
- * @return {JSX.Element} เนื้อหาขั้นที่ 8
+ * @return {JSX.Element} เนื้อหาขั้นที่ 9
  * @author StealthTrade Team
  */
-function Step8MerkleZkp() {
-  const { tree, selectedLeaf, authPathSteps } = useLab05()
-  const [zkpMode, setZkpMode] = useState("merkle") // "merkle" | "zkp"
+function Step9Efficiency() {
+  const { goToStep, reset, markComplete } = useLab05()
+  const [activeTab, setActiveTab] = useState("merkle") // "merkle" | "snark"
 
-  const targetOrder = orders[selectedLeaf ?? 0] || orders[0]
-  const rootHash = tree?.root
-  const isZkp = zkpMode === "zkp"
+  useEffect(() => {
+    if (typeof markComplete === "function") {
+      markComplete(9)
+    }
+  }, [markComplete])
 
-  const matrixRows = [
-    { name: "ลายเซ็นข้อมูลเดิม (Leaf Data)", isHidden: isZkp },
-    { name: "ค่า Hash คู่เคียง (Sibling Hashes)", isHidden: isZkp },
-    { name: "ค่ารากดั้งเดิม (Trusted Root)", isHidden: false, isPublic: true },
+  const isMerkleOnly = activeTab === "merkle"
+
+  // Visibility matrix data (Matches media_1792539684391.png & media_1792540323633.png)
+  const matrixData = [
+    {
+      label: "รหัสลับของออร์เดอร์",
+      prover: "เห็น",
+      verifier: isMerkleOnly ? "เห็น" : "ซ่อนด้วย ZKP",
+      verifierHighlight: isMerkleOnly ? "red" : "red",
+    },
+    {
+      label: "Hash ข้าง ๆ และตำแหน่ง",
+      prover: "เห็น",
+      verifier: isMerkleOnly ? "เห็น" : "ซ่อนด้วย ZKP",
+      verifierHighlight: isMerkleOnly ? "red" : "red",
+    },
+    {
+      label: "ว่าเป็นออร์เดอร์ใบไหน",
+      prover: "เห็น",
+      verifier: isMerkleOnly ? "เห็น" : "ซ่อนด้วย ZKP",
+      verifierHighlight: isMerkleOnly ? "red" : "red",
+    },
+    {
+      label: "Root ที่ประกาศไว้",
+      prover: "เห็น",
+      verifier: "เห็น",
+      verifierHighlight: "normal",
+    },
+    {
+      label: 'ผลลัพธ์ "จริง / ไม่จริง"',
+      prover: "เห็น",
+      verifier: "เห็น",
+      verifierHighlight: "normal",
+    },
   ]
 
   return (
-    <div className="lab5-space-y-6">
-      <LessonHeading
-        sectionLabel="MERKLE กับ ZKP"
-        title="มาดูกันว่าการใช้ Merkle proof  กับ Merkle + ZKP แตกต่างกันอย่างไร?"
-        description={
-          <>
-            Merkle proof พิสูจน์ได้ว่า Order อยู่ในต้นไม้ แต่ผู้ตรวจสอบต้องเห็น Order และ Hash ที่ส่งมาทั้งหมด
-            <br />
-            ลองสลับดูว่าถ้านำการตรวจแบบเดียวกันไปไว้ในระบบ ZKP ผู้ตรวจสอบจะเห็นอะไรเปลี่ยนไป
-          </>
-        }
-      />
+    <div className="lab5-s9-wrapper">
+      {/* Header */}
+      <div className="lab5-s9-header">
+        <span className="lab5-s9-tag">สรุป</span>
+        <h2 className="lab5-s9-title">Merkle Tree + zk-SNARK ช่วยอะไรเรา?</h2>
+        <p className="lab5-s9-subtitle">
+          สลับดูว่าผู้ตรวจเห็นอะไรบ้าง เมื่อใช้แค่ Merkle proof เทียบกับใช้ zk-SNARK ร่วมด้วย
+        </p>
+      </div>
 
-      <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
+      {/* Mode Selector Tabs */}
+      <div className="lab5-s9-tabs">
         <button
           type="button"
-          onClick={() => setZkpMode("merkle")}
-          aria-pressed={!isZkp}
-          className={JoinClassNames("lab5-zk-mode", !isZkp && "lab5-zk-mode--danger")}
+          onClick={() => setActiveTab("merkle")}
+          className={`lab5-s9-tab-btn ${isMerkleOnly ? "lab5-s9-tab-btn--active-rose" : "lab5-s9-tab-btn--idle"}`}
         >
-          <p className="lab5-zk-mode-title">Merkle proof อย่างเดียว</p>
-          <p className="lab5-zk-mode-sub">ส่งหลักฐานให้ผู้ตรวจสอบตรง ๆ</p>
+          <span className={`lab5-s9-tab-title ${isMerkleOnly ? "lab5-s9-tab-title--rose" : "lab5-s9-tab-title--slate"}`}>
+            Merkle proof อย่างเดียว
+          </span>
+          <span className="lab5-s9-tab-sub">ภาค 1 — ส่งหลักฐานให้ผู้ตรวจตรง ๆ</span>
         </button>
         <button
           type="button"
-          onClick={() => setZkpMode("zkp")}
-          aria-pressed={isZkp}
-          className={JoinClassNames("lab5-zk-mode", isZkp && "lab5-zk-mode--success")}
+          onClick={() => setActiveTab("snark")}
+          className={`lab5-s9-tab-btn ${!isMerkleOnly ? "lab5-s9-tab-btn--active-green" : "lab5-s9-tab-btn--idle"}`}
         >
-          <p className="lab5-zk-mode-title">Merkle + ZKP (จำลอง)</p>
-          <p className="lab5-zk-mode-sub">ซ่อนข้อมูลไว้ในวงจรพิสูจน์</p>
+          <span className={`lab5-s9-tab-title ${!isMerkleOnly ? "lab5-s9-tab-title--green" : "lab5-s9-tab-title--slate"}`}>
+            Merkle + zk-SNARK
+          </span>
+          <span className="lab5-s9-tab-sub">ภาค 2 — ซ่อนข้อมูลไว้ในวงจรพิสูจน์</span>
         </button>
       </div>
 
-      <div className="lab5-zk-shared-root">
-        <span className="lab5-text-xs lab5-font-bold lab5-text-foreground">ราก (เห็นเหมือนกันทั้งสองโหมด)</span>
-        <HashChip tone="white" hash={rootHash} />
+      {/* Root Box */}
+      <div className="lab5-s9-root-card">
+        <span className="lab5-s9-root-label">Root (เห็นเหมือนกันทั้งสองแบบ)</span>
+        <span className="lab5-s9-root-chip">592ed5ae...</span>
       </div>
 
-      <div className="lab5-space-y-3">
-        <div className="lab5-flex lab5-items-center lab5-justify-between">
-          <h3 className="lab5-text-sm lab5-font-bold lab5-text-foreground">เปรียบเทียบสิ่งที่แต่ละฝ่ายมองเห็น</h3>
-          <span className="lab5-text-11 lab5-font-bold lab5-text-primary">Side-by-side view</span>
+      {/* Visibility Matrix Card */}
+      <div className="lab5-s9-matrix-card">
+        <div className="lab5-s9-matrix-header">
+          <div className="lab5-s9-matrix-title">Visibility Matrix</div>
+          <div className="lab5-s9-matrix-sub">สรุปสิ่งที่ผู้พิสูจน์และผู้ตรวจสอบมองเห็น</div>
         </div>
-
-        <div key={zkpMode} className="lab5-animate-merge-up lab5-grid lab5-gap-4 lab5-sm:grid-cols-2">
-          {/* ผู้พิสูจน์ */}
-          <div className="lab5-zk-party lab5-zk-party--prover">
-            <ZkCardHeader
-              icon={Lock}
-              isCompact
-              title="ผู้พิสูจน์ (Prover)"
-              description={isZkp ? "ข้อมูลที่ซ่อนไว้ในวงจร" : "ส่งทุกอย่างนี้ให้ผู้ตรวจสอบ"}
-            />
-            <div className="lab5-zk-party-body">
-              {isZkp ? (
-                <>
-                  <div>
-                    <p className="lab5-zk-field-label">Order ที่เลือก (ข้อมูลลับ)</p>
-                    <ZkChip tone="primary" isDashed className="lab5-font-mono">
-                      <Lock className="lab5-size-3" />
-                      {targetOrder.label} - {targetOrder.value}
-                    </ZkChip>
-                  </div>
-                  <div>
-                    <p className="lab5-zk-field-label">Sibling Hashes (ข้อมูลลับ)</p>
-                    <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
-                      {authPathSteps.map((pathStep) => (
-                        <ZkChip key={pathStep.nodeId} tone="primary" isDashed className="lab5-font-mono">
-                          <Lock className="lab5-size-3" />
-                          {pathStep.label}
-                        </ZkChip>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <p className="lab5-zk-party-empty">
-                  ไม่มีอะไรถูกซ่อน ผู้พิสูจน์ส่ง {targetOrder.label}
-                  <br />
-                  และ SiblingHashes ให้ผู้ตรวจสอบตรง ๆ
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* ผู้ตรวจสอบ */}
-          <div className="lab5-zk-party">
-            <ZkCardHeader
-              icon={Eye}
-              tone="neutral"
-              isCompact
-              title="ผู้ตรวจสอบ (Verifier) เห็น"
-              description={isZkp ? "ราก + proof จำลอง" : "ราก + Order + Sibling Hashes"}
-            />
-            <div className="lab5-zk-party-body">
-              <div>
-                <p className="lab5-zk-field-label">ราก</p>
-                <HashChip hash={rootHash} />
-              </div>
-              {isZkp ? (
-                <>
-                  <div>
-                    <p className="lab5-zk-field-label">หลักฐานแบบซ่อนข้อมูล (Zero-Knowledge Proof)</p>
-                    <ZkChip className="lab5-font-sans">ยืนยันสิทธิ์ได้โดยไม่เปิดเผยออร์เดอร์</ZkChip>
-                  </div>
-                  <p className="lab5-flex lab5-items-center lab5-gap-1.5 lab5-text-11 lab5-text-muted-foreground">
-                    <EyeOff className="lab5-size-3.5 lab5-shrink-0" />
-                    ผู้ตรวจสอบไม่เห็น Order ที่เลือก และไม่เห็น Sibling Hashes
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <p className="lab5-zk-field-label">Order ที่กำลังพิสูจน์</p>
-                    <p className="lab5-flex lab5-items-baseline lab5-gap-2">
-                      <span className="lab5-text-sm lab5-font-bold lab5-text-foreground">{targetOrder.label}</span>
-                      <span className="lab5-font-mono lab5-text-11 lab5-text-muted-foreground">{targetOrder.value}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="lab5-zk-field-label">Sibling Hashes ที่ส่งมาพร้อมหลักฐาน</p>
-                    <div className="lab5-flex lab5-flex-wrap lab5-gap-1.5">
-                      {authPathSteps.map((pathStep) => (
-                        <HashChip key={pathStep.nodeId} tone="primary" label={pathStep.label} hash={pathStep.hash} />
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Visibility Matrix */}
-      <div className="lab5-zk-matrix">
-        <div className="lab5-zk-matrix-head">
-          <p className="lab5-text-sm lab5-font-bold lab5-text-foreground">Visibility Matrix</p>
-          <p className="lab5-text-11 lab5-text-muted-foreground">สรุปสิ่งที่ผู้พิสูจน์และผู้ตรวจสอบมองเห็น</p>
-        </div>
-        <table className="lab5-zk-matrix-table">
+        <table className="lab5-s9-table">
           <thead>
             <tr>
               <th>ข้อมูลในระบบ</th>
-              <th className="lab5-text-center">Prover</th>
-              <th className="lab5-text-center">Verifier</th>
+              <th>Prover</th>
+              <th>Verifier</th>
             </tr>
           </thead>
           <tbody>
-            {matrixRows.map((row) => (
-              <tr key={row.name}>
-                <td>{row.name}</td>
-                <td className="lab5-text-center lab5-text-success">เห็น</td>
-                <td className={JoinClassNames("lab5-text-center", row.isPublic || row.isHidden ? "lab5-text-success" : "lab5-text-danger")}>
-                  {row.isHidden ? "ซ่อนด้วย ZKP" : "เห็น"}
+            {matrixData.map((row, idx) => (
+              <tr key={idx}>
+                <td>{row.label}</td>
+                <td>{row.prover}</td>
+                <td
+                  className={
+                    row.verifierHighlight === "red"
+                      ? "lab5-s9-cell-red"
+                      : row.verifierHighlight === "green"
+                      ? "lab5-s9-cell-green"
+                      : ""
+                  }
+                >
+                  {row.verifier}
                 </td>
               </tr>
             ))}
@@ -2938,108 +6867,130 @@ function Step8MerkleZkp() {
         </table>
       </div>
 
-      <div className="lab5-zk-callout">
-        {isZkp ? (
-          <p>
-            ในแนวคิดของ ZKP วงจรจะตรวจการคำนวณจาก Order ไปหาราก ให้อยู่ข้างใน ผู้ตรวจสอบจึงยืนยันได้ว่า “มีออร์เดอร์บางรายอยู่ใต้ราก
-            นี้” โดยไม่ต้องเห็น Order และเส้นทางที่ใช้
-          </p>
-        ) : (
-          <p>
-            ผู้ตรวจสอบคำนวณรากเองได้จากหลักฐานที่ได้รับ จึงยืนยันได้ว่า {targetOrder.label} อยู่ในต้นไม้ แต่ก็รู้ด้วยว่า กำลังพิสูจน์{" "}
-            <strong className="lab5-text-foreground">{targetOrder.label}</strong>
-          </p>
-        )}
+      {/* Callout Box */}
+      <div className="lab5-s9-callout">
+        <Lightbulb size={18} color="#7c3aed" style={{ flexShrink: 0 }} />
+        <span className="lab5-s9-callout-text">
+          {isMerkleOnly
+            ? "ผู้ตรวจคำนวณ Root เองได้จากหลักฐาน จึงเชื่อได้ — แต่ก็รู้ด้วยว่าคุณคือออร์เดอร์ B และเห็นรหัสลับ"
+            : 'ผู้ตรวจยืนยันได้ว่า "มีออร์เดอร์หนึ่งใบใต้ Root นี้ที่เป็นของผู้ส่ง" โดยไม่รู้ว่าคือออร์เดอร์ B'}
+        </span>
       </div>
 
-      <p className="lab5-text-11 lab5-leading-relaxed lab5-text-muted-foreground">
-        ตัวอย่างระบบที่ใช้แนวคิดใกล้เคียงกัน: Semaphore ใช้ Merkle Tree ของออร์เดอร์กลุ่มร่วมกับ ZK circuit
-        เพื่อพิสูจน์ว่าเป็นออร์เดอร์กลุ่มโดยไม่ระบุตัวตน ส่วนในแลปนี้เป็นเพียงภาพจำลองเพื่อให้เห็นว่าผู้ตรวจสอบเห็นข้อมูลต่างกันอย่างไร
-      </p>
-    </div>
-  )
-}
+      {/* Takeaway: จำไว้ 3 อย่าง (Matches media_1792539994348.png) */}
+      <div className="lab5-s9-takeaway-section">
+        <h3 className="lab5-s9-takeaway-heading">จำไว้ 3 อย่าง</h3>
 
-/**
- * ขั้นที่ 9: สรุปบริบทการเทรด (แล้วมันช่วยอะไรเรา?)
- *
- * @return {JSX.Element} เนื้อหาขั้นที่ 9
- * @author StealthTrade Team
- */
-function Step9Efficiency() {
-  const { goToStep, reset } = useLab05()
-
-  const comparisonRows = [
-    ["อาจต้องดู/ส่งข้อมูลจำนวนมาก", "ใช้ Root + หลักฐานเฉพาะเส้นทาง"],
-    ["ตรวจออร์เดอร์ของชุดใหญ่ได้ยากกว่า", "ตรวจออร์เดอร์ได้เป็นขั้นตอน"],
-    ["หลักฐานอาจโตตามจำนวนข้อมูล", "Authentication Path โตตามความลึกของต้นไม้"],
-    ["ไม่มีค่าเดียวสรุปทั้งชุด", "มี Merkle Root เป็นค่าอ้างอิง"],
-  ]
-
-  return (
-    <div className="lab5-space-y-6">
-      <LessonHeading sectionLabel="สรุปประโยชน์" title="แล้วมันช่วยอะไรเรา?" />
-
-      <div className="lab5-grid lab5-gap-3 lab5-sm:grid-cols-2">
-        <div className="lab5-zk-summary-card">
-          <p className="lab5-text-xs lab5-font-bold lab5-text-muted-foreground">ไม่มี Merkle Tree</p>
-          <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-gap-2">
-            {["A", "B", "C", "D"].map((id) => (
-              <span key={id} className="lab5-zk-summary-leaf">
-                {id}
-              </span>
-            ))}
+        {/* Card 1: Hash */}
+        <div className="lab5-s9-takeaway-card">
+          <div className="lab5-s9-takeaway-icon-circle">
+            <Fingerprint size={20} />
           </div>
-          <p className="lab5-text-xs lab5-text-muted-foreground">ต้องเปิดเผยทุก Order</p>
+          <div className="lab5-s9-takeaway-body">
+            <div className="lab5-s9-takeaway-title">Hash = ลายนิ้วมือของข้อมูล</div>
+            <div className="lab5-s9-takeaway-desc">
+              ข้อมูลเดิมได้ค่าเดิม แก้นิดเดียวเปลี่ยนหมด และย้อนกลับไม่ได้
+            </div>
+          </div>
         </div>
 
-        <div className="lab5-zk-summary-card lab5-zk-summary-card--primary">
-          <p className="lab5-text-xs lab5-font-bold lab5-text-primary">มี Merkle Tree</p>
-          <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-gap-2 lab5-text-xs">
-            <span className="lab5-zk-summary-leaf lab5-zk-summary-leaf--active">A</span>
-            <span className="lab5-text-muted-foreground">+</span>
-            <span className="lab5-zk-summary-hash">H(B)</span>
-            <span className="lab5-text-muted-foreground">+</span>
-            <span className="lab5-zk-summary-hash">H(C+D)</span>
-            <ArrowRight className="lab5-size-3.5 lab5-text-primary" />
-            <span className="lab5-zk-summary-hash lab5-zk-summary-hash--root">Root</span>
+        {/* Card 2: Merkle Tree */}
+        <div className="lab5-s9-takeaway-card">
+          <div className="lab5-s9-takeaway-icon-circle">
+            <Key size={20} />
           </div>
-          <p className="lab5-text-xs lab5-text-muted-foreground">Order อื่นเปิดเผยแค่ Hash ที่จำเป็น</p>
+          <div className="lab5-s9-takeaway-body">
+            <div className="lab5-s9-takeaway-title">Merkle Tree = พิสูจน์ว่าอยู่ในชุดข้อมูล</div>
+            <div className="lab5-s9-takeaway-desc">
+              ใช้ Root ค่าเดียว + Hash ไม่กี่ตัว ก็ยืนยันได้ และแก้ข้อมูลแล้วถูกจับทันที
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: zk-SNARK */}
+        <div className="lab5-s9-takeaway-card">
+          <div className="lab5-s9-takeaway-icon-circle">
+            <ShieldCheck size={20} />
+          </div>
+          <div className="lab5-s9-takeaway-body">
+            <div className="lab5-s9-takeaway-title">zk-SNARK = พิสูจน์โดยไม่เปิดเผยความลับ</div>
+            <div className="lab5-s9-takeaway-desc">
+              Statement + Circuit + Witness → Proof ก้อนเล็ก ส่งครั้งเดียว ใครก็ตรวจได้ แต่ไม่มีใครเห็น Witness
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="lab5-zk-matrix">
-        <table className="lab5-zk-matrix-table lab5-zk-summary-table">
-          <thead>
-            <tr>
-              <th className="lab5-text-foreground">ไม่มี Merkle Tree</th>
-              <th className="lab5-text-primary">มี Merkle Tree</th>
-            </tr>
-          </thead>
-          <tbody>
-            {comparisonRows.map(([withoutTree, withTree]) => (
-              <tr key={withoutTree}>
-                <td className="lab5-text-muted-foreground">{withoutTree}</td>
-                <td>{withTree}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Real Feature Mapping: จากแลปนี้ สู่ฟีเจอร์จริงใน Stealth Trade (Cycle 2) */}
+      <div className="lab5-s9-features-card">
+        <div className="lab5-s9-features-header">
+          จากแลปนี้ สู่ฟีเจอร์จริงใน Stealth Trade (Cycle 2)
+        </div>
+
+        {/* Row 1: Merkle Tree */}
+        <div className="lab5-s9-features-row">
+          <div className="lab5-s9-features-step">ขั้น 2–4 · Merkle Tree</div>
+          <div className="lab5-s9-features-info">
+            <div className="lab5-s9-features-title">
+              <span className="lab5-s9-features-tag">C2-S6</span>
+              Private Asset Ownership —
+            </div>
+            <div className="lab5-s9-features-desc">
+              พิสูจน์ว่าถือเหรียญจริง โดยไม่โชว์รายการในกระเป๋า
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Balance Proof */}
+        <div className="lab5-s9-features-row">
+          <div className="lab5-s9-features-step">ขั้น 7 · ยอดเงินพอ</div>
+          <div className="lab5-s9-features-info">
+            <div className="lab5-s9-features-title">
+              <span className="lab5-s9-features-tag">C2-S5</span>
+              Private Balance Proof —
+            </div>
+            <div className="lab5-s9-features-desc">
+              พิสูจน์ว่าเงินพอ โดยไม่บอกยอดเงิน
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: Pipeline */}
+        <div className="lab5-s9-features-row">
+          <div className="lab5-s9-features-step">ขั้น 6 · ไปป์ไลน์ zk-SNARK</div>
+          <div className="lab5-s9-features-info">
+            <div className="lab5-s9-features-title">
+              <span className="lab5-s9-features-tag">C2-S7</span>
+              Private Order Validation —
+            </div>
+            <div className="lab5-s9-features-desc">
+              รวมหลาย Proof ตรวจคำสั่งซื้อก่อนส่งเข้าตลาด
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="lab5-animate-merge-up lab5-zk-complete">
-        <PartyPopper className="lab5-mx-auto lab5-size-8 lab5-text-success" />
-        <h3 className="lab5-text-lg lab5-font-bold lab5-text-foreground">เรียนจบ Lab 05 แล้ว</h3>
-        <p className="lab5-text-xs lab5-text-muted-foreground">
-          คุณสร้างต้นไม้ พิสูจน์ว่าข้อมูลอยู่ในต้นไม้ และตรวจจับการปลอมแปลงได้ด้วยตัวเองแล้ว
+      {/* Completion Card: เรียนจบ Lab 05 • 07 แล้ว (Matches media_1792539994348.png) */}
+      <div className="lab5-animate-merge-up lab5-s9-complete-card">
+        <Trophy size={32} className="lab5-s9-complete-trophy" />
+        <h3 className="lab5-s9-complete-title">เรียนจบ Lab 05 • 07 แล้ว</h3>
+        <p className="lab5-s9-complete-desc">
+          คุณสร้างต้นไม้ พิสูจน์ว่าข้อมูลอยู่ในต้นไม้ จับการปลอมแปลงได้ และซ่อนตัวตนด้วย zk-SNARK ได้ด้วยตัวเองแล้ว
         </p>
-        <div className="lab5-flex lab5-flex-wrap lab5-items-center lab5-justify-center lab5-gap-3 lab5-pt-3">
-          <button type="button" onClick={() => goToStep(4)} className="lab5-zk-btn lab5-zk-btn--outline-primary lab5-zk-btn--lg">
-            ลองพิสูจน์ Order อื่น
+        <div className="lab5-s9-complete-btns">
+          <button
+            type="button"
+            onClick={() => goToStep(4)}
+            className="lab5-s9-btn-outline"
+          >
+            <RotateCcw size={14} /> ลองพิสูจน์ออร์เดอร์อื่น
           </button>
-          <button type="button" onClick={reset} className="lab5-zk-btn lab5-zk-btn--outline lab5-zk-btn--lg">
-            <RotateCcw className="lab5-size-3.5" />
-            เริ่มใหม่ทั้งหมด
+          <button
+            type="button"
+            onClick={reset}
+            className="lab5-s9-btn-primary"
+          >
+            <RotateCcw size={14} /> เริ่มใหม่ทั้งหมด
           </button>
         </div>
       </div>
@@ -3070,11 +7021,11 @@ function StepContent({ step }) {
     case 3:
       return <Step3BuildTree />
     case 4:
-      return <Step4SelectTarget />
+      return <Step4Tamper />
     case 5:
-      return <Step5AuthPath />
+      return <Step5MerkleExposed />
     case 6:
-      return <Step7Tamper />
+      return <Step6ZkPipeline />
     case 7:
       return <Step7ZkpWorkflow />
     case 8:
@@ -3110,8 +7061,17 @@ function LabContainer() {
       <main className={`lab5-flex-1 lab5-px-4 ${isIntro ? "lab5-intro-main" : "lab5-pt-4 lab5-pb-10"}`}>
         <div className="lab5-mx-auto lab5-flex lab5-max-w-3xl lab5-flex-col lab5-gap-6">
           {!isIntro && STEP_META[currentStep]?.mission && (
-            <div className="lab5-rounded-2xl lab5-border lab5-border-primary-30 lab5-bg-primary-soft lab5-px-4 lab5-py-3">
-              <p className="lab5-text-xs lab5-font-semibold lab5-text-primary">
+            <div
+              className="lab5-rounded-2xl lab5-px-4 lab5-py-3"
+              style={{
+                backgroundColor: "#f5f3ff",
+                border: "1px solid #ede9fe",
+              }}
+            >
+              <p
+                className="lab5-text-xs lab5-font-semibold"
+                style={{ color: "#6d4bd8", margin: 0 }}
+              >
                 <span className="lab5-font-bold">ภารกิจ:</span> {STEP_META[currentStep].mission}
               </p>
             </div>
