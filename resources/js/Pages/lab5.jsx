@@ -167,6 +167,90 @@ function XIcon({ size = 16, color = "currentColor", strokeWidth = 2.5, className
     );
 }
 
+// Base data for all 4 orders to support dynamic selection across all steps
+const ordersData = {
+    A: {
+        id: 'A',
+        name: 'ออร์เดอร์ A',
+        originalCode: 'secret-A-7f3k',
+        tamperedCode: 'secret-A-7f4m',
+        originalHash: '966a2cef410889bb...',
+        hashShort: '966a2c...',
+        hashDisplay: '966a2cef...',
+        tamperedHash: '3e98f12a...',
+        indexText: 'ใบที่ 1 จาก 4',
+        sibling1: { name: 'H(B)', hash: '06e8f513...', side: 'อยู่ฝั่งขวา', key: 'B' },
+        sibling2: { name: 'H(C+D)', hash: 'bc6a6e07...', side: 'อยู่ฝั่งขวา', key: 'HCD' },
+        parentName: 'H(A+B)',
+        siblingParentName: 'H(C+D)',
+        parentHash: 'f619fa...',
+        siblingParentHash: 'bc6a6e07...',
+        tamperedParentHash: '0e08c6fa...',
+        orderInPair: 'left',
+        pairInTree: 'left'
+    },
+    B: {
+        id: 'B',
+        name: 'ออร์เดอร์ B',
+        originalCode: 'secret-B-q92m',
+        tamperedCode: 'secret-B-q93n',
+        originalHash: '06e8f513d7c3aa...',
+        hashShort: '06e8f5...',
+        hashDisplay: '06e8f513...',
+        tamperedHash: 'a395c3b9...',
+        indexText: 'ใบที่ 2 จาก 4',
+        sibling1: { name: 'H(A)', hash: '966a2cef...', side: 'อยู่ฝั่งซ้าย', key: 'A' },
+        sibling2: { name: 'H(C+D)', hash: 'bc6a6e07...', side: 'อยู่ฝั่งขวา', key: 'HCD' },
+        parentName: 'H(A+B)',
+        siblingParentName: 'H(C+D)',
+        parentHash: 'f619fa...',
+        siblingParentHash: 'bc6a6e07...',
+        tamperedParentHash: '0e08c6fa...',
+        orderInPair: 'right',
+        pairInTree: 'left'
+    },
+    C: {
+        id: 'C',
+        name: 'ออร์เดอร์ C',
+        originalCode: 'secret-C-x41d',
+        tamperedCode: 'secret-C-x42e',
+        originalHash: '8a82756eb123...',
+        hashShort: '8a8275...',
+        hashDisplay: '8a82756e...',
+        tamperedHash: 'd48e219a...',
+        indexText: 'ใบที่ 3 จาก 4',
+        sibling1: { name: 'H(D)', hash: 'e8db9e60...', side: 'อยู่ฝั่งขวา', key: 'D' },
+        sibling2: { name: 'H(A+B)', hash: 'f619fa11...', side: 'อยู่ฝั่งซ้าย', key: 'HAB' },
+        parentName: 'H(C+D)',
+        siblingParentName: 'H(A+B)',
+        parentHash: 'bc6a6e...',
+        siblingParentHash: 'f619fa...',
+        tamperedParentHash: '8e09f12b...',
+        orderInPair: 'left',
+        pairInTree: 'right'
+    },
+    D: {
+        id: 'D',
+        name: 'ออร์เดอร์ D',
+        originalCode: 'secret-D-p80z',
+        tamperedCode: 'secret-D-p81w',
+        originalHash: 'e8db9e60f09a...',
+        hashShort: 'e8db9e...',
+        hashDisplay: 'e8db9e60...',
+        tamperedHash: 'b529d81f...',
+        indexText: 'ใบที่ 4 จาก 4',
+        sibling1: { name: 'H(C)', hash: '8a82756e...', side: 'อยู่ฝั่งซ้าย', key: 'C' },
+        sibling2: { name: 'H(A+B)', hash: 'f619fa11...', side: 'อยู่ฝั่งซ้าย', key: 'HAB' },
+        parentName: 'H(C+D)',
+        siblingParentName: 'H(A+B)',
+        parentHash: 'bc6a6e...',
+        siblingParentHash: 'f619fa...',
+        tamperedParentHash: '8e09f12b...',
+        orderInPair: 'right',
+        pairInTree: 'right'
+    }
+};
+
 export default function Lab5() {
     // Current step: 0 = Intro, 1..8 = Steps 1 to 8
     const [step, setStep] = useState(0);
@@ -181,8 +265,8 @@ export default function Lab5() {
     // Step 2: Order hashing & selection
     const [selectedOrder, setSelectedOrder] = useState('B');
 
-    // Step 3: Sibling selection in Merkle Proof
-    const [selectedSiblings, setSelectedSiblings] = useState({ HA: true, HCD: true });
+    // Step 3: Sibling selection in Merkle Proof (s1 = sibling1, s2 = sibling2)
+    const [selectedSiblings, setSelectedSiblings] = useState({ s1: true, s2: true });
 
     // Step 4: Data tampering toggle (ON by default = tampered)
     const [isTampered, setIsTampered] = useState(true);
@@ -201,23 +285,28 @@ export default function Lab5() {
     // Step 8: Summary comparison tab
     const [summaryTab, setSummaryTab] = useState('merkle_zk'); // 'merkle_only' | 'merkle_zk'
 
-    // Orders data
+    // Active order dynamic details
+    const currOrder = ordersData[selectedOrder] || ordersData.B;
+    const isCurrentTampered = isTampered && step === 4;
+
+    // Dynamic orders state with tampered check
     const orders = {
-        A: { id: 'A', code: 'secret-A-7f3k', hash: '966a2cef410889bb...' },
-        B: {
-            id: 'B',
-            code: isTampered && step === 4 ? 'secret-B-q93n' : 'secret-B-q92m',
-            originalCode: 'secret-B-q92m',
-            hash: isTampered && step === 4 ? 'a395c3b901aef...' : '06e8f513d7c3aa...'
-        },
-        C: { id: 'C', code: 'secret-C-x41d', hash: '8a82756eb123...' },
-        D: { id: 'D', code: 'secret-D-p80z', hash: 'e8db9e60f09a...' }
+        A: { id: 'A', code: selectedOrder === 'A' && isCurrentTampered ? ordersData.A.tamperedCode : ordersData.A.originalCode, hash: selectedOrder === 'A' && isCurrentTampered ? ordersData.A.tamperedHash : ordersData.A.originalHash },
+        B: { id: 'B', code: selectedOrder === 'B' && isCurrentTampered ? ordersData.B.tamperedCode : ordersData.B.originalCode, hash: selectedOrder === 'B' && isCurrentTampered ? ordersData.B.tamperedHash : ordersData.B.originalHash },
+        C: { id: 'C', code: selectedOrder === 'C' && isCurrentTampered ? ordersData.C.tamperedCode : ordersData.C.originalCode, hash: selectedOrder === 'C' && isCurrentTampered ? ordersData.C.tamperedHash : ordersData.C.originalHash },
+        D: { id: 'D', code: selectedOrder === 'D' && isCurrentTampered ? ordersData.D.tamperedCode : ordersData.D.originalCode, hash: selectedOrder === 'D' && isCurrentTampered ? ordersData.D.tamperedHash : ordersData.D.originalHash }
     };
 
     // Tree hashes
-    const HAB = isTampered && step === 4 ? '0e08c6fa...' : 'f619fa...';
-    const HCD = 'bc6a6e07...';
-    const computedRoot = isTampered && step === 4 ? 'aff3bb92...' : '592ed5ae...';
+    const HAB = isCurrentTampered
+        ? (currOrder.pairInTree === 'left' ? currOrder.tamperedParentHash : currOrder.parentHash)
+        : (currOrder.pairInTree === 'left' ? currOrder.parentHash : currOrder.siblingParentHash);
+
+    const HCD = isCurrentTampered
+        ? (currOrder.pairInTree === 'right' ? currOrder.tamperedParentHash : currOrder.parentHash)
+        : (currOrder.pairInTree === 'right' ? currOrder.parentHash : currOrder.siblingParentHash);
+
+    const computedRoot = isCurrentTampered ? 'aff3bb92...' : '592ed5ae...';
     const declaredRoot = '592ed5ae...';
 
     // Glossary items
@@ -237,7 +326,7 @@ export default function Lab5() {
         setShowWhy(false);
         setStep1Answer(null);
         setSelectedOrder('B');
-        setSelectedSiblings({ HA: true, HCD: true });
+        setSelectedSiblings({ s1: true, s2: true });
         setIsTampered(true);
         setStep5Answer(null);
         setStep6Answer(0);
@@ -454,8 +543,8 @@ export default function Lab5() {
                         <div style={{ color: '#475569', fontSize: '0.92rem', lineHeight: 1.6 }}>
                             {step === 1 && 'สวัสดีครับ! สมมติว่าคุณเพิ่งส่งคำสั่งซื้อในเว็บเทรด ตอนนี้คุณอยากให้คนอื่นเชื่อว่า "ออร์เดอร์ของฉันอยู่ในระบบจริง" แต่ไม่อยากให้ใครเห็นข้อมูลออร์เดอร์ของคุณเลย เราจะแก้ปัญหานี้ไปด้วยกันทีละขั้นครับ โดยพื้นฐานจาก Lab ที่ผ่านมา'}
                             {step === 2 && 'ก่อนสร้างต้นไม้ เราต้องรู้จัก "Hash" ก่อนครับ ให้คิดว่า Hash คือลายนิ้วมือของข้อมูล — ข้อมูลเดียวกันได้ลายนิ้วมือเดิมเสมอ แต่ถ้าเห็นแค่ลายนิ้วมือ จะย้อนกลับไปรู้ข้อมูลต้นฉบับไม่ได้'}
-                            {step === 3 && 'เว็บเทรดประกาศ Root ไว้แล้ว ถ้าคุณอยากพิสูจน์ว่าออร์เดอร์ B อยู่ในต้นไม้ ไม่ต้องส่งทุกใบครับ ส่งแค่ "Hash ข้าง ๆ" บนทางเดินจากใบของเราขึ้นไปหา Root ก็พอ เพราะผู้ตรวจจะคำนวณตามแล้วดูว่าได้ Root เดียวกันไหม'}
-                            {step === 4 && 'ถ้ามีคนแอบแก้ข้อมูลออร์เดอร์ — แม้แต่ตัวอักษรเดียว — จะเกิดอะไรขึ้น? ลองเปิดสวิตช์ด้านล่างดูครับ แล้วสังเกตสีของต้นไม้'}
+                            {step === 3 && `เว็บเทรดประกาศ Root ไว้แล้ว ถ้าคุณอยากพิสูจน์ว่าออร์เดอร์ ${selectedOrder} อยู่ในต้นไม้ ไม่ต้องส่งทุกใบครับ ส่งแค่ "Hash ข้าง ๆ" บนทางเดินจากใบของเราขึ้นไปหา Root ก็พอ เพราะผู้ตรวจจะคำนวณตามแล้วดูว่าได้ Root เดียวกันไหม`}
+                            {step === 4 && `ถ้ามีคนแอบแก้ข้อมูลออร์เดอร์ ${selectedOrder} — แม้แต่ตัวอักษรเดียว — จะเกิดอะไรขึ้น? ลองเปิดสวิตช์ด้านล่างดูครับ แล้วสังเกตสีของต้นไม้`}
                             {step === 5 && 'ก่อนจะไปต่อ เรามาทำความเข้าใจเทคโนโลยีสำคัญที่จะเข้ามาช่วยแก้ปัญหาความเป็นส่วนตัวและสเกลของระบบกันก่อนครับ นั่นคือ zk-SNARK'}
                             {step === 6 && 'Merkle proof เก่งมากครับ แต่ลองเปลี่ยนมุมมอง — ถ้าคุณเป็นผู้ตรวจ แล้วได้รับ "กล่องหลักฐาน" ด้านล่าง คุณจะรู้อะไรเกี่ยวกับเจ้าของกล่องบ้าง?'}
                             {step === 7 && 'zk-SNARK เหมือน "เครื่องตรวจปิดผนึก" ครับ คุณใส่ข้อมูลลับเข้าไปในเครื่อง เครื่องตรวจตามกติกาแล้วพิมพ์ "ใบรับรอง" ออกมา ใครก็ตรวจใบรับรองได้ว่าของจริง แต่ไม่มีใครเห็นข้างในเครื่อง มาดูทีละชิ้นกันครับ มีทั้งหมด 5 ชิ้น'}
@@ -516,11 +605,11 @@ export default function Lab5() {
                                     let borderColor = '#e2e8f0';
                                     let bgColor = '#ffffff';
 
-                                    if (step1Answer !== null) {
+                                    if (isSelected) {
                                         if (isCorrect) {
                                             borderColor = '#10b981';
-                                            bgColor = isSelected ? '#ecfdf5' : '#ffffff';
-                                        } else if (isSelected) {
+                                            bgColor = '#ecfdf5';
+                                        } else {
                                             borderColor = '#ef4444';
                                             bgColor = '#fef2f2';
                                         }
@@ -543,14 +632,21 @@ export default function Lab5() {
                                                 transition: 'all 0.2s'
                                             }}
                                         >
-                                            <span style={{ fontWeight: 700, color: isSelected && isCorrect ? '#059669' : '#1e293b', fontSize: '0.9rem' }}>
+                                            <span style={{ fontWeight: 700, color: isSelected ? (isCorrect ? '#059669' : '#dc2626') : '#1e293b', fontSize: '0.9rem' }}>
                                                 ตัวเลือก {String.fromCharCode(65 + opt.id)}
                                             </span>
-                                            <span style={{ fontSize: '0.88rem', color: '#475569', flex: 1 }}>{opt.text}</span>
+                                            <span style={{ fontSize: '0.88rem', color: isSelected && !isCorrect ? '#991b1b' : '#475569', flex: 1 }}>{opt.text}</span>
                                         </button>
                                     );
                                 })}
                             </div>
+
+                            {step1Answer !== null && step1Answer !== 2 && (
+                                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '12px 18px', marginTop: '1rem', color: '#991b1b', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px', animation: 'lab5-fade-in-up 0.2s ease-out' }}>
+                                    <XIcon size={16} color="#dc2626" strokeWidth={3} />
+                                    <span>ยังไม่ถูกต้องครับ ลองอ่านโจทย์ด้านบนแล้วเลือกใหม่อีกครั้ง</span>
+                                </div>
+                            )}
 
                             {step1Answer === 2 && (
                                 <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '12px', padding: '14px 18px', marginTop: '1rem', color: '#065f46', fontSize: '0.9rem', lineHeight: 1.5, animation: 'lab5-fade-in-up 0.2s ease-out' }}>
@@ -596,35 +692,38 @@ export default function Lab5() {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 {[
-                                    { k: 'A', name: 'ออร์เดอร์ A', code: 'secret-A-7f3k', hash: '966a2cef...' },
-                                    { k: 'B', name: 'ออร์เดอร์ B', code: 'secret-B-q92m', hash: '06e8f513...', isMine: true },
-                                    { k: 'C', name: 'ออร์เดอร์ C', code: 'secret-C-x41d', hash: '8a82756e...' },
-                                    { k: 'D', name: 'ออร์เดอร์ D', code: 'secret-D-p80z', hash: 'e8db9e60...' }
-                                ].map((item) => (
-                                    <div key={item.k} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '16px 20px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1e293b' }}>{item.name}</span>
-                                                {item.isMine && (
-                                                    <span style={{ background: '#ede9fe', color: '#6D48D1', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
-                                                        ของฉัน
-                                                    </span>
-                                                )}
+                                    { k: 'A', name: 'ออร์เดอร์ A', code: ordersData.A.originalCode, hash: ordersData.A.hashDisplay },
+                                    { k: 'B', name: 'ออร์เดอร์ B', code: ordersData.B.originalCode, hash: ordersData.B.hashDisplay },
+                                    { k: 'C', name: 'ออร์เดอร์ C', code: ordersData.C.originalCode, hash: ordersData.C.hashDisplay },
+                                    { k: 'D', name: 'ออร์เดอร์ D', code: ordersData.D.originalCode, hash: ordersData.D.hashDisplay }
+                                ].map((item) => {
+                                    const isMine = item.k === selectedOrder;
+                                    return (
+                                        <div key={item.k} style={{ background: '#ffffff', border: isMine ? '2px solid #6D48D1' : '1px solid #e2e8f0', borderRadius: '16px', padding: '16px 20px', transition: 'all 0.2s' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: isMine ? '#6D48D1' : '#1e293b' }}>{item.name}</span>
+                                                    {isMine && (
+                                                        <span style={{ background: '#ede9fe', color: '#6D48D1', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                                                            ของฉัน
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span style={{ fontSize: '0.82rem', color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    &darr; Hash (SHA-256)
+                                                </span>
                                             </div>
-                                            <span style={{ fontSize: '0.82rem', color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                &darr; Hash (SHA-256)
-                                            </span>
-                                        </div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace', marginTop: '4px', marginBottom: '12px' }}>
-                                            รหัสลับ: {item.code}
-                                        </div>
-                                        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
-                                            <div style={{ display: 'inline-block', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '6px', padding: '6px 14px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#6D48D1' }}>
-                                                Hash ของ {item.name} = {item.hash}
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace', marginTop: '4px', marginBottom: '12px' }}>
+                                                รหัสลับ: {item.code}
+                                            </div>
+                                            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
+                                                <div style={{ display: 'inline-block', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '6px', padding: '6px 14px', fontSize: '0.8rem', fontFamily: 'monospace', color: '#6D48D1' }}>
+                                                    Hash ของ {item.name} = {item.hash}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -722,7 +821,10 @@ export default function Lab5() {
                                 {['A', 'B', 'C', 'D'].map((k) => (
                                     <div
                                         key={k}
-                                        onClick={() => setSelectedOrder(k)}
+                                        onClick={() => {
+                                            setSelectedOrder(k);
+                                            setSelectedSiblings({ s1: true, s2: true });
+                                        }}
                                         style={{
                                             background: selectedOrder === k ? '#f5f3ff' : '#ffffff',
                                             border: selectedOrder === k ? '2px solid #6D48D1' : '1px solid #e2e8f0',
@@ -737,7 +839,7 @@ export default function Lab5() {
                                             ออร์เดอร์ {k}
                                         </div>
                                         <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace' }}>
-                                            {orders[k].code}
+                                            {ordersData[k].originalCode}
                                         </div>
                                         {selectedOrder === k && (
                                             <div style={{ fontSize: '0.7rem', color: '#6D48D1', fontWeight: 700, marginTop: '4px' }}>
@@ -749,7 +851,7 @@ export default function Lab5() {
                             </div>
 
                             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px', fontSize: '0.8rem', color: '#64748b', marginBottom: '1rem' }}>
-                                ข้อความอย่าง secret-B-q92m คือ <strong>"รหัสลับของออร์เดอร์"</strong> — มีแต่เจ้าของออร์เดอร์ที่รู้ เว็บเทรดจริงมีออร์เดอร์เป็นล้านใบ แต่แลปนี้ย่อส่วนมาใช้แค่ 4 ใบเพื่อให้เห็นภาพชัดเจน
+                                ข้อความอย่าง {currOrder.originalCode} คือ <strong>"รหัสลับของออร์เดอร์"</strong> — มีแต่เจ้าของออร์เดอร์ที่รู้ เว็บเทรดจริงมีออร์เดอร์เป็นล้านใบ แต่แลปนี้ย่อส่วนมาใช้แค่ 4 ใบเพื่อให้เห็นภาพชัดเจน
                             </div>
 
                             <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '12px', padding: '12px 16px', color: '#065f46', fontSize: '0.85rem' }}>
@@ -772,7 +874,7 @@ export default function Lab5() {
                                 สร้างและตรวจ PROOF
                             </span>
                             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b', marginTop: '0.5rem', marginBottom: '0.25rem' }}>
-                                พิสูจน์ว่า ออร์เดอร์ B อยู่ในชุดข้อมูลจริง
+                                พิสูจน์ว่า ออร์เดอร์ {selectedOrder} อยู่ในชุดข้อมูลจริง
                             </h2>
                             <p style={{ color: '#64748b', fontSize: '0.88rem' }}>
                                 คลิกเลือก Hash บนต้นไม้ที่ต้องใช้ "จับคู่" กับเส้นทางของเรา (เรียกว่า Sibling Hash) แล้วคำนวณย้อนกลับไปหา Root
@@ -780,7 +882,9 @@ export default function Lab5() {
                         </div>
 
                         <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.9rem', color: '#1e293b', marginBottom: '0.75rem' }}>
-                            ได้ Sibling Hash ครบแล้ว — ลองคำนวณย้อนกลับไปหา Root
+                            {selectedSiblings.s1 && selectedSiblings.s2
+                                ? 'ได้ Sibling Hash ครบแล้ว — ลองคำนวณย้อนกลับไปหา Root'
+                                : 'ยังเลือก Sibling Hash ไม่ครบ — กรุณาคลิกเลือก Sibling Hash บนต้นไม้ให้ครบ 2 ตัว'}
                         </div>
 
                         {/* Interactive Merkle Tree with active path */}
@@ -792,22 +896,44 @@ export default function Lab5() {
                             </div>
 
                             <svg width="240" height="30" style={{ marginTop: '-0.2rem', marginBottom: '-0.2rem' }}>
-                                <line x1="120" y1="0" x2="60" y2="30" stroke="#6D48D1" strokeWidth="2.5" />
-                                <line x1="120" y1="0" x2="180" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
+                                <line x1="120" y1="0" x2="60" y2="30" stroke={currOrder.pairInTree === 'left' ? '#6D48D1' : '#e2e8f0'} strokeWidth={currOrder.pairInTree === 'left' ? 2.5 : 1.5} />
+                                <line x1="120" y1="0" x2="180" y2="30" stroke={currOrder.pairInTree === 'right' ? '#6D48D1' : '#e2e8f0'} strokeWidth={currOrder.pairInTree === 'right' ? 2.5 : 1.5} />
                             </svg>
 
                             {/* Level 2 */}
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '80px', width: '100%' }}>
                                 <div
-                                    onClick={() => setSelectedSiblings({ ...selectedSiblings, HA: !selectedSiblings.HA })}
-                                    style={{ background: '#10b981', color: '#ffffff', borderRadius: '12px', padding: '6px 14px', textAlign: 'center', cursor: 'pointer' }}
+                                    onClick={() => {
+                                        if (currOrder.pairInTree === 'right') {
+                                            setSelectedSiblings({ ...selectedSiblings, s2: !selectedSiblings.s2 });
+                                        }
+                                    }}
+                                    style={{
+                                        background: currOrder.pairInTree === 'left' ? '#10b981' : (selectedSiblings.s2 ? '#6D48D1' : '#94a3b8'),
+                                        color: '#ffffff',
+                                        borderRadius: '12px',
+                                        padding: '6px 14px',
+                                        textAlign: 'center',
+                                        cursor: currOrder.pairInTree === 'right' ? 'pointer' : 'default'
+                                    }}
                                 >
                                     <div style={{ fontWeight: 700, fontSize: '0.75rem' }}>H(A+B)</div>
                                     <div style={{ fontSize: '0.65rem', fontFamily: 'monospace' }}>f619fa...</div>
                                 </div>
                                 <div
-                                    onClick={() => setSelectedSiblings({ ...selectedSiblings, HCD: !selectedSiblings.HCD })}
-                                    style={{ background: selectedSiblings.HCD ? '#6D48D1' : '#94a3b8', color: '#ffffff', borderRadius: '12px', padding: '6px 14px', textAlign: 'center', cursor: 'pointer' }}
+                                    onClick={() => {
+                                        if (currOrder.pairInTree === 'left') {
+                                            setSelectedSiblings({ ...selectedSiblings, s2: !selectedSiblings.s2 });
+                                        }
+                                    }}
+                                    style={{
+                                        background: currOrder.pairInTree === 'right' ? '#10b981' : (selectedSiblings.s2 ? '#6D48D1' : '#94a3b8'),
+                                        color: '#ffffff',
+                                        borderRadius: '12px',
+                                        padding: '6px 14px',
+                                        textAlign: 'center',
+                                        cursor: currOrder.pairInTree === 'left' ? 'pointer' : 'default'
+                                    }}
                                 >
                                     <div style={{ fontWeight: 700, fontSize: '0.75rem' }}>H(C+D)</div>
                                     <div style={{ fontSize: '0.65rem', fontFamily: 'monospace' }}>bc6a6e...</div>
@@ -815,37 +941,51 @@ export default function Lab5() {
                             </div>
 
                             <svg width="360" height="30" style={{ marginTop: '-0.2rem', marginBottom: '-0.2rem' }}>
-                                <line x1="100" y1="0" x2="50" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
-                                <line x1="100" y1="0" x2="150" y2="30" stroke="#6D48D1" strokeWidth="2.5" />
-                                <line x1="260" y1="0" x2="210" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
-                                <line x1="260" y1="0" x2="310" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
+                                <line x1="100" y1="0" x2="50" y2="30" stroke={selectedOrder === 'A' ? '#6D48D1' : '#e2e8f0'} strokeWidth={selectedOrder === 'A' ? 2.5 : 1.5} />
+                                <line x1="100" y1="0" x2="150" y2="30" stroke={selectedOrder === 'B' ? '#6D48D1' : '#e2e8f0'} strokeWidth={selectedOrder === 'B' ? 2.5 : 1.5} />
+                                <line x1="260" y1="0" x2="210" y2="30" stroke={selectedOrder === 'C' ? '#6D48D1' : '#e2e8f0'} strokeWidth={selectedOrder === 'C' ? 2.5 : 1.5} />
+                                <line x1="260" y1="0" x2="310" y2="30" stroke={selectedOrder === 'D' ? '#6D48D1' : '#e2e8f0'} strokeWidth={selectedOrder === 'D' ? 2.5 : 1.5} />
                             </svg>
 
                             {/* Level 3 */}
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', width: '100%', marginBottom: '1rem' }}>
-                                <div
-                                    onClick={() => setSelectedSiblings({ ...selectedSiblings, HA: !selectedSiblings.HA })}
-                                    style={{ background: selectedSiblings.HA ? '#6D48D1' : '#cbd5e1', color: '#ffffff', borderRadius: '10px', padding: '6px 12px', textAlign: 'center', cursor: 'pointer' }}
-                                >
-                                    <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>H(A)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace' }}>966a2c...</div>
-                                </div>
-                                <div style={{ background: '#ffffff', border: '2px solid #6D48D1', color: '#6D48D1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>H(B)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace' }}>06e8f5...</div>
-                                </div>
-                                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>H(C)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: '#94a3b8' }}>8a8275...</div>
-                                </div>
-                                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>H(D)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: '#94a3b8' }}>e8db9e...</div>
-                                </div>
+                                {['A', 'B', 'C', 'D'].map((k) => {
+                                    const isMine = k === selectedOrder;
+                                    const isSibling1 = k === currOrder.sibling1.key;
+
+                                    if (isMine) {
+                                        return (
+                                            <div key={k} style={{ background: '#ffffff', border: '2px solid #6D48D1', color: '#6D48D1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>H({k})</div>
+                                                <div style={{ fontSize: '0.62rem', fontFamily: 'monospace' }}>{ordersData[k].hashShort}</div>
+                                            </div>
+                                        );
+                                    }
+                                    if (isSibling1) {
+                                        return (
+                                            <div
+                                                key={k}
+                                                onClick={() => setSelectedSiblings({ ...selectedSiblings, s1: !selectedSiblings.s1 })}
+                                                style={{ background: selectedSiblings.s1 ? '#6D48D1' : '#cbd5e1', color: '#ffffff', borderRadius: '10px', padding: '6px 12px', textAlign: 'center', cursor: 'pointer' }}
+                                            >
+                                                <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>H({k})</div>
+                                                <div style={{ fontSize: '0.62rem', fontFamily: 'monospace' }}>{ordersData[k].hashShort}</div>
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <div key={k} style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>H({k})</div>
+                                            <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: '#94a3b8' }}>{ordersData[k].hashShort}</div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#64748b' }}>
-                                <span style={{ background: '#ede9fe', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>2/2 Sibling Hash</span>
+                                <span style={{ background: '#ede9fe', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                                    {(selectedSiblings.s1 ? 1 : 0) + (selectedSiblings.s2 ? 1 : 0)}/2 Sibling Hash
+                                </span>
                                 <span>กรอบม่วงอ่อน = ใบของเรา · คลิกที่โหนดเพื่อเลือก</span>
                             </div>
                         </div>
@@ -858,13 +998,13 @@ export default function Lab5() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#6D48D1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>1</span>
-                                    <span style={{ background: '#f5f3ff', color: '#6D48D1', padding: '4px 10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.8rem' }}>H(A) = 966a2cef...</span>
-                                    <span style={{ background: '#f3e8ff', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>อยู่ฝั่งซ้าย</span>
+                                    <span style={{ background: '#f5f3ff', color: '#6D48D1', padding: '4px 10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.8rem' }}>{currOrder.sibling1.name} = {currOrder.sibling1.hash}</span>
+                                    <span style={{ background: '#f3e8ff', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>{currOrder.sibling1.side}</span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#6D48D1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>2</span>
-                                    <span style={{ background: '#f5f3ff', color: '#6D48D1', padding: '4px 10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.8rem' }}>H(C+D) = bc6a6e07...</span>
-                                    <span style={{ background: '#f3e8ff', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>อยู่ฝั่งขวา</span>
+                                    <span style={{ background: '#f5f3ff', color: '#6D48D1', padding: '4px 10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.8rem' }}>{currOrder.sibling2.name} = {currOrder.sibling2.hash}</span>
+                                    <span style={{ background: '#f3e8ff', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>{currOrder.sibling2.side}</span>
                                 </div>
                             </div>
                         </div>
@@ -874,17 +1014,31 @@ export default function Lab5() {
                             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e293b', marginBottom: '0.5rem' }}>
                                 Root Reconstruction — คำนวณย้อนกลับทีละชั้น
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', flexWrap: 'wrap', color: '#64748b' }}>
-                                <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(A)</span>
-                                <span>+</span>
-                                <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(B)</span>
-                                <span>&rarr;</span>
-                                <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>H(A+B)</span>
-                                <span>+</span>
-                                <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(C+D)</span>
-                                <span>&rarr;</span>
-                                <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 700 }}>Root 592ed5ae</span>
-                            </div>
+                            {currOrder.pairInTree === 'left' ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', flexWrap: 'wrap', color: '#64748b' }}>
+                                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(A)</span>
+                                    <span>+</span>
+                                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(B)</span>
+                                    <span>&rarr;</span>
+                                    <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>H(A+B)</span>
+                                    <span>+</span>
+                                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(C+D)</span>
+                                    <span>&rarr;</span>
+                                    <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 700 }}>Root 592ed5ae</span>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', flexWrap: 'wrap', color: '#64748b' }}>
+                                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(C)</span>
+                                    <span>+</span>
+                                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(D)</span>
+                                    <span>&rarr;</span>
+                                    <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>H(C+D)</span>
+                                    <span>+</span>
+                                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', color: '#6D48D1', fontFamily: 'monospace' }}>H(A+B)</span>
+                                    <span>&rarr;</span>
+                                    <span style={{ background: '#ecfdf5', color: '#059669', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 700 }}>Root 592ed5ae</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Comparison Boxes */}
@@ -913,7 +1067,7 @@ export default function Lab5() {
                                 <CheckCircleIcon size={18} color="#059669" strokeWidth={2.5} /> ตรวจสอบผ่าน: Root ตรงกัน
                             </div>
                             <div style={{ marginBottom: '4px' }}>
-                                ยืนยันได้ว่า <strong>ออร์เดอร์ B</strong> อยู่ในชุดข้อมูลจริง โดยผู้ตรวจไม่ต้องเห็นรหัสลับของออร์เดอร์อีก 3 ใบเลย
+                                ยืนยันได้ว่า <strong>ออร์เดอร์ {selectedOrder}</strong> อยู่ในชุดข้อมูลจริง โดยผู้ตรวจไม่ต้องเห็นรหัสลับของออร์เดอร์อีก 3 ใบเลย
                             </div>
                             <div style={{ fontSize: '0.78rem', color: '#047857' }}>
                                 ใช้ Hash แค่ 2 ตัวแทนการส่งข้อมูลทั้ง 4 ใบ — ถ้ามี 1 ล้านออร์เดอร์ ก็ใช้แค่ประมาณ 20 ตัวเท่านั้น
@@ -935,7 +1089,7 @@ export default function Lab5() {
                                 ถ้าข้อมูลคำสั่งซื้อถูกเปลี่ยน จะเกิดอะไรขึ้น?
                             </h2>
                             <p style={{ color: '#64748b', fontSize: '0.88rem' }}>
-                                ลองแก้ข้อมูลของออร์เดอร์ B แล้วใช้ Authentication Path ชุดเดิมตรวจอีกครั้ง
+                                ลองแก้ข้อมูลของออร์เดอร์ {selectedOrder} แล้วใช้ Authentication Path ชุดเดิมตรวจอีกครั้ง
                             </p>
                         </div>
 
@@ -943,10 +1097,10 @@ export default function Lab5() {
                         <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.25rem 1.5rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e293b', marginBottom: '2px' }}>
-                                    จำลองการแก้ไขข้อมูลของออร์เดอร์ B
+                                    จำลองการแก้ไขข้อมูลของออร์เดอร์ {selectedOrder}
                                 </div>
                                 <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                                    ระบบแก้ข้อมูลเล็กน้อย (secret-B-q92m &rarr; <span style={{ color: '#e11d48', fontWeight: 700 }}>secret-B-q93n</span>) แล้วคำนวณ Hash ใหม่จากข้อมูลจริงทันที
+                                    ระบบแก้ข้อมูลเล็กน้อย ({currOrder.originalCode} &rarr; <span style={{ color: '#e11d48', fontWeight: 700 }}>{currOrder.tamperedCode}</span>) แล้วคำนวณ Hash ใหม่จากข้อมูลจริงทันที
                                 </div>
                             </div>
                             <div
@@ -1004,45 +1158,107 @@ export default function Lab5() {
                             </div>
 
                             <svg width="240" height="30" style={{ marginTop: '-0.2rem', marginBottom: '-0.2rem' }}>
-                                <line x1="120" y1="0" x2="60" y2="30" stroke={isTampered ? '#e11d48' : '#6D48D1'} strokeWidth="2.5" />
-                                <line x1="120" y1="0" x2="180" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
+                                <line
+                                    x1="120"
+                                    y1="0"
+                                    x2="60"
+                                    y2="30"
+                                    stroke={currOrder.pairInTree === 'left' ? (isTampered ? '#e11d48' : '#6D48D1') : '#e2e8f0'}
+                                    strokeWidth={currOrder.pairInTree === 'left' ? 2.5 : 1.5}
+                                />
+                                <line
+                                    x1="120"
+                                    y1="0"
+                                    x2="180"
+                                    y2="30"
+                                    stroke={currOrder.pairInTree === 'right' ? (isTampered ? '#e11d48' : '#6D48D1') : '#e2e8f0'}
+                                    strokeWidth={currOrder.pairInTree === 'right' ? 2.5 : 1.5}
+                                />
                             </svg>
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '80px', width: '100%' }}>
-                                <div style={{ background: isTampered ? '#e11d48' : '#10b981', color: '#ffffff', borderRadius: '12px', padding: '6px 14px', textAlign: 'center' }}>
+                                <div style={{
+                                    background: currOrder.pairInTree === 'left' ? (isTampered ? '#e11d48' : '#10b981') : '#ffffff',
+                                    border: currOrder.pairInTree === 'left' ? 'none' : '1px solid #cbd5e1',
+                                    color: currOrder.pairInTree === 'left' ? '#ffffff' : '#64748b',
+                                    borderRadius: '12px',
+                                    padding: '6px 14px',
+                                    textAlign: 'center'
+                                }}>
                                     <div style={{ fontWeight: 700, fontSize: '0.75rem' }}>H(A+B)</div>
                                     <div style={{ fontSize: '0.65rem', fontFamily: 'monospace' }}>{HAB.slice(0, 8)}...</div>
                                 </div>
-                                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#64748b', borderRadius: '12px', padding: '6px 14px', textAlign: 'center' }}>
+                                <div style={{
+                                    background: currOrder.pairInTree === 'right' ? (isTampered ? '#e11d48' : '#10b981') : '#ffffff',
+                                    border: currOrder.pairInTree === 'right' ? 'none' : '1px solid #cbd5e1',
+                                    color: currOrder.pairInTree === 'right' ? '#ffffff' : '#64748b',
+                                    borderRadius: '12px',
+                                    padding: '6px 14px',
+                                    textAlign: 'center'
+                                }}>
                                     <div style={{ fontWeight: 700, fontSize: '0.75rem' }}>H(C+D)</div>
-                                    <div style={{ fontSize: '0.65rem', fontFamily: 'monospace' }}>{HCD}</div>
+                                    <div style={{ fontSize: '0.65rem', fontFamily: 'monospace' }}>{HCD.slice(0, 8)}...</div>
                                 </div>
                             </div>
 
                             <svg width="360" height="30" style={{ marginTop: '-0.2rem', marginBottom: '-0.2rem' }}>
-                                <line x1="100" y1="0" x2="50" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
-                                <line x1="100" y1="0" x2="150" y2="30" stroke={isTampered ? '#e11d48' : '#6D48D1'} strokeWidth="2.5" />
-                                <line x1="260" y1="0" x2="210" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
-                                <line x1="260" y1="0" x2="310" y2="30" stroke="#e2e8f0" strokeWidth="1.5" />
+                                <line
+                                    x1="100"
+                                    y1="0"
+                                    x2="50"
+                                    y2="30"
+                                    stroke={selectedOrder === 'A' ? (isTampered ? '#e11d48' : '#6D48D1') : '#e2e8f0'}
+                                    strokeWidth={selectedOrder === 'A' ? 2.5 : 1.5}
+                                />
+                                <line
+                                    x1="100"
+                                    y1="0"
+                                    x2="150"
+                                    y2="30"
+                                    stroke={selectedOrder === 'B' ? (isTampered ? '#e11d48' : '#6D48D1') : '#e2e8f0'}
+                                    strokeWidth={selectedOrder === 'B' ? 2.5 : 1.5}
+                                />
+                                <line
+                                    x1="260"
+                                    y1="0"
+                                    x2="210"
+                                    y2="30"
+                                    stroke={selectedOrder === 'C' ? (isTampered ? '#e11d48' : '#6D48D1') : '#e2e8f0'}
+                                    strokeWidth={selectedOrder === 'C' ? 2.5 : 1.5}
+                                />
+                                <line
+                                    x1="260"
+                                    y1="0"
+                                    x2="310"
+                                    y2="30"
+                                    stroke={selectedOrder === 'D' ? (isTampered ? '#e11d48' : '#6D48D1') : '#e2e8f0'}
+                                    strokeWidth={selectedOrder === 'D' ? 2.5 : 1.5}
+                                />
                             </svg>
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', width: '100%' }}>
-                                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>H(A)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: '#94a3b8' }}>966a2c...</div>
-                                </div>
-                                <div style={{ background: isTampered ? '#e11d48' : '#ffffff', border: isTampered ? 'none' : '2px solid #6D48D1', color: isTampered ? '#ffffff' : '#6D48D1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>H(B)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace' }}>{orders.B.hash.slice(0, 8)}...</div>
-                                </div>
-                                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>H(C)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: '#94a3b8' }}>8a8275...</div>
-                                </div>
-                                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>H(D)</div>
-                                    <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: '#94a3b8' }}>e8db9e...</div>
-                                </div>
+                                {['A', 'B', 'C', 'D'].map((k) => {
+                                    const isTarget = k === selectedOrder;
+                                    const leafHash = isTarget && isTampered ? currOrder.tamperedHash.slice(0, 6) + '...' : ordersData[k].hashShort;
+                                    return (
+                                        <div
+                                            key={k}
+                                            style={{
+                                                background: isTarget ? (isTampered ? '#e11d48' : '#ffffff') : '#ffffff',
+                                                border: isTarget ? (isTampered ? 'none' : '2px solid #6D48D1') : '1px solid #cbd5e1',
+                                                color: isTarget ? (isTampered ? '#ffffff' : '#6D48D1') : '#64748b',
+                                                borderRadius: '10px',
+                                                padding: '6px 12px',
+                                                textAlign: 'center'
+                                            }}
+                                        >
+                                            <div style={{ fontSize: '0.75rem', fontWeight: isTarget ? 700 : 500 }}>H({k})</div>
+                                            <div style={{ fontSize: '0.62rem', fontFamily: 'monospace', color: isTarget && isTampered ? '#ffffff' : '#94a3b8' }}>
+                                                {leafHash}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -1176,11 +1392,11 @@ export default function Lab5() {
                                     let borderColor = '#e2e8f0';
                                     let bgColor = '#ffffff';
 
-                                    if (step5Answer !== null) {
+                                    if (isSelected) {
                                         if (isCorrect) {
                                             borderColor = '#10b981';
-                                            bgColor = isSelected ? '#ecfdf5' : '#ffffff';
-                                        } else if (isSelected) {
+                                            bgColor = '#ecfdf5';
+                                        } else {
                                             borderColor = '#ef4444';
                                             bgColor = '#fef2f2';
                                         }
@@ -1203,14 +1419,21 @@ export default function Lab5() {
                                                 transition: 'all 0.2s'
                                             }}
                                         >
-                                            <span style={{ fontWeight: 700, color: isSelected && isCorrect ? '#059669' : '#1e293b', fontSize: '0.9rem' }}>
+                                            <span style={{ fontWeight: 700, color: isSelected ? (isCorrect ? '#059669' : '#dc2626') : '#1e293b', fontSize: '0.9rem' }}>
                                                 ตัวเลือก {String.fromCharCode(65 + opt.id)}
                                             </span>
-                                            <span style={{ fontSize: '0.88rem', color: '#475569', flex: 1 }}>{opt.text}</span>
+                                            <span style={{ fontSize: '0.88rem', color: isSelected && !isCorrect ? '#991b1b' : '#475569', flex: 1 }}>{opt.text}</span>
                                         </button>
                                     );
                                 })}
                             </div>
+
+                            {step5Answer !== null && step5Answer !== 2 && (
+                                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '12px 18px', marginTop: '1rem', color: '#991b1b', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px', animation: 'lab5-fade-in-up 0.2s ease-out' }}>
+                                    <XIcon size={16} color="#dc2626" strokeWidth={3} />
+                                    <span>ยังไม่ถูกต้องครับ ลองอ่านโจทย์ด้านบนแล้วเลือกใหม่อีกครั้ง</span>
+                                </div>
+                            )}
 
                             {step5Answer === 2 && (
                                 <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '12px', padding: '14px 18px', marginTop: '1rem', color: '#065f46', fontSize: '0.9rem', lineHeight: 1.5, animation: 'lab5-fade-in-up 0.2s ease-out' }}>
@@ -1256,7 +1479,7 @@ export default function Lab5() {
                                 <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '10px' }}>
                                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '4px' }}>ข้อมูลออร์เดอร์ที่พิสูจน์</div>
                                     <span style={{ background: '#6D48D1', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                                        ออร์เดอร์ B · secret-B-q92m
+                                        ออร์เดอร์ {selectedOrder} · {currOrder.originalCode}
                                     </span>
                                 </div>
 
@@ -1264,10 +1487,10 @@ export default function Lab5() {
                                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '4px' }}>Sibling Hash พร้อมตำแหน่ง</div>
                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                         <span style={{ background: '#ffffff', border: '1px solid #e2e8f0', color: '#6D48D1', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                                            H(A) 966a2cef · ฝั่งซ้าย
+                                            {currOrder.sibling1.name} {currOrder.sibling1.hash} · {currOrder.sibling1.side}
                                         </span>
                                         <span style={{ background: '#ffffff', border: '1px solid #e2e8f0', color: '#6D48D1', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                                            H(C+D) bc6a6e07 · ฝั่งขวา
+                                            {currOrder.sibling2.name} {currOrder.sibling2.hash} · {currOrder.sibling2.side}
                                         </span>
                                     </div>
                                 </div>
@@ -1341,11 +1564,11 @@ export default function Lab5() {
                                     </div>
                                     <div style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#475569' }}>รหัสลับของออร์เดอร์ (secret-B-q92m)</span>
+                                            <span style={{ color: '#475569' }}>รหัสลับของออร์เดอร์ ({currOrder.originalCode})</span>
                                             <span style={{ color: '#e11d48', fontWeight: 700 }}>รั่ว</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9', fontSize: '0.85rem' }}>
-                                            <span style={{ color: '#475569' }}>ว่าคุณคือออร์เดอร์ B (ใบที่ 2 จาก 4)</span>
+                                            <span style={{ color: '#475569' }}>ว่าคุณคือออร์เดอร์ {selectedOrder} ({currOrder.indexText})</span>
                                             <span style={{ color: '#e11d48', fontWeight: 700 }}>รั่ว</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: '0.85rem' }}>
@@ -1536,25 +1759,25 @@ export default function Lab5() {
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                     <span style={{ fontSize: '0.82rem', color: '#64748b', width: '100px' }}>รหัสลับ</span>
                                                     <span style={{ background: '#6D48D1', color: '#ffffff', padding: '4px 12px', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                                                        {hideWitness ? '•••••••••••••' : 'secret-B-q92m'}
+                                                        {hideWitness ? '•••••••••••••' : currOrder.originalCode}
                                                     </span>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <span style={{ fontSize: '0.82rem', color: '#64748b', width: '100px' }}>Sibling H(A)</span>
+                                                    <span style={{ fontSize: '0.82rem', color: '#64748b', width: '100px' }}>Sibling {currOrder.sibling1.name}</span>
                                                     <span style={{ background: '#f5f3ff', color: '#6D48D1', border: '1px solid #ddd6fe', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                                                        {hideWitness ? '••••••••' : '966a2cef...'}
+                                                        {hideWitness ? '••••••••' : currOrder.sibling1.hash}
                                                     </span>
                                                     <span style={{ background: '#ede9fe', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600 }}>
-                                                        ฝั่งซ้าย
+                                                        {currOrder.sibling1.side}
                                                     </span>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <span style={{ fontSize: '0.82rem', color: '#64748b', width: '100px' }}>Sibling H(C+D)</span>
+                                                    <span style={{ fontSize: '0.82rem', color: '#64748b', width: '100px' }}>Sibling {currOrder.sibling2.name}</span>
                                                     <span style={{ background: '#f5f3ff', color: '#6D48D1', border: '1px solid #ddd6fe', padding: '4px 10px', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                                                        {hideWitness ? '••••••••' : 'bc6a6e07...'}
+                                                        {hideWitness ? '••••••••' : currOrder.sibling2.hash}
                                                     </span>
                                                     <span style={{ background: '#ede9fe', color: '#7c3aed', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600 }}>
-                                                        ฝั่งขวา
+                                                        {currOrder.sibling2.side}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1598,7 +1821,7 @@ export default function Lab5() {
                                                     <LockIcon size={13} color="#7c3aed" /> Witness (ลับ)
                                                 </div>
                                                 <div style={{ fontSize: '0.75rem', color: '#475569', fontFamily: 'monospace' }}>
-                                                    {tamperedProof ? 'secret-B-FAKE + path' : 'secret-B-q92m + path'}
+                                                    {tamperedProof ? `secret-${selectedOrder}-FAKE + path` : `${currOrder.originalCode} + path`}
                                                 </div>
                                             </div>
 
@@ -1707,7 +1930,7 @@ export default function Lab5() {
                                                 <CheckCircleIcon size={18} color="#059669" strokeWidth={2.5} /> ผู้ตรวจยอมรับ: Proof ถูกต้อง
                                             </div>
                                             <div style={{ fontSize: '0.85rem' }}>
-                                                ผู้ตรวจเชื่อได้ว่า <strong>"มีออร์เดอร์หนึ่งใบใต้ Root นี้ที่เป็นของผู้ส่ง"</strong> — แต่ไม่รู้เลยว่าคือออร์เดอร์ B และไม่เห็นรหัสลับ
+                                                ผู้ตรวจเชื่อได้ว่า <strong>"มีออร์เดอร์หนึ่งใบใต้ Root นี้ที่เป็นของผู้ส่ง"</strong> — แต่ไม่รู้เลยว่าคือออร์เดอร์ {selectedOrder} และไม่เห็นรหัสลับ
                                             </div>
                                             <div style={{ fontSize: '0.75rem', color: '#047857', marginTop: '2px' }}>
                                                 เทียบกับขั้นที่ 6: ข้อมูลที่เคยรั่วทั้ง 3 อย่าง ตอนนี้ถูกซ่อนหมดแล้ว
@@ -1887,8 +2110,8 @@ export default function Lab5() {
                         {/* Takeaway banner */}
                         <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '12px', padding: '12px 16px', fontSize: '0.85rem', color: '#5b21b6', marginBottom: '1.75rem' }}>
                             {summaryTab === 'merkle_only'
-                                ? 'ผู้ตรวจคำนวณ Root เองได้จากหลักฐาน จึงเชื่อได้ — แต่ก็รู้ด้วยว่าคุณคือออร์เดอร์ B และเห็นรหัสลับ'
-                                : 'ผู้ตรวจยืนยันได้ว่า "มีออร์เดอร์หนึ่งใบใต้ Root นี้ที่เป็นของผู้ส่ง" โดยไม่รู้ว่าคือออร์เดอร์ B'}
+                                ? `ผู้ตรวจคำนวณ Root เองได้จากหลักฐาน จึงเชื่อได้ — แต่ก็รู้ด้วยว่าคุณคือออร์เดอร์ ${selectedOrder} และเห็นรหัสลับ`
+                                : `ผู้ตรวจยืนยันได้ว่า "มีออร์เดอร์หนึ่งใบใต้ Root นี้ที่เป็นของผู้ส่ง" โดยไม่รู้ว่าคือออร์เดอร์ ${selectedOrder}`}
                         </div>
 
                         {/* 3 Key Takeaways */}
