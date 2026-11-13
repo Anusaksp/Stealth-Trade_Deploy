@@ -11,7 +11,7 @@ function ItemCard({ item }) {
     return (
         <Link
             href={route('items.show', item.id)}
-            className="group bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all overflow-hidden flex flex-col"
+            className="group bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-neutral-300 transition-all overflow-hidden flex flex-col"
         >
             <div className="aspect-square bg-neutral-100 overflow-hidden">
                 {cover ? (
@@ -29,7 +29,7 @@ function ItemCard({ item }) {
             </div>
             <div className="p-3 flex flex-col gap-1">
                 <div className="text-sm font-semibold text-neutral-800 truncate">{item.name}</div>
-                <div className="text-emerald-700 font-bold">฿{formatPrice(item.price)}</div>
+                <div className="text-neutral-900 font-bold">฿{formatPrice(item.price)}</div>
                 <div className="text-xs text-neutral-400">
                     {item.item_type} · {item.seller_name}
                 </div>
@@ -65,7 +65,7 @@ export default function Index({ items, filters }) {
                     </div>
                     <Link
                         href={route('items.create')}
-                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                        className="px-4 py-2.5 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
                     >
                         + ขายสินค้า
                     </Link>
@@ -78,11 +78,11 @@ export default function Index({ items, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="ค้นหาสินค้า (ชื่อ / รายละเอียด)..."
-                        className="flex-1 rounded-xl border border-neutral-300 bg-white text-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        className="flex-1 rounded-xl border border-neutral-300 bg-white text-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500"
                     />
                     <button
                         type="submit"
-                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                        className="px-4 py-2.5 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
                     >
                         ค้นหา
                     </button>
@@ -121,8 +121,8 @@ export default function Index({ items, filters }) {
                                     className={[
                                         'px-3 py-1.5 rounded-lg text-sm border',
                                         link.active
-                                            ? 'bg-emerald-600 text-white border-emerald-600'
-                                            : 'bg-white text-neutral-600 border-neutral-200 hover:border-emerald-400',
+                                            ? 'bg-neutral-900 text-white border-neutral-900'
+                                            : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400',
                                     ].join(' ')}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />

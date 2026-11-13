@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GoogleLoginController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
@@ -78,6 +79,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
     Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
     Route::get('/account/items', [ItemController::class, 'myItems'])->name('account.items');
+
+    // แชท
+    Route::post('/items/{item}/chat', [ChatController::class, 'start'])->name('chat.start');
+    Route::get('/conversations', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/conversations/{conversation}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/conversations/{conversation}/messages', [ChatController::class, 'send'])->name('chat.send');
+    Route::get('/conversations/{conversation}/messages', [ChatController::class, 'messages'])->name('chat.messages');
 });
 
 // Minigame Route

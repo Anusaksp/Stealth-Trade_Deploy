@@ -9,7 +9,7 @@ function ItemCard({ item }) {
     return (
         <Link
             href={route('items.show', item.id)}
-            className="group bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all overflow-hidden flex flex-col"
+            className="group bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-neutral-300 transition-all overflow-hidden flex flex-col"
         >
             <div className="aspect-square bg-neutral-100 overflow-hidden">
                 {item.cover_image ? (
@@ -25,7 +25,7 @@ function ItemCard({ item }) {
             </div>
             <div className="p-3 flex flex-col gap-1">
                 <div className="text-sm font-semibold text-neutral-800 truncate">{item.name}</div>
-                <div className="text-emerald-700 font-bold">฿{formatPrice(item.price)}</div>
+                <div className="text-neutral-900 font-bold">฿{formatPrice(item.price)}</div>
                 <div className="text-xs text-neutral-400">{item.item_type}</div>
             </div>
         </Link>
@@ -86,8 +86,8 @@ export default function Show({ seller, items }) {
                                         className={[
                                             'px-3 py-1.5 rounded-lg text-sm border',
                                             link.active
-                                                ? 'bg-emerald-600 text-white border-emerald-600'
-                                                : 'bg-white text-neutral-600 border-neutral-200 hover:border-emerald-400',
+                                                ? 'bg-neutral-900 text-white border-neutral-900'
+                                                : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400',
                                         ].join(' ')}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />

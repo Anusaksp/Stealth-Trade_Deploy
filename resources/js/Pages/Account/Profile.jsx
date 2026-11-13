@@ -24,7 +24,7 @@ export default function Profile({ profile }) {
     };
 
     const inputCls =
-        'w-full rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500';
+        'w-full rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500';
 
     return (
         <AccountLayout active="profile">
@@ -35,7 +35,7 @@ export default function Profile({ profile }) {
 
                 <form onSubmit={submit} className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 space-y-5">
                     {(flash?.success || recentlySuccessful) && (
-                        <div className="bg-emerald-50 border border-emerald-300 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
+                        <div className="bg-neutral-100 border border-neutral-300 text-neutral-900 px-4 py-3 rounded-xl text-sm font-medium">
                             ✓ {flash?.success || 'บันทึกแล้ว'}
                         </div>
                     )}
@@ -55,7 +55,7 @@ export default function Profile({ profile }) {
                         type="file"
                         accept="image/*"
                         onChange={onAvatar}
-                        className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 file:font-medium hover:file:bg-emerald-100"
+                        className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-neutral-100 file:text-neutral-900 file:font-medium hover:file:bg-neutral-200"
                     />
                 </div>
                 {errors.avatar && <p className="text-sm text-red-500">{errors.avatar}</p>}
@@ -99,7 +99,7 @@ export default function Profile({ profile }) {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+                    className="px-5 py-2.5 bg-neutral-900 hover:bg-black disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
                 >
                     {processing ? 'กำลังบันทึก...' : 'บันทึกโปรไฟล์'}
                 </button>

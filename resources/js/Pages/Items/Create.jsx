@@ -36,7 +36,7 @@ export default function Create({ itemTypes, addresses }) {
     };
 
     const inputCls =
-        'w-full rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500';
+        'w-full rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500';
 
     return (
         <StealthTradeLayout>
@@ -123,7 +123,7 @@ export default function Create({ itemTypes, addresses }) {
                         {addresses.length === 0 && (
                             <p className="text-xs text-neutral-400 mt-1">
                                 ยังไม่มีที่อยู่ —{' '}
-                                <Link href={route('account.addresses')} className="text-emerald-600 underline">
+                                <Link href={route('account.addresses')} className="text-neutral-900 underline">
                                     เพิ่มที่อยู่
                                 </Link>
                             </p>
@@ -140,7 +140,7 @@ export default function Create({ itemTypes, addresses }) {
                             accept="image/*"
                             multiple
                             onChange={onFiles}
-                            className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 file:font-medium hover:file:bg-emerald-100"
+                            className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-neutral-100 file:text-neutral-900 file:font-medium hover:file:bg-neutral-200"
                         />
                         {errors.images && <p className="text-sm text-red-500 mt-1">{errors.images}</p>}
 
@@ -181,7 +181,7 @@ export default function Create({ itemTypes, addresses }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+                            className="px-5 py-2.5 bg-neutral-900 hover:bg-black disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
                         >
                             {processing ? 'กำลังบันทึก...' : 'ลงขายสินค้า'}
                         </button>

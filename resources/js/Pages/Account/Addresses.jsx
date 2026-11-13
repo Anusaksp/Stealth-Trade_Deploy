@@ -51,7 +51,7 @@ export default function Addresses({ addresses }) {
     const { delete: destroy } = useForm();
 
     const inputCls =
-        'w-full rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500';
+        'w-full rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500';
 
     return (
         <AccountLayout active="addresses">
@@ -63,14 +63,14 @@ export default function Addresses({ addresses }) {
                     <button
                         type="button"
                         onClick={startAdd}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                        className="px-4 py-2 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
                     >
                         + เพิ่มที่อยู่
                     </button>
                 </div>
 
                 {(flash?.success || recentlySuccessful) && !showForm && (
-                    <div className="bg-emerald-50 border border-emerald-300 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
+                    <div className="bg-neutral-100 border border-neutral-300 text-neutral-900 px-4 py-3 rounded-xl text-sm font-medium">
                         ✓ {flash?.success || 'บันทึกแล้ว'}
                     </div>
                 )}
@@ -82,7 +82,7 @@ export default function Addresses({ addresses }) {
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold text-neutral-800">{a.label}</span>
                                 {a.is_default && (
-                                    <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">ค่าเริ่มต้น</span>
+                                    <span className="text-xs bg-neutral-100 text-neutral-900 px-2 py-0.5 rounded-full">ค่าเริ่มต้น</span>
                                 )}
                             </div>
                             <p className="text-sm text-neutral-600 mt-1">
@@ -99,7 +99,7 @@ export default function Addresses({ addresses }) {
                             <button
                                 type="button"
                                 onClick={() => startEdit(a)}
-                                className="text-sm text-neutral-500 hover:text-emerald-700 px-2 py-1"
+                                className="text-sm text-neutral-500 hover:text-neutral-900 px-2 py-1"
                             >
                                 แก้ไข
                             </button>
@@ -192,7 +192,7 @@ export default function Addresses({ addresses }) {
                                 type="checkbox"
                                 checked={data.is_default}
                                 onChange={(e) => setData('is_default', e.target.checked)}
-                                className="rounded border-neutral-300 text-emerald-600 focus:ring-emerald-500"
+                                className="rounded border-neutral-300 text-neutral-900 focus:ring-neutral-500"
                             />
                             ใช้เป็นที่อยู่เริ่มต้น
                         </label>
@@ -201,7 +201,7 @@ export default function Addresses({ addresses }) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+                                className="px-5 py-2.5 bg-neutral-900 hover:bg-black disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
                             >
                                 {processing ? 'กำลังบันทึก...' : 'บันทึก'}
                             </button>

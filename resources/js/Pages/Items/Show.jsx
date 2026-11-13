@@ -34,7 +34,7 @@ export default function Show({ item, canManage }) {
                                         type="button"
                                         onClick={() => setIdx(i)}
                                         className={`w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 ${
-                                            i === idx ? 'border-emerald-500' : 'border-transparent'
+                                            i === idx ? 'border-neutral-500' : 'border-transparent'
                                         }`}
                                     >
                                         <img src={`/images/${img.path}`} alt="" className="w-full h-full object-cover" />
@@ -47,17 +47,17 @@ export default function Show({ item, canManage }) {
                     {/* Info */}
                     <div className="space-y-4">
                         <div>
-                            <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wide">{item.item_type}</div>
+                            <div className="text-xs text-neutral-900 font-semibold uppercase tracking-wide">{item.item_type}</div>
                             <h1 className="text-2xl font-bold text-neutral-900 mt-1">{item.name}</h1>
                         </div>
 
-                        <div className="text-3xl font-bold text-emerald-700">฿{formatPrice(item.price)}</div>
+                        <div className="text-3xl font-bold text-neutral-900">฿{formatPrice(item.price)}</div>
 
                         <div className="text-sm text-neutral-500">
                             ขายโดย{' '}
                             <Link
                                 href={route('sellers.show', item.seller_id)}
-                                className="font-medium text-neutral-700 underline hover:text-emerald-700"
+                                className="font-medium text-neutral-700 underline hover:text-neutral-900"
                             >
                                 {item.seller_name}
                             </Link>
@@ -83,15 +83,26 @@ export default function Show({ item, canManage }) {
                             </div>
                         )}
 
-                        {canManage && (
+                        {canManage ? (
                             <div className="flex gap-2 pt-2">
                                 <Link
                                     href={route('items.edit', item.id)}
-                                    className="px-4 py-2 bg-white border border-neutral-300 hover:border-emerald-500 text-sm font-medium rounded-xl transition-colors text-neutral-700"
+                                    className="px-4 py-2 bg-white border border-neutral-300 hover:border-neutral-500 text-sm font-medium rounded-xl transition-colors text-neutral-700"
                                 >
                                     แก้ไข
                                 </Link>
                                 <DeleteButton itemId={item.id} />
+                            </div>
+                        ) : (
+                            <div className="pt-2">
+                                <Link
+                                    href={route('chat.start', item.id)}
+                                    method="post"
+                                    as="button"
+                                    className="w-full px-4 py-3 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
+                                >
+                                    💬 แชทกับผู้ขาย
+                                </Link>
                             </div>
                         )}
                     </div>

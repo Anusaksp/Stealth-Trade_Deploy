@@ -6,7 +6,7 @@ function formatPrice(price) {
 }
 
 const STATUS_LABEL = {
-    available: { text: 'ขายอยู่', cls: 'bg-emerald-50 text-emerald-700' },
+    available: { text: 'ขายอยู่', cls: 'bg-neutral-100 text-neutral-900' },
     reserved: { text: 'จองแล้ว', cls: 'bg-amber-50 text-amber-700' },
     sold: { text: 'ขายแล้ว', cls: 'bg-neutral-100 text-neutral-500' },
 };
@@ -28,14 +28,14 @@ function Row({ item }) {
 
             <div className="flex-1 min-w-0">
                 <div className="font-semibold text-neutral-800 truncate">{item.name}</div>
-                <div className="text-emerald-700 font-bold text-sm">฿{formatPrice(item.price)}</div>
+                <div className="text-neutral-900 font-bold text-sm">฿{formatPrice(item.price)}</div>
                 <span className={`inline-block text-xs px-2 py-0.5 rounded-full mt-1 ${status.cls}`}>{status.text}</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-1.5 shrink-0">
                 <Link
                     href={route('items.edit', item.id)}
-                    className="text-sm text-neutral-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg border border-neutral-200 hover:border-emerald-400 text-center"
+                    className="text-sm text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-400 text-center"
                 >
                     แก้ไข
                 </Link>
@@ -64,7 +64,7 @@ export default function Items({ items }) {
                     <h1 className="text-xl font-bold text-neutral-900">สินค้าของฉัน</h1>
                     <Link
                         href={route('items.create')}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                        className="px-4 py-2 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
                     >
                         + ขายสินค้า
                     </Link>

@@ -11,9 +11,11 @@ export default function StealthTradeLayout({ children }) {
     const { url } = usePage();
     const [lang, setLang] = useState('TH');
 
+    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers'].some((p) => url.startsWith(p));
+
     return (
         <LangContext.Provider value={{ lang, setLang }}>
-            <PageBackground className="stealth-layout">
+            <PageBackground className="stealth-layout" variant={isMarketplace ? 'silver' : 'default'}>
                 {/* ── Navbar ── */}
                 <nav className="stealth-nav">
                     <div className="stealth-nav__inner">

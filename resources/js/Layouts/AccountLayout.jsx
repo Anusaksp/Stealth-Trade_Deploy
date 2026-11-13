@@ -5,6 +5,7 @@ const MENU = [
     { key: 'profile', label: 'โปรไฟล์', href: 'account.profile' },
     { key: 'addresses', label: 'ที่อยู่', href: 'account.addresses' },
     { key: 'items', label: 'สินค้าของฉัน', href: 'account.items' },
+    { key: 'messages', label: 'ข้อความ', href: 'chat.index' },
 ];
 
 export default function AccountLayout({ children, active }) {
@@ -22,8 +23,8 @@ export default function AccountLayout({ children, active }) {
                                     className={[
                                         'flex-1 md:flex-none text-center min-w-0 px-2 md:px-4 py-2.5 rounded-xl text-sm font-medium leading-tight transition-colors border',
                                         active === m.key
-                                            ? 'bg-emerald-600 text-white border-emerald-600'
-                                            : 'bg-white text-neutral-700 border-neutral-200 hover:border-emerald-400 hover:text-emerald-700',
+                                            ? 'bg-neutral-900 text-white border-neutral-900'
+                                            : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-400 hover:text-neutral-900',
                                     ].join(' ')}
                                 >
                                     {m.label}
