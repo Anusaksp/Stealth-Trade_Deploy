@@ -5,7 +5,7 @@ import AccountLayout from '@/Layouts/AccountLayout';
 export default function Profile({ profile }) {
     const [preview, setPreview] = useState(null);
     const { flash } = usePage().props;
-    const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
+    const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
         display_name: profile?.display_name ?? '',
         phone: profile?.phone ?? '',
         bio: profile?.bio ?? '',
@@ -20,7 +20,7 @@ export default function Profile({ profile }) {
 
     const submit = (e) => {
         e.preventDefault();
-        patch(route('account.profile.update'));
+        post(route('account.profile.update'));
     };
 
     const inputCls =

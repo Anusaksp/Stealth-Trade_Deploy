@@ -4,7 +4,7 @@ import StealthTradeLayout from '@/Layouts/StealthTradeLayout';
 
 export default function Edit({ item, itemTypes, addresses }) {
     const [previews, setPreviews] = useState([]);
-    const { data, setData, patch, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         name: item.name,
         price: item.price,
         description: item.description ?? '',
@@ -21,7 +21,7 @@ export default function Edit({ item, itemTypes, addresses }) {
 
     const submit = (e) => {
         e.preventDefault();
-        patch(route('items.update', item.id));
+        post(route('items.update', item.id));
     };
 
     const inputCls =

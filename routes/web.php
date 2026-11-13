@@ -65,12 +65,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/sell', [ItemController::class, 'create'])->name('items.create');
     Route::post('/items', [ItemController::class, 'store'])->name('items.store');
     Route::get('/items/{item}/edit', [ItemController::class, 'edit'])->name('items.edit');
-    Route::patch('/items/{item}', [ItemController::class, 'update'])->name('items.update');
+    Route::post('/items/{item}', [ItemController::class, 'update'])->name('items.update');
     Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
 
     // บัญชีของฉัน
     Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
-    Route::patch('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::post('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
     Route::get('/account/addresses', [AddressController::class, 'index'])->name('account.addresses');
     Route::post('/account/addresses', [AddressController::class, 'store'])->name('account.addresses.store');
     Route::patch('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
