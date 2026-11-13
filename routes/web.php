@@ -5,6 +5,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\GoogleLoginController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SellerController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +54,7 @@ Route::get('/dashboard', function () {
 // Feed สินค้า (สาธารณะ)
 Route::get('/market', [ItemController::class, 'index'])->name('items.index');
 Route::get('/items/{item}', [ItemController::class, 'show'])->name('items.show');
+Route::get('/sellers/{user}', [SellerController::class, 'show'])->name('sellers.show');
 
 // สตรีมรูปจาก storage (รองรับ R2 ที่เป็น private bucket)
 Route::get('/images/{path}', function (string $path) {

@@ -54,7 +54,13 @@ export default function Show({ item, canManage }) {
                         <div className="text-3xl font-bold text-emerald-700">฿{formatPrice(item.price)}</div>
 
                         <div className="text-sm text-neutral-500">
-                            ขายโดย <span className="font-medium text-neutral-700">{item.seller_name}</span>
+                            ขายโดย{' '}
+                            <Link
+                                href={route('sellers.show', item.seller_id)}
+                                className="font-medium text-neutral-700 underline hover:text-emerald-700"
+                            >
+                                {item.seller_name}
+                            </Link>
                             {' · '}
                             {new Date(item.created_at).toLocaleDateString('th-TH')}
                         </div>

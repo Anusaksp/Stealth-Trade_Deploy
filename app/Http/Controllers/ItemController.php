@@ -139,6 +139,7 @@ class ItemController extends Controller
             'name' => $item->name,
             'price' => $item->price,
             'status' => $item->status,
+            'seller_id' => $item->user_id,
             'created_at' => $item->created_at?->toISOString(),
             'item_type' => $item->itemType?->name,
             'images' => $item->images->map(fn ($img) => [
