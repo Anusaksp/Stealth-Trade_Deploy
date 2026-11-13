@@ -7,23 +7,39 @@ use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
 use App\Models\ItemType;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ItemController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $items = Item::query()
+        $query = Item::query()
             ->with(['images', 'itemType', 'user.profile'])
-            ->where('status', Item::STATUS_AVAILABLE)
+            ->where('status', Item::STATUS_AVAILABLE);
+
+        $search = $request->query('search');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query
             ->latest()
-            ->paginate(12)
+            ->paginate(48)
+            ->withQueryString()
             ->through(fn (Item $item) => $this->serialize($item));
 
         return Inertia::render('Items/Index', [
             'items' => $items,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 

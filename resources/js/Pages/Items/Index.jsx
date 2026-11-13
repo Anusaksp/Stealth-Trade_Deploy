@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import StealthTradeLayout from '@/Layouts/StealthTradeLayout';
 
 function formatPrice(price) {
@@ -37,8 +38,20 @@ function ItemCard({ item }) {
     );
 }
 
-export default function Index({ items }) {
+export default function Index({ items, filters }) {
     const list = items?.data ?? [];
+    const [search, setSearch] = useState(filters?.search ?? '');
+
+    const submitSearch = (e) => {
+        e.preventDefault();
+        router.get(route('items.index'), { search }, { preserveState: true, replace: true });
+    };
+
+    const clearSearch = () => {
+        setSearch('');
+        router.get(route('items.index'), {}, { preserveState: true, replace: true });
+    };
+
     return (
         <StealthTradeLayout>
             <Head title="ตลาดซื้อขาย" />
@@ -58,12 +71,38 @@ export default function Index({ items }) {
                     </Link>
                 </div>
 
+                {/* Search */}
+                <form onSubmit={submitSearch} className="flex gap-2 mb-6">
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="ค้นหาสินค้า (ชื่อ / รายละเอียด)..."
+                        className="flex-1 rounded-xl border border-neutral-300 bg-white text-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                    >
+                        ค้นหา
+                    </button>
+                    {filters?.search && (
+                        <button
+                            type="button"
+                            onClick={clearSearch}
+                            className="px-4 py-2.5 border border-neutral-300 hover:border-neutral-400 text-neutral-600 text-sm rounded-xl transition-colors"
+                        >
+                            ล้าง
+                        </button>
+                    )}
+                </form>
+
                 {list.length === 0 ? (
                     <div className="bg-white rounded-2xl border border-neutral-200 p-16 text-center text-neutral-400">
-                        ยังไม่มีสินค้าในขณะนี้
+                        {filters?.search ? 'ไม่พบสินค้าที่ค้นหา' : 'ยังไม่มีสินค้าในขณะนี้'}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
                         {list.map((item) => (
                             <ItemCard key={item.id} item={item} />
                         ))}

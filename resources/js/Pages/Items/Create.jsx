@@ -19,6 +19,17 @@ export default function Create({ itemTypes, addresses }) {
         setPreviews(files.map((f) => URL.createObjectURL(f)));
     };
 
+    const moveImage = (index, dir) => {
+        const target = index + dir;
+        if (target < 0 || target >= data.images.length) return;
+        const newImages = [...data.images];
+        const newPreviews = [...previews];
+        [newImages[index], newImages[target]] = [newImages[target], newImages[index]];
+        [newPreviews[index], newPreviews[target]] = [newPreviews[target], newPreviews[index]];
+        setData('images', newImages);
+        setPreviews(newPreviews);
+    };
+
     const submit = (e) => {
         e.preventDefault();
         post(route('items.store'));
@@ -136,8 +147,29 @@ export default function Create({ itemTypes, addresses }) {
                         {previews.length > 0 && (
                             <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
                                 {previews.map((src, i) => (
-                                    <div key={i} className="aspect-square rounded-lg overflow-hidden border border-neutral-200">
+                                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200">
                                         <img src={src} alt={`รูป ${i + 1}`} className="w-full h-full object-cover" />
+                                        <span className="absolute top-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded-full">
+                                            {i + 1}
+                                        </span>
+                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => moveImage(i, -1)}
+                                                disabled={i === 0}
+                                                className="bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-0.5 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                                            >
+                                                ◀
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => moveImage(i, 1)}
+                                                disabled={i === previews.length - 1}
+                                                className="bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-0.5 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                                            >
+                                                ▶
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
