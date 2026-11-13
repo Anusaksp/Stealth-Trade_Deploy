@@ -1569,3 +1569,63 @@ body {
         max-width: 100%;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   Navbar — Responsive (mobile)
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .stealth-nav__inner {
+        height: 60px;
+        padding: 0 12px;
+        grid-template-columns: auto 1fr auto;
+        gap: 8px;
+    }
+    .stealth-nav__logo-img {
+        height: 38px;
+    }
+    .stealth-nav__center {
+        gap: 4px;
+        justify-self: stretch;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .stealth-nav__center::-webkit-scrollbar {
+        display: none;
+    }
+    .stealth-nav__link {
+        font-size: 0.72rem;
+        padding: 5px 10px;
+        white-space: nowrap;
+    }
+    .stealth-nav__right {
+        gap: 8px;
+    }
+    .stealth-lang-text {
+        display: none;
+    }
+    .stealth-user-menu {
+        gap: 8px;
+    }
+    .stealth-user-btn {
+        max-width: 76px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .stealth-login-btn {
+        padding: 5px 10px;
+        font-size: 0.68rem;
+        letter-spacing: normal;
+    }
+    .stealth-auth-buttons {
+        gap: 8px;
+    }
+    .stealth-btn-outline,
+    .stealth-btn-primary {
+        padding: 6px 12px;
+        font-size: 0.72rem;
+    }
+}

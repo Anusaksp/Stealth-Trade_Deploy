@@ -1,0 +1,11 @@
+/* Marketplace — form controls readability fix
+   .stealth-layout sets color:#ffffff globally, so <select>/<option>
+   inherit white text on white background. Force dark text here. */
+select {
+    color: #1f2937;
+    background-color: #ffffff;
+}
+select option {
+    color: #1f2937;
+    background-color: #ffffff;
+}

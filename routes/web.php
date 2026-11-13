@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\GoogleLoginController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use App\Http\Controllers\GoogleLoginController;
 
 Route::get('/', function () {
     return Inertia::render('Homepage', [
@@ -41,6 +45,38 @@ Route::get('/stealth-dashboard', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// ==========================================
+// Marketplace (Phase 1)
+// ==========================================
+
+// Feed สินค้า (สาธารณะ)
+Route::get('/market', [ItemController::class, 'index'])->name('items.index');
+Route::get('/items/{item}', [ItemController::class, 'show'])->name('items.show');
+
+// สตรีมรูปจาก storage (รองรับ R2 ที่เป็น private bucket)
+Route::get('/images/{path}', function (string $path) {
+    abort_unless(Storage::exists($path), 404);
+    return Storage::response($path);
+})->where('path', '.*')->name('images.show');
+
+Route::middleware('auth')->group(function () {
+    // ลงขาย / จัดการสินค้า
+    Route::get('/sell', [ItemController::class, 'create'])->name('items.create');
+    Route::post('/items', [ItemController::class, 'store'])->name('items.store');
+    Route::get('/items/{item}/edit', [ItemController::class, 'edit'])->name('items.edit');
+    Route::patch('/items/{item}', [ItemController::class, 'update'])->name('items.update');
+    Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
+
+    // บัญชีของฉัน
+    Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
+    Route::patch('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::get('/account/addresses', [AddressController::class, 'index'])->name('account.addresses');
+    Route::post('/account/addresses', [AddressController::class, 'store'])->name('account.addresses.store');
+    Route::patch('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
+    Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
+    Route::get('/account/items', [ItemController::class, 'myItems'])->name('account.items');
+});
 
 // Minigame Route
 Route::get('/minigame', function () {

@@ -1,5 +1,6 @@
 import '../css/app.css';
 import '../css/stealth-trade.css';
+import '../css/marketplace.css';
 import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/react';

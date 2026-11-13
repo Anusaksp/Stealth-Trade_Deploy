@@ -33,5 +33,5 @@ RUN npm run build
 # 7. ตั้งค่าสิทธิ์โฟลเดอร์ให้ Laravel เขียนไฟล์ได้
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 8. รัน Migration และ Start Apache
-CMD php artisan migrate --force && apache2-foreground
+# 8. รัน Migration + Seed หมวดหมู่ + Start Apache
+CMD php artisan migrate --force && php artisan db:seed --class=ItemTypeSeeder --force && apache2-foreground

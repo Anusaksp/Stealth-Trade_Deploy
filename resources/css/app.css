@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* จองพื้นที่ scrollbar ไว้ตลอด — กันเนื้อหา (ที่ถูก center) ขยับซ้าย-ขวา
+   ตอน scrollbar โผล่/หายระหว่างหน้า */
+html {
+    scrollbar-gutter: stable;
+}
+

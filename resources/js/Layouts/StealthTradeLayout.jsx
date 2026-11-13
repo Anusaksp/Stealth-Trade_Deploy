@@ -31,6 +31,8 @@ export default function StealthTradeLayout({ children }) {
                         {/* Center Links */}
                         <div className="stealth-nav__center">
                             <Link href="/" className={`stealth-nav__link ${url === '/' ? 'stealth-nav__link--active' : ''}`}>หน้าแรก</Link>
+                            <Link href={route('items.index')} className={`stealth-nav__link ${url.startsWith('/market') ? 'stealth-nav__link--active' : ''}`}>ตลาด</Link>
+                            <Link href={route('items.create')} className={`stealth-nav__link ${url.startsWith('/sell') ? 'stealth-nav__link--active' : ''}`}>ขายสินค้า</Link>
                             <Link href={route('stealth.dashboard')} className={`stealth-nav__link ${url.startsWith('/stealth-dashboard') ? 'stealth-nav__link--active' : ''}`}>ZKP</Link>
                         </div>
 
@@ -38,8 +40,8 @@ export default function StealthTradeLayout({ children }) {
                         <div className="stealth-nav__right">
                             {auth?.user ? (
                                 <div className="stealth-user-menu">
-                                    <Link href={route('profile.edit')} className="stealth-user-btn">
-                                        {auth.user.name}
+                                    <Link href={route('account.profile')} className="stealth-user-btn">
+                                        {auth.profile?.display_name || auth.user.name}
                                     </Link>
                                     <Link
                                         href={route('logout')}
