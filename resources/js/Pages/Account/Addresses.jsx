@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import AccountLayout from '@/Layouts/AccountLayout';
 
@@ -15,6 +15,7 @@ const EMPTY = {
 export default function Addresses({ addresses }) {
     const [editingId, setEditingId] = useState(null);
     const [showForm, setShowForm] = useState(addresses.length === 0);
+    const { flash } = usePage().props;
 
     const { data, setData, post, patch, processing, errors, reset, recentlySuccessful } = useForm(EMPTY);
 
@@ -68,7 +69,11 @@ export default function Addresses({ addresses }) {
                     </button>
                 </div>
 
-                {recentlySuccessful && !showForm && <div className="text-sm text-emerald-600">บันทึกแล้ว ✓</div>}
+                {(flash?.success || recentlySuccessful) && !showForm && (
+                    <div className="bg-emerald-50 border border-emerald-300 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
+                        ✓ {flash?.success || 'บันทึกแล้ว'}
+                    </div>
+                )}
 
                 {/* List */}
                 {addresses.map((a) => (

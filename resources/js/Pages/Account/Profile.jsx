@@ -1,9 +1,10 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import AccountLayout from '@/Layouts/AccountLayout';
 
 export default function Profile({ profile }) {
     const [preview, setPreview] = useState(null);
+    const { flash } = usePage().props;
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         display_name: profile?.display_name ?? '',
         phone: profile?.phone ?? '',
@@ -33,7 +34,11 @@ export default function Profile({ profile }) {
                 <h1 className="text-xl font-bold text-neutral-900">โปรไฟล์</h1>
 
                 <form onSubmit={submit} className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 space-y-5">
-                    {recentlySuccessful && <div className="text-sm text-emerald-600">บันทึกแล้ว ✓</div>}
+                    {(flash?.success || recentlySuccessful) && (
+                        <div className="bg-emerald-50 border border-emerald-300 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
+                            ✓ {flash?.success || 'บันทึกแล้ว'}
+                        </div>
+                    )}
 
                 {/* Avatar */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
