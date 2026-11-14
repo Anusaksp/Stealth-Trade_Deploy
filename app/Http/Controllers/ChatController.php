@@ -31,6 +31,8 @@ class ChatController extends Controller
         $user = auth()->user();
         $this->authorizeConversation($conversation, $user);
 
+        $this->markRead($conversation, $user);
+
         $conversation->load(['item.images', 'buyer.profile', 'seller.profile', 'messages']);
 
         $other = $conversation->buyer_id === $user->id ? $conversation->seller : $conversation->buyer;
@@ -97,6 +99,9 @@ class ChatController extends Controller
 
         $lastId = $messages->last()?->id ?? $after;
 
+        // เปิดดูอยู่ = mark ข้อความจากคู่สนทนาเป็นอ่านแล้ว
+        $this->markRead($conversation, $user);
+
         return response()->json([
             'messages' => $messages->map(fn ($m) => [
                 'id' => $m->id,
@@ -108,15 +113,27 @@ class ChatController extends Controller
         ]);
     }
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $user = auth()->user();
+        $role = $request->query('role'); // buying | selling | null
 
-        $conversations = Conversation::query()
+        $query = Conversation::query()
             ->with(['item.images', 'buyer.profile', 'seller.profile', 'lastMessage'])
             ->where(function ($q) use ($user) {
                 $q->where('buyer_id', $user->id)->orWhere('seller_id', $user->id);
-            })
+            });
+
+        if ($role === 'buying') {
+            $query->where('buyer_id', $user->id);
+        } elseif ($role === 'selling') {
+            $query->where('seller_id', $user->id);
+        }
+
+        $conversations = $query
+            ->withCount(['messages as unread_count' => function ($q) use ($user) {
+                $q->where('sender_id', '!=', $user->id)->whereNull('read_at');
+            }])
             ->orderByDesc('last_message_at')
             ->get()
             ->map(function (Conversation $c) use ($user) {
@@ -124,6 +141,7 @@ class ChatController extends Controller
 
                 return [
                     'id' => $c->id,
+                    'role' => $c->buyer_id === $user->id ? 'buying' : 'selling',
                     'item' => [
                         'id' => $c->item->id,
                         'name' => $c->item->name,
@@ -135,10 +153,44 @@ class ChatController extends Controller
                     ],
                     'last_message' => $c->lastMessage?->body,
                     'last_message_at' => $c->last_message_at?->toISOString(),
+                    'unread_count' => $c->unread_count,
                 ];
             });
 
         return Inertia::render('Conversations/Index', [
+            'conversations' => $conversations,
+            'role' => $role,
+        ]);
+    }
+
+    public function unread(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $conversations = Conversation::query()
+            ->with(['item', 'buyer.profile', 'seller.profile'])
+            ->where(function ($q) use ($user) {
+                $q->where('buyer_id', $user->id)->orWhere('seller_id', $user->id);
+            })
+            ->withCount(['messages as unread_count' => function ($q) use ($user) {
+                $q->where('sender_id', '!=', $user->id)->whereNull('read_at');
+            }])
+            ->get()
+            ->filter(fn (Conversation $c) => $c->unread_count > 0)
+            ->map(function (Conversation $c) use ($user) {
+                $other = $c->buyer_id === $user->id ? $c->seller : $c->buyer;
+
+                return [
+                    'id' => $c->id,
+                    'other_user' => $other->profile?->display_name ?: $other->name,
+                    'item_name' => $c->item->name,
+                    'unread' => $c->unread_count,
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'unread_count' => $conversations->sum('unread'),
             'conversations' => $conversations,
         ]);
     }
@@ -149,5 +201,13 @@ class ChatController extends Controller
             $conversation->buyer_id === $user->id || $conversation->seller_id === $user->id,
             403,
         );
+    }
+
+    private function markRead(Conversation $conversation, $user): void
+    {
+        $conversation->messages()
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
     }
 }

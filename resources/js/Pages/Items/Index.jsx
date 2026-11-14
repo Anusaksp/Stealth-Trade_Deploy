@@ -60,7 +60,7 @@ export default function Index({ items, filters }) {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-neutral-900">ตลาดซื้อขาย</h1>
+                        <h1 className="text-2xl font-bold text-neutral-900">Market</h1>
                         <p className="text-sm text-neutral-500">สินค้าทั้งหมดจากผู้ขายในแพลตฟอร์ม</p>
                     </div>
                     <Link

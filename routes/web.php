@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     // แชท
     Route::post('/items/{item}/chat', [ChatController::class, 'start'])->name('chat.start');
     Route::get('/conversations', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/conversations/unread', [ChatController::class, 'unread'])->name('chat.unread');
     Route::get('/conversations/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/conversations/{conversation}/messages', [ChatController::class, 'send'])->name('chat.send');
     Route::get('/conversations/{conversation}/messages', [ChatController::class, 'messages'])->name('chat.messages');

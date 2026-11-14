@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState, createContext, useContext } from 'react';
+import { useState, useEffect, useRef, createContext, useContext } from 'react';
+import axios from 'axios';
 import PageBackground from '@/Components/PageBackground';
 
 export const LangContext = createContext();
@@ -10,8 +11,41 @@ export default function StealthTradeLayout({ children }) {
     const { auth } = usePage().props;
     const { url } = usePage();
     const [lang, setLang] = useState('TH');
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [toast, setToast] = useState(null);
+    const prevUnreadRef = useRef(0);
+    const toastTimerRef = useRef(null);
 
-    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers'].some((p) => url.startsWith(p));
+    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers', '/conversations'].some((p) => url.startsWith(p));
+
+    // Global polling: ตรวจข้อความใหม่ (unread) ทุก 15 วิ
+    useEffect(() => {
+        if (!auth?.user) return;
+        let mounted = true;
+        const fetchUnread = async () => {
+            try {
+                const res = await axios.get(route('chat.unread'));
+                if (!mounted) return;
+                const count = res.data.unread_count;
+                if (count > prevUnreadRef.current && res.data.conversations.length > 0) {
+                    const latest = res.data.conversations[0];
+                    setToast(`💬 ข้อความใหม่จาก ${latest.other_user} — ${latest.item_name}`);
+                    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+                    toastTimerRef.current = setTimeout(() => setToast(null), 4000);
+                }
+                prevUnreadRef.current = count;
+                setUnreadCount(count);
+            } catch (e) {
+                // ignore
+            }
+        };
+        fetchUnread();
+        const interval = setInterval(fetchUnread, 15000);
+        return () => {
+            mounted = false;
+            clearInterval(interval);
+        };
+    }, [auth?.user]);
 
     return (
         <LangContext.Provider value={{ lang, setLang }}>
@@ -40,6 +74,20 @@ export default function StealthTradeLayout({ children }) {
 
                         {/* Right side: lang switcher + login/user */}
                         <div className="stealth-nav__right">
+                            {auth?.user && (
+                                <Link
+                                    href={route('chat.index')}
+                                    className="relative flex items-center justify-center w-9 h-9 rounded-full hover:bg-neutral-200/50 text-neutral-700 transition-colors"
+                                    title="ข้อความ"
+                                >
+                                    <span className="material-symbols-outlined text-[22px]">chat_bubble</span>
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none">
+                                            {unreadCount > 99 ? '99+' : unreadCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            )}
                             {auth?.user ? (
                                 <div className="stealth-user-menu">
                                     <Link href={route('account.profile')} className="stealth-user-btn">
@@ -137,6 +185,13 @@ export default function StealthTradeLayout({ children }) {
                         </div>
                     </div>
                 </footer>
+
+                {/* Toast แจ้งข้อความใหม่ */}
+                {toast && (
+                    <div className="fixed bottom-4 right-4 z-50 bg-neutral-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm max-w-xs">
+                        {toast}
+                    </div>
+                )}
             </PageBackground>
         </LangContext.Provider>
     );
