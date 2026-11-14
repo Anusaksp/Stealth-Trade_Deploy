@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import StealthTradeLayout from '@/Layouts/StealthTradeLayout';
+import { compressImage } from '@/utils/compressImage';
 
 export default function Create({ itemTypes, addresses }) {
     const [previews, setPreviews] = useState([]);
@@ -13,10 +14,11 @@ export default function Create({ itemTypes, addresses }) {
         images: [],
     });
 
-    const onFiles = (e) => {
+    const onFiles = async (e) => {
         const files = Array.from(e.target.files || []);
-        setData('images', files);
-        setPreviews(files.map((f) => URL.createObjectURL(f)));
+        const compressed = await Promise.all(files.map((f) => compressImage(f)));
+        setData('images', compressed);
+        setPreviews(compressed.map((f) => URL.createObjectURL(f)));
     };
 
     const moveImage = (index, dir) => {

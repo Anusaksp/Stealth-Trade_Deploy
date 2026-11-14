@@ -11,6 +11,11 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y nodejs \
     && docker-php-ext-install pdo pdo_pgsql
 
+# ตั้งค่า PHP upload limits (รองรับรูปสินค้าขนาดใหญ่ขึ้น)
+RUN echo "upload_max_filesize=20M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=60M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini
+
 # 2. เปิดใช้งาน mod_rewrite ของ Apache
 RUN a2enmod rewrite
 

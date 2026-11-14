@@ -20,7 +20,7 @@ class UpdateItemRequest extends FormRequest
             'item_type_id' => ['required', 'integer', 'exists:item_types,id'],
             'pickup_address_id' => ['nullable', 'integer', 'exists:addresses,id'],
             'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'max:2048'],
+            'images.*' => ['image', 'max:10240'],
         ];
     }
 }

@@ -20,7 +20,7 @@ class StoreItemRequest extends FormRequest
             'item_type_id' => ['required', 'integer', 'exists:item_types,id'],
             'pickup_address_id' => ['nullable', 'integer', 'exists:addresses,id'],
             'images' => ['required', 'array', 'min:1', 'max:5'],
-            'images.*' => ['image', 'max:2048'],
+            'images.*' => ['image', 'max:10240'],
         ];
     }
 
@@ -31,7 +31,7 @@ class StoreItemRequest extends FormRequest
             'images.min' => 'ต้องมีรูปอย่างน้อย 1 รูป',
             'images.max' => 'อัปโหลดได้สูงสุด 5 รูป',
             'images.*.image' => 'ไฟล์ต้องเป็นรูปภาพเท่านั้น',
-            'images.*.max' => 'รูปต้องมีขนาดไม่เกิน 2MB',
+            'images.*.max' => 'รูปต้องมีขนาดไม่เกิน 10MB',
         ];
     }
 }
