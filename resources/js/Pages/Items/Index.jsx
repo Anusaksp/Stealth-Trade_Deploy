@@ -38,19 +38,47 @@ function ItemCard({ item }) {
     );
 }
 
-export default function Index({ items, filters }) {
+export default function Index({ items, filters, itemTypes }) {
     const list = items?.data ?? [];
     const [search, setSearch] = useState(filters?.search ?? '');
+    const [itemTypeId, setItemTypeId] = useState(filters?.item_type_id ?? '');
+    const [minPrice, setMinPrice] = useState(filters?.min_price ?? '');
+    const [maxPrice, setMaxPrice] = useState(filters?.max_price ?? '');
+
+    const applyFilters = (overrides = {}) => {
+        const q = {
+            search: search || undefined,
+            item_type_id: itemTypeId || undefined,
+            min_price: minPrice || undefined,
+            max_price: maxPrice || undefined,
+            ...overrides,
+        };
+        Object.keys(q).forEach((k) => {
+            if (q[k] === undefined || q[k] === '' || q[k] === null) delete q[k];
+        });
+        router.get(route('items.index'), q, { preserveState: true, replace: true });
+    };
 
     const submitSearch = (e) => {
         e.preventDefault();
-        router.get(route('items.index'), { search }, { preserveState: true, replace: true });
+        applyFilters();
     };
 
-    const clearSearch = () => {
+    const onCategoryChange = (e) => {
+        const v = e.target.value;
+        setItemTypeId(v);
+        applyFilters({ item_type_id: v || undefined });
+    };
+
+    const clearAll = () => {
         setSearch('');
+        setItemTypeId('');
+        setMinPrice('');
+        setMaxPrice('');
         router.get(route('items.index'), {}, { preserveState: true, replace: true });
     };
+
+    const hasFilter = !!(filters?.search || filters?.item_type_id || filters?.min_price || filters?.max_price);
 
     return (
         <StealthTradeLayout>
@@ -71,35 +99,68 @@ export default function Index({ items, filters }) {
                     </Link>
                 </div>
 
-                {/* Search */}
-                <form onSubmit={submitSearch} className="flex gap-2 mb-6">
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="ค้นหาสินค้า (ชื่อ / รายละเอียด)..."
-                        className="flex-1 rounded-xl border border-neutral-300 bg-white text-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500"
-                    />
-                    <button
-                        type="submit"
-                        className="px-4 py-2.5 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
-                    >
-                        ค้นหา
-                    </button>
-                    {filters?.search && (
+                {/* Search + Filters */}
+                <form onSubmit={submitSearch} className="space-y-3 mb-6">
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="ค้นหาสินค้า (ชื่อ / รายละเอียด)..."
+                            className="flex-1 rounded-xl border border-neutral-300 bg-white text-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500"
+                        />
                         <button
-                            type="button"
-                            onClick={clearSearch}
-                            className="px-4 py-2.5 border border-neutral-300 hover:border-neutral-400 text-neutral-600 text-sm rounded-xl transition-colors"
+                            type="submit"
+                            className="px-4 py-2.5 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
                         >
-                            ล้าง
+                            ค้นหา
                         </button>
-                    )}
+                        {hasFilter && (
+                            <button
+                                type="button"
+                                onClick={clearAll}
+                                className="px-4 py-2.5 border border-neutral-300 hover:border-neutral-400 text-neutral-600 text-sm rounded-xl transition-colors shrink-0"
+                            >
+                                ล้างทั้งหมด
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <select
+                            value={itemTypeId}
+                            onChange={onCategoryChange}
+                            className="rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                        >
+                            <option value="">ทุกหมวดหมู่</option>
+                            {itemTypes.map((t) => (
+                                <option key={t.id} value={t.id}>
+                                    {t.name}
+                                </option>
+                            ))}
+                        </select>
+                        <input
+                            type="number"
+                            min="0"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            placeholder="ราคาต่ำสุด (บาท)"
+                            className="rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                        />
+                        <input
+                            type="number"
+                            min="0"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            placeholder="ราคาสูงสุด (บาท)"
+                            className="rounded-xl border border-neutral-300 bg-white text-neutral-800 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                        />
+                    </div>
                 </form>
 
                 {list.length === 0 ? (
                     <div className="bg-white rounded-2xl border border-neutral-200 p-16 text-center text-neutral-400">
-                        {filters?.search ? 'ไม่พบสินค้าที่ค้นหา' : 'ยังไม่มีสินค้าในขณะนี้'}
+                        {hasFilter ? 'ไม่พบสินค้าที่ตรงกับเงื่อนไข' : 'ยังไม่มีสินค้าในขณะนี้'}
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">

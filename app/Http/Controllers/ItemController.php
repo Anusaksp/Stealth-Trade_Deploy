@@ -21,12 +21,27 @@ class ItemController extends Controller
             ->where('status', Item::STATUS_AVAILABLE);
 
         $search = $request->query('search');
+        $itemTypeId = $request->query('item_type_id');
+        $minPrice = $request->query('min_price');
+        $maxPrice = $request->query('max_price');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
+        }
+
+        if ($itemTypeId !== null && $itemTypeId !== '') {
+            $query->where('item_type_id', (int) $itemTypeId);
+        }
+
+        if ($minPrice !== null && $minPrice !== '') {
+            $query->where('price', '>=', (float) $minPrice);
+        }
+
+        if ($maxPrice !== null && $maxPrice !== '') {
+            $query->where('price', '<=', (float) $maxPrice);
         }
 
         $items = $query
@@ -37,8 +52,12 @@ class ItemController extends Controller
 
         return Inertia::render('Items/Index', [
             'items' => $items,
+            'itemTypes' => ItemType::orderBy('name')->get(),
             'filters' => [
                 'search' => $search,
+                'item_type_id' => $itemTypeId,
+                'min_price' => $minPrice,
+                'max_price' => $maxPrice,
             ],
         ]);
     }
