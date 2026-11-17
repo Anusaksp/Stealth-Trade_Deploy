@@ -10,9 +10,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import '../../css/cipher.css';
 
 // ─── ZKP Parameters ───
-const ZKP_P = 11;
-const ZKP_G = 2;
-const ZKP_X = 4; // real secret
+const zkpP = 11;
+const zkpG = 2;
+const zkpX = 4; // real secret
 
 /**
  * คำนวณ (base ^ exponent) mod modulus ด้วยวิธียกกำลังแบบทวีคูณ (square-and-multiply)

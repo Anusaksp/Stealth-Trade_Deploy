@@ -14,10 +14,10 @@ import { Head, Link } from '@inertiajs/react';     // Head สำหรับ SE
 import { useState, useEffect, useCallback, useRef } from 'react'; // React hooks
 
 // === ค่าคงที่ของเกม ===
-const TOTAL_ROUNDS = 5; // จำนวนรอบทั้งหมดที่ต้องทดสอบเพื่อพิสูจน์ ZKP
+const totalRounds = 5; // จำนวนรอบทั้งหมดที่ต้องทดสอบเพื่อพิสูจน์ ZKP
 
 // === ข้อมูลสีของลูกบอล ===
-const BALL_COLORS = {
+const ballColors = {
     blue: { hex: '#3b82f6', name: 'น้ำเงิน' },  // ลูกบอลสีน้ำเงิน
     red: { hex: '#ef4444', name: 'แดง' },      // ลูกบอลสีแดง
 };
@@ -30,7 +30,7 @@ const BALL_COLORS = {
 //   - hidden: ถ้า true จะแสดงเป็นสีเทา (มุมมองผู้ตรวจสอบ)
 // ──────────────────────────────────────────────────────
 function Ball({ color, hidden = false }) {
-    const c = BALL_COLORS[color];
+    const c = ballColors[color];
     // ถ้าซ่อนสี ให้ใช้สีเทา (ผู้ตรวจสอบมองไม่เห็นสีจริง)
     const ballColor = hidden ? '#94a3b8' : c.hex;
 
@@ -69,7 +69,7 @@ function Ball({ color, hidden = false }) {
 //   - rounds: จำนวนรอบที่ผ่านแล้ว
 //   - total: จำนวนรอบทั้งหมด
 // ──────────────────────────────────────────────────────
-function ConfidenceBar({ confidence = 50, correctRounds = 0, total = TOTAL_ROUNDS }) {
+function ConfidenceBar({ confidence = 50, correctRounds = 0, total = totalRounds }) {
     const pct = Math.min(100, Math.max(0, confidence));
     const guessProb = correctRounds === 0 ? 50 : (Math.pow(0.5, correctRounds) * 100);
 
@@ -197,7 +197,7 @@ function useTypewriter(text, speed = 22) {
 // ข้อความของนักบรรยาย (ดร. ซิโร่) ในแต่ละสถานะเกม
 // แยก Prover / Verifier ทุกสถานะ
 // ──────────────────────────────────────────────────────
-const MSG = {
+const messages = {
     // ข้อความเลือกบทบาทตอนเริ่มเกม (ใช้ร่วมกัน)
     roleSelect: 'ยินดีต้อนรับสู่ห้องปฏิบัติการที่สำคัญที่สุด\nที่คุณจะได้ทดลองปัญหาคลาสสิกของวงการ Cryptography : จะพิสูจน์ได้ไหมว่าเรารู้ความจริง โดยไม่เคยบอกว่าความจริงคืออะไรและไม่เปิดเผยความลับไม่แม้แต่บิตเดียว \n\nลองนึกภาพว่าคุณกำลังจะทำแบบทดสอบหนึ่งเป็นมินิเกมลูกบอลโดยมีลูกบอลอยู่ 2 ลูก โดย prover บอกว่าลูกบอลทั้ง 2 ลูกเป็นคนละสีกัน โดยเราจะเป็นผู้ตรวจสอบหรือ Verifier ที่จะมาพิสูจน์ว่าลูกบอลทั้ง 2 ลูกเป็นคนละสีกันจริงมั้ย โดยที่ไม่ต้องให้ Prover บอกว่าลูกไหนคือสีไหน และเราก็ตาบอดสีด้วย',
 
@@ -210,12 +210,12 @@ const MSG = {
     waitingVerifier: (side) => `ตอนนี้คุณคือผู้ตรวจสอบ (Verifier) : ผมที่เป็น Prover จะบอกคุณว่าลูกบอลสีแดงสลับฝั่งหรือไม่`,
 
     // ─── ข้อความเมื่อตอบถูกแต่ละรอบ ───
-    correctProver: (r, conf) => `รอบที่ ${r} — ยอดเยี่ยมครับ! คุณพิสูจน์ได้สำเร็จว่ารู้ตำแหน่งลูกแดงจริง!\nระดับความเชื่อมั่นของ Verifier: ${conf}% ทดสอบต่ออีก ${TOTAL_ROUNDS - r} รอบ`,
-    correctVerifier: (r, conf, action) => `รอบที่ ${r} — ครั้งนี้คุณกด "${action}" ครับ เพราะผมเป็น Prover ที่มองเห็นสีจริงๆไม่ได้โกหกคุณ!\nระดับความเชื่อมั่น: ${conf}% ทดสอบต่ออีก ${TOTAL_ROUNDS - r} รอบ`,
+    correctProver: (r, conf) => `รอบที่ ${r} — ยอดเยี่ยมครับ! คุณพิสูจน์ได้สำเร็จว่ารู้ตำแหน่งลูกแดงจริง!\nระดับความเชื่อมั่นของ Verifier: ${conf}% ทดสอบต่ออีก ${totalRounds - r} รอบ`,
+    correctVerifier: (r, conf, action) => `รอบที่ ${r} — ครั้งนี้คุณกด "${action}" ครับ เพราะผมเป็น Prover ที่มองเห็นสีจริงๆไม่ได้โกหกคุณ!\nระดับความเชื่อมั่น: ${conf}% ทดสอบต่ออีก ${totalRounds - r} รอบ`,
 
     // ─── ข้อความเมื่อตอบผิด ───
-    wrongProver: (r, conf) => `รอบที่ ${r} — ผิดพลาดครับ! คุณชี้ผิดฝั่ง Verifier จะเริ่มสงสัยแล้ว!\nระดับความเชื่อมั่นลดลง: ${conf}% ทดสอบต่ออีก ${TOTAL_ROUNDS - r} รอบ`,
-    wrongVerifier: (r, conf, action) => `รอบที่ ${r} — ครั้งนี้คุณกด "${action}" ครับ เพราะผมเป็น Prover ที่มองเห็นสีจริงๆไม่ได้โกหกคุณ!\nระดับความเชื่อมั่นเพิ่มขึ้น: ${conf}% ทดสอบต่ออีก ${TOTAL_ROUNDS - r} รอบ`,
+    wrongProver: (r, conf) => `รอบที่ ${r} — ผิดพลาดครับ! คุณชี้ผิดฝั่ง Verifier จะเริ่มสงสัยแล้ว!\nระดับความเชื่อมั่นลดลง: ${conf}% ทดสอบต่ออีก ${totalRounds - r} รอบ`,
+    wrongVerifier: (r, conf, action) => `รอบที่ ${r} — ครั้งนี้คุณกด "${action}" ครับ เพราะผมเป็น Prover ที่มองเห็นสีจริงๆไม่ได้โกหกคุณ!\nระดับความเชื่อมั่นเพิ่มขึ้น: ${conf}% ทดสอบต่ออีก ${totalRounds - r} รอบ`,
 
     // ─── ข้อความเมื่อเล่นครบ 5 รอบ (ชนะ) ───
     winProver: (conf) => `ยอดเยี่ยม! ครบ 5 รอบแล้ว!\nระดับความเชื่อมั่นสุดท้าย: ${conf}%\nคุณพิสูจน์สำเร็จว่ารู้สีลูกบอล โดยไม่เคยเปิดเผยข้อมูลให้ Verifier — นี่คือหัวใจของ Zero-Knowledge Proof ที่ปกป้องคำสั่งซื้อขายบน Stealth Trade!`,
@@ -233,7 +233,7 @@ const MSG = {
 export default function MiniGame() {
 
     // === ข้อความสนทนาเริ่มต้น ===
-    const INITIAL_CHAT = [
+    const initialChat = [
         {
             id: 1,
             sender: 'prover',
@@ -273,14 +273,14 @@ export default function MiniGame() {
     const [proverView, setProverView] = useState(false);                  // สลับมุมมอง: ผู้ตรวจสอบ/ผู้พิสูจน์
     const [swapOffset, setSwapOffset] = useState(0);                      // ค่า offset สำหรับ animation สลับ (0=ปกติ, 1=กำลังสลับ)
     const [isAnimating, setIsAnimating] = useState(false);                // ป้องกันกดซ้ำระหว่าง animation
-    const [narratorText, setNarratorText] = useState(MSG.roleSelect);     // ข้อความนักบรรยายปัจจุบัน
+    const [narratorText, setNarratorText] = useState(messages.roleSelect);     // ข้อความนักบรรยายปัจจุบัน
     const [gameWon, setGameWon] = useState(false);                        // เกมจบแล้วหรือยัง
     const [confidence, setConfidence] = useState(0);                      // ระดับความเชื่อมั่น (เริ่มที่ 0%)
     const [correctStreak, setCorrectStreak] = useState(0);                // จำนวนรอบที่ตอบถูกต่อเนื่อง (n ใน ZKP formula)
     const typed = useTypewriter(narratorText);                            // ข้อความที่กำลังพิมพ์ดีด
 
     // === State สำหรับระบบสนทนาแบบแชท ===
-    const [chatMessages, setChatMessages] = useState(INITIAL_CHAT);
+    const [chatMessages, setChatMessages] = useState(initialChat);
     const chatEndRef = useRef(null);
 
     // Auto scroll แชทเมื่อมีข้อความใหม่
@@ -376,7 +376,7 @@ export default function MiniGame() {
                 }
             ]);
         } else {
-            setChatMessages(INITIAL_CHAT);
+            setChatMessages(initialChat);
         }
         setPhase('waiting');
     }, [randomizePositions]);
@@ -391,23 +391,23 @@ export default function MiniGame() {
         setProverView(false);
         setSwapOffset(0);
         setIsAnimating(false);
-        setNarratorText(MSG.roleSelect);
+        setNarratorText(messages.roleSelect);
         setGameWon(false);
         setConfidence(0);
         setCorrectStreak(0);
-        setChatMessages(INITIAL_CHAT);
+        setChatMessages(initialChat);
     }, []);
 
     // === ฟังก์ชันจัดการเริ่มรอบถัดไป ===
     const handleNextRound = useCallback(() => {
         const nextRoundNum = round + 1;
-        if (nextRoundNum > TOTAL_ROUNDS) {
+        if (nextRoundNum > totalRounds) {
             // จบการทดลองทั้งหมด
             setPhase('done');
 
             const isProver = selectedRole === 'prover';
             const totalCorrectSoFar = log.filter(e => e.correct).length;
-            const won = isProver ? (totalCorrectSoFar >= Math.ceil(TOTAL_ROUNDS / 2)) : true;
+            const won = isProver ? (totalCorrectSoFar >= Math.ceil(totalRounds / 2)) : true;
 
             if (isProver) {
                 if (won) {
@@ -428,7 +428,7 @@ export default function MiniGame() {
                             text: `เห็นไหมล่ะ! นี่คือหัวใจของ Zero-Knowledge Proof ที่ Stealth Trade ใช้ปกป้องข้อมูลการเทรดของคุณไง!`
                         }
                     ]);
-                    setNarratorText(MSG.winProver(confidence));
+                    setNarratorText(messages.winProver(confidence));
                 } else {
                     setChatMessages(prev => [
                         ...prev,
@@ -447,7 +447,7 @@ export default function MiniGame() {
                             text: `แหะๆ... รอบนี้พลาดไปหน่อย ขอแก้ตัวใหม่อีกรอบนะ!`
                         }
                     ]);
-                    setNarratorText(MSG.loseProver(confidence));
+                    setNarratorText(messages.loseProver(confidence));
                 }
             } else {
                 // Verifier Role - AI Prover wins
@@ -468,7 +468,7 @@ export default function MiniGame() {
                         text: `เห็นไหมล่ะ! นี่คือความมหัศจรรย์ของ ZKP พิสูจน์ความจริงได้โดยไม่ต้องเปิดเผยสีหรือข้อมูลใด ๆ เลย!`
                     }
                 ]);
-                setNarratorText(MSG.winVerifier(confidence));
+                setNarratorText(messages.winVerifier(confidence));
             }
             setGameWon(won);
             return;
@@ -528,12 +528,12 @@ export default function MiniGame() {
         // อัพเดท narrator text
         if (proverIsCorrect) {
             setNarratorText(selectedRole === 'prover' 
-                ? MSG.correctProver(newRound, newConf) 
-                : MSG.correctVerifier(newRound, newConf, chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'));
+                ? messages.correctProver(newRound, newConf) 
+                : messages.correctVerifier(newRound, newConf, chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'));
         } else {
             setNarratorText(selectedRole === 'prover' 
-                ? MSG.wrongProver(newRound, newConf) 
-                : MSG.wrongVerifier(newRound, newConf, chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'));
+                ? messages.wrongProver(newRound, newConf) 
+                : messages.wrongVerifier(newRound, newConf, chooseSide === 'left' ? 'สลับฝั่ง' : 'ไม่สลับ'));
         }
 
         // แอนิเมชันสลับตำแหน่ง
@@ -618,7 +618,7 @@ export default function MiniGame() {
                 if (!proverIsCorrect) {
                     setPhase('done');
                     setGameWon(false);
-                    setNarratorText(MSG.loseVerifier(newConf));
+                    setNarratorText(messages.loseVerifier(newConf));
                 }
                 setIsAnimating(false);
             }, 750);
@@ -673,7 +673,7 @@ export default function MiniGame() {
                 if (!proverIsCorrect) {
                     setPhase('done');
                     setGameWon(false);
-                    setNarratorText(MSG.loseProver(newConf));
+                    setNarratorText(messages.loseProver(newConf));
                 }
                 setIsAnimating(false);
             }, 750);
@@ -684,7 +684,7 @@ export default function MiniGame() {
     const showColors = selectedRole === 'prover' || phase === 'done';
 
     // === ระยะห่างระหว่างลูกบอล สำหรับ animation สลับตำแหน่ง (พิกเซล) ===
-    const SWAP_GAP = 200;
+    const swapGap = 200;
 
     // ══════════════════════════════════════════════════
     // เริ่มต้น JSX: โครงสร้างหน้ามินิเกม
@@ -868,7 +868,7 @@ export default function MiniGame() {
                                 </button>
                             ) : phase === 'reveal' ? (
                                 <button className="mg-btn-primary" onClick={handleNextRound} disabled={isAnimating}>
-                                    {round >= TOTAL_ROUNDS ? 'สรุปผลการทดลอง ZKP →' : `เริ่มรอบที่ ${round + 1} →`}
+                                    {round >= totalRounds ? 'สรุปผลการทดลอง ZKP →' : `เริ่มรอบที่ ${round + 1} →`}
                                 </button>
                             ) : (
                                 <div className="mg-action-row">
@@ -904,7 +904,7 @@ export default function MiniGame() {
 
                             {/* ═══ จุดแสดงจำนวนรอบ (5 จุด) ═══ */}
                             <div className="mg-dots">
-                                {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
+                                {Array.from({ length: totalRounds }).map((_, i) => (
                                     <div
                                         key={i}
                                         className={`mg-dot ${i < round ? 'mg-dot-done' : i === round && phase !== 'done' ? 'mg-dot-active' : ''}`}
@@ -917,7 +917,7 @@ export default function MiniGame() {
                     {/* ══════ ฝั่งขวา: แถบด้านข้าง (Sidebar) ══════ */}
                     <aside className="mg-sidebar">
                         {/* แถบความเชื่อมั่น */}
-                        <ConfidenceBar confidence={confidence} correctRounds={correctStreak} total={TOTAL_ROUNDS} />
+                        <ConfidenceBar confidence={confidence} correctRounds={correctStreak} total={totalRounds} />
 
                         {/* บันทึกผลการทดสอบ */}
                         <RoundLog log={log} />

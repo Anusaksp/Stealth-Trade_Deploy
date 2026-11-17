@@ -125,11 +125,11 @@ Route::get('/upload-drive', function () {
 });
 
 Route::get('/minigameball', function () {
-    return Inertia::render('minigame_ball');
+    return Inertia::render('MiniGame');
 })->name('minigameball');
 
 Route::get('/minigamecave', function () {
-    return Inertia::render('minigame_cave');
+    return Inertia::render('MiniGameCave');
 })->name('minigamecave');
 
 Route::get('/lab0', function () {
@@ -137,11 +137,11 @@ Route::get('/lab0', function () {
 })->name('lab0');
 
 Route::get('/minigame_cipher', function () {
-    return Inertia::render('minigame_cipher');
+    return Inertia::render('MiniGameCipher');
 })->name('minigame_cipher');
 
 Route::get('/minigame_commitreveal', function () {
-    return Inertia::render('minigame_commitreveal');
+    return Inertia::render('Lab4');
 })->name('minigame_commitreveal');
 
 Route::get('/lab5', function () {

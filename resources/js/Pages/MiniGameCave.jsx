@@ -16,7 +16,7 @@ import '../../css/cave.css';
 import PageBackground from '@/Components/PageBackground';
 
 // ===== ค่าคงที่ของเกม =====
-const STEPS = {
+const steps = {
     CHOOSE_KNOWLEDGE: 'choose_knowledge',
     CHOOSE_ENTRANCE: 'choose_entrance',
     PEGGY_ENTERING: 'peggy_entering',
@@ -25,9 +25,9 @@ const STEPS = {
     RESULT: 'result',
 };
 
-const PROGRESS_INSIDE = 0.63;
-const OUTSIDE_POS = { x: 300, y: 522 };
-const DOOR_CENTER_POS = { x: 300, y: 168 };
+const progressInside = 0.63;
+const outsidePos = { x: 300, y: 522 };
+const doorCenterPos = { x: 300, y: 168 };
 
 
 // ──────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ function useTypewriter(text, speed = 22) {
 // ──────────────────────────────────────────────────────
 // ข้อความของนักบรรยาย (ดร. ซิโร่)
 // ──────────────────────────────────────────────────────
-const MSG = {
+const messages = {
     intro: 'สวัสดีครับ! ผมคือดร. ซิโร่ วิศวกร ZKP ของ Stealth Trade\n\nคุณกำลังจะเล่นปริศนาถ้ำ Ali Baba — ถ้ำวงแหวนที่มี "ประตูลับ" กลางทาง\nPeggy จะเข้าถ้ำทางใดทางหนึ่ง แล้ว Victor จะสั่งให้ออกทางที่เขาเลือก\nถ้า Peggy รู้คำวิเศษ เธอจะเปิดประตูลับข้ามฝั่งได้ทุกครั้ง!\n\n------------------------\n\nเลือกบทบาทก่อนครับ — คุณจะเป็น Peggy ที่ "รู้จริง" หรือ "แกล้งทำ"?\nถ้ารู้จริง = เปิดประตูลับได้ ออกทางไหนก็ได้\nถ้าแกล้งทำ = เปิดประตูไม่ได้ ต้องเสี่ยงว่า Victor จะสั่งออกทางเดียวกับที่เข้า',
 
     chooseKnowledge: 'เลือกบทบาทก่อนครับ — คุณจะเป็น Peggy ที่ "รู้จริง" หรือ "แกล้งทำ"?\n\nถ้ารู้จริง = เปิดประตูลับได้ ออกทางไหนก็ได้\nถ้าแกล้งทำ = เปิดประตูไม่ได้ ต้องเสี่ยงว่า Victor จะสั่งออกทางเดียวกับที่เข้า',
@@ -88,7 +88,7 @@ const MSG = {
 
 
 // ──────────────────────────────────────────────────────
-// Confidence Engine (เหมือนใน minigame_ball)
+// Confidence Engine (เหมือนใน MiniGame)
 // ──────────────────────────────────────────────────────
 /**
  * แสดงแถบความเชื่อมั่น (Confidence Engine) ตามจำนวนรอบที่พิสูจน์ผ่าน
@@ -280,7 +280,7 @@ export default function MiniGameCave() {
     const [hasSecretKnowledge, setHasSecretKnowledge] = useState(true);
     const totalRounds = hasSecretKnowledge ? 5 : 3;
 
-    const [step, setStep] = useState(STEPS.CHOOSE_KNOWLEDGE);
+    const [step, setStep] = useState(steps.CHOOSE_KNOWLEDGE);
     const [chosenEntrance, setChosenEntrance] = useState(null);
     const [victorRequest, setVictorRequest] = useState(null);
     const [isDoorOpen, setIsDoorOpen] = useState(false);
@@ -293,18 +293,18 @@ export default function MiniGameCave() {
     const [isGameWon, setIsGameWon] = useState(false);
 
     // === State สำหรับแอนิเมชัน ===
-    const [peggyPos, setPeggyPos] = useState({ ...OUTSIDE_POS, isWalking: false });
+    const [peggyPos, setPeggyPos] = useState({ ...outsidePos, isWalking: false });
     const [isAnimating, setIsAnimating] = useState(false);
     const [highlightPath, setHighlightPath] = useState(null);
     const [exitPath, setExitPath] = useState(null);
 
     // === Narrator ===
-    const [narratorText, setNarratorText] = useState(MSG.intro);
+    const [narratorText, setNarratorText] = useState(messages.intro);
     const typedText = useTypewriter(narratorText, 25);
 
     // === Refs ===
     const autoPlayRef = useRef(null);
-    const peggyPosRef = useRef({ ...OUTSIDE_POS });
+    const peggyPosRef = useRef({ ...outsidePos });
     const pathARef = useRef(null);
     const pathBRef = useRef(null);
     const rafRef = useRef(null);
@@ -392,8 +392,8 @@ export default function MiniGameCave() {
      */
     const handleChooseKnowledge = useCallback((hasKnowledge) => {
         setHasSecretKnowledge(hasKnowledge);
-        setStep(STEPS.CHOOSE_ENTRANCE);
-        setNarratorText(MSG.waiting);
+        setStep(steps.CHOOSE_ENTRANCE);
+        setNarratorText(messages.waiting);
         setStatusMsg('พร้อมเริ่มรอบใหม่ — เลือกทางเข้าถ้ำ');
     }, []);
 
@@ -411,16 +411,16 @@ export default function MiniGameCave() {
         setResult(null);
         setExitPath(null);
         setHighlightPath(path);
-        setStep(STEPS.PEGGY_ENTERING);
+        setStep(steps.PEGGY_ENTERING);
         setStatusMsg(`Peggy เลือกเข้าทาง ${path}...`);
-        setNarratorText(MSG.entering(path));
+        setNarratorText(messages.entering(path));
 
         const pathRef = path === 'A' ? pathARef : pathBRef;
-        await moveAlongPath(pathRef, 0, PROGRESS_INSIDE, 1100);
+        await moveAlongPath(pathRef, 0, progressInside, 1100);
 
         setStatusMsg('Peggy อยู่ในถ้ำแล้ว — Victor เลือกทางออก');
-        setNarratorText(MSG.victorChoose);
-        setStep(STEPS.VICTOR_CHOOSE);
+        setNarratorText(messages.victorChoose);
+        setStep(steps.VICTOR_CHOOSE);
         setIsAnimating(false);
     }, [isAnimating, moveAlongPath, pathARef, pathBRef]);
 
@@ -436,7 +436,7 @@ export default function MiniGameCave() {
         setIsAnimating(true);
         setVictorRequest(requestedPath);
         setExitPath(requestedPath);
-        setStep(STEPS.PEGGY_EXITING);
+        setStep(steps.PEGGY_EXITING);
 
         const isSameWay = chosenEntrance === requestedPath;
         const enteredPathRef = chosenEntrance === 'A' ? pathARef : pathBRef;
@@ -448,18 +448,18 @@ export default function MiniGameCave() {
             isMaybe = true;
             isSuccess = false;
             setStatusMsg(`Peggy ออกทาง ${requestedPath} ทางเดิมที่เข้า — Victor สงสัย...`);
-            await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 0, 1100);
+            await moveAlongPath(enteredPathRef, progressInside, 0, 1100);
         } else {
             if (hasSecretKnowledge) {
                 isSuccess = true;
                 setStatusMsg(`Peggy รู้คำวิเศษ! เปิดประตูลับและออกทาง ${requestedPath} ✨`);
                 
-                await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 1.0, 700);
+                await moveAlongPath(enteredPathRef, progressInside, 1.0, 700);
                 
                 setHighlightPath(requestedPath);
                 setIsDoorOpen(true);
                 
-                await movePeggy(DOOR_CENTER_POS, 250);
+                await movePeggy(doorCenterPos, 250);
                 setIsDoorOpen(false);
                 await moveAlongPath(exitPathRef, 1.0, 0, 1100);
             } else {
@@ -467,7 +467,7 @@ export default function MiniGameCave() {
                 setStatusMsg(`Peggy ไม่รู้คำวิเศษ! เปิดประตูไม่ได้ ❌`);
                 
                 // เดินไปถึงประตูแล้วติด
-                await moveAlongPath(enteredPathRef, PROGRESS_INSIDE, 1.0, 700);
+                await moveAlongPath(enteredPathRef, progressInside, 1.0, 700);
                 
                 const currentPosition = peggyPosRef.current;
                 for (let i = 0; i < 2; i++) {
@@ -479,7 +479,7 @@ export default function MiniGameCave() {
         }
 
         setResult(isSuccess ? 'success' : isMaybe ? 'maybe' : 'fail');
-        setStep(STEPS.RESULT);
+        setStep(steps.RESULT);
 
         let newSuccessCount;
         let newConfidenceCount;
@@ -500,13 +500,13 @@ export default function MiniGameCave() {
         if (newSuccessCount >= totalRounds) {
             setIsGameWon(true);
             const finalPercent = ((1 - Math.pow(0.5, newConfidenceCount)) * 100).toFixed(2) + '%';
-            setNarratorText(MSG.win(finalPercent, totalRounds));
+            setNarratorText(messages.win(finalPercent, totalRounds));
         } else if (isMaybe) {
-            setNarratorText(MSG.maybe(round));
+            setNarratorText(messages.maybe(round));
         } else if (isSuccess) {
-            setNarratorText(MSG.success(round, totalRounds));
+            setNarratorText(messages.success(round, totalRounds));
         } else {
-            setNarratorText(MSG.fail(round));
+            setNarratorText(messages.fail(round));
             setSuccessCount(0);
             setConfidenceCount(0);
         }
@@ -531,17 +531,17 @@ export default function MiniGameCave() {
      */
     const handleNextRound = useCallback(() => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        setStep(STEPS.CHOOSE_ENTRANCE);
+        setStep(steps.CHOOSE_ENTRANCE);
         setChosenEntrance(null);
         setVictorRequest(null);
         setIsDoorOpen(false);
         setResult(null);
         setExitPath(null);
         setHighlightPath(null);
-        peggyPosRef.current = { ...OUTSIDE_POS };
-        setPeggyPos({ ...OUTSIDE_POS, isWalking: false });
+        peggyPosRef.current = { ...outsidePos };
+        setPeggyPos({ ...outsidePos, isWalking: false });
         setStatusMsg('พร้อมเริ่มรอบใหม่ — เลือกทางเข้าถ้ำ');
-        setNarratorText(MSG.waiting);
+        setNarratorText(messages.waiting);
     }, []);
 
     /**
@@ -557,7 +557,7 @@ export default function MiniGameCave() {
         setConfidenceCount(0);
         setHistoryEntries([]);
         setHasSecretKnowledge(true);
-        setStep(STEPS.CHOOSE_KNOWLEDGE);
+        setStep(steps.CHOOSE_KNOWLEDGE);
         setChosenEntrance(null);
         setVictorRequest(null);
         setIsDoorOpen(false);
@@ -565,10 +565,10 @@ export default function MiniGameCave() {
         setExitPath(null);
         setHighlightPath(null);
         setIsGameWon(false);
-        peggyPosRef.current = { ...OUTSIDE_POS };
-        setPeggyPos({ ...OUTSIDE_POS, isWalking: false });
+        peggyPosRef.current = { ...outsidePos };
+        setPeggyPos({ ...outsidePos, isWalking: false });
         setStatusMsg('พร้อมเริ่มรอบใหม่ — เลือกบทบาทของคุณ');
-        setNarratorText(MSG.intro);
+        setNarratorText(messages.intro);
         if (autoPlayRef.current) {
             clearInterval(autoPlayRef.current);
             autoPlayRef.current = null;
@@ -624,7 +624,7 @@ export default function MiniGameCave() {
         setSuccessCount(successStreak);
         setConfidenceCount(confidenceStreak);
         if (confidenceStreak >= totalRounds) setIsGameWon(true);
-        setStep(STEPS.RESULT);
+        setStep(steps.RESULT);
         setResult(null);
         setStatusMsg(`จำลองเสร็จ 20 รอบ — ดูผลลัพธ์ด้านล่าง`);
         setNarratorText(`จำลองเสร็จ 20 รอบแล้ว!\nรอบสำเร็จติดกันล่าสุด: ${successStreak} รอบ\nดูผลลัพธ์ที่ Confidence Engine ด้านขวาครับ`);
@@ -639,7 +639,7 @@ export default function MiniGameCave() {
     const lastEntry = historyEntries.length > 0 ? historyEntries[0] : null;
 
     // ====================================================
-    // UI — ใช้ Layout เดียวกับ minigame_ball
+    // UI — ใช้ Layout เดียวกับ MiniGame
     // ====================================================
     return (
         <PageBackground className="cave-page">
@@ -730,16 +730,16 @@ export default function MiniGameCave() {
                         </div>
 
                         {/* ═══ แผงควบคุมหลัก (Grid 2 คอลัมน์) ═══ */}
-                        {step !== STEPS.CHOOSE_KNOWLEDGE && (
+                        {step !== steps.CHOOSE_KNOWLEDGE && (
                             <div className="mg-cave-panel-grid">
 
                                 {/* ฝั่งซ้าย: เลือกทางเข้า และ ปุ่มควบคุม */}
                                 <div className="mg-cave-panel-card">
                                     <h4 className="mg-cave-section-title" style={{ marginBottom: '8px' }}>
-                                        {step === STEPS.VICTOR_CHOOSE ? '👁 Victor สั่งให้ออกทาง...' : 'เลือกทางเข้า'}
+                                        {step === steps.VICTOR_CHOOSE ? '👁 Victor สั่งให้ออกทาง...' : 'เลือกทางเข้า'}
                                     </h4>
 
-                                    {step === STEPS.VICTOR_CHOOSE ? (
+                                    {step === steps.VICTOR_CHOOSE ? (
                                         <div className="mg-action-row" style={{ marginBottom: '12px' }}>
                                             <button className="mg-btn-path" onClick={() => handleVictorRequest('A')} disabled={isAnimating}>
                                                 <span className="mg-btn-path-char">A</span>
@@ -755,7 +755,7 @@ export default function MiniGameCave() {
                                             <button
                                                 className={`mg-btn-path ${chosenEntrance === 'A' ? 'mg-selected' : ''}`}
                                                 onClick={() => handleChooseEntrance('A')}
-                                                disabled={step !== STEPS.CHOOSE_ENTRANCE || isAnimating}
+                                                disabled={step !== steps.CHOOSE_ENTRANCE || isAnimating}
                                             >
                                                 <span className="mg-btn-path-char">A</span>
                                                 <span className="mg-btn-path-desc">ทาง A (ซ้าย)</span>
@@ -763,7 +763,7 @@ export default function MiniGameCave() {
                                             <button
                                                 className={`mg-btn-path ${chosenEntrance === 'B' ? 'mg-selected' : ''}`}
                                                 onClick={() => handleChooseEntrance('B')}
-                                                disabled={step !== STEPS.CHOOSE_ENTRANCE || isAnimating}
+                                                disabled={step !== steps.CHOOSE_ENTRANCE || isAnimating}
                                             >
                                                 <span className="mg-btn-path-char">B</span>
                                                 <span className="mg-btn-path-desc">ทาง B (ขวา)</span>
@@ -772,7 +772,7 @@ export default function MiniGameCave() {
                                     )}
 
                                     <div className="mg-action-row">
-                                        <button className="mg-btn-primary-action" onClick={handleNextRound} disabled={step === STEPS.CHOOSE_ENTRANCE && historyEntries.length === 0}>
+                                        <button className="mg-btn-primary-action" onClick={handleNextRound} disabled={step === steps.CHOOSE_ENTRANCE && historyEntries.length === 0}>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
                                             รอบต่อไป
                                         </button>
@@ -808,7 +808,7 @@ export default function MiniGameCave() {
                         )}
 
                         {/* เลือกบทบาท (ตอนเริ่มเกม) */}
-                        {step === STEPS.CHOOSE_KNOWLEDGE && (
+                        {step === steps.CHOOSE_KNOWLEDGE && (
                             <div className="mg-cave-section" style={{ marginTop: '10px' }}>
                                 <h4 className="mg-cave-section-title">เลือกบทบาทของคุณ</h4>
                                 <div className="mg-action-row">

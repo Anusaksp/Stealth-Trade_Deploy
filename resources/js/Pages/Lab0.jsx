@@ -6,7 +6,7 @@ import PageBackground from '@/Components/PageBackground';
 /* ══════════════════════════════════════════════════════
    ⚙️ ชุดคำถามและเป้าหมายสำหรับ Station 1
    ══════════════════════════════════════════════════════ */
-const QUESTIONS = [
+const questions = [
     {
         id: 1,
         title: 'ข้อที่ 1: ฝูงชนในป่าซาฟารี',
@@ -80,12 +80,12 @@ const QUESTIONS = [
     },
 ];
 
-const MENTOR_LINES = {
+const mentorLines = {
     intro: `<p>สวัสดีครับ! ผมคือ ดร. ชิโร่ วิศวกร ZKP ของ Stealth Trade</p><p>ห้องนี้ผมจะไม่บรรยายให้ฟังเฉย ๆ ครับ — ผมเตรียม <b>สถานีทดลอง 3 จุด</b> ไว้ให้คุณลองกดเอง พิมพ์เอง แล้วดูผลด้วยตาตัวเอง</p><p>โดยก่อนที่จะไปเล่นจะให้เข้าใจก่อนว่าคำศัพท์พวกนี้คืออะไร</p>
     <p><b>- Proof (หลักฐาน) </b> : ชุดข้อมูลทางคณิตศาสตร์ที่ส่งไปพิสูจน์ โดยไม่เปิดเผยรายละเอียดความลับ</p>
     <p><b>- Verifier (ผู้ตรวจสอบ)</b> : คนที่เอาหลักฐานมาตรวจสอบตามกฎ เพื่อตัดสินว่าจะยอมรับหรือไม่</p>
     <p><b>- Prover (ผู้พิสูจน์) </b> : คนที่ต้องการยืนยันว่าตัวเองรู้ข้อมูลจริง</p>
-    <p>เริ่มจากสถานีแรกเลยครับ ลองพิสูจน์ให้เพื่อนเชื่อว่าคุณหา${QUESTIONS[0].name}เจอ โดยไม่บอกว่าเขาอยู่ตรงไหน</p>`,
+    <p>เริ่มจากสถานีแรกเลยครับ ลองพิสูจน์ให้เพื่อนเชื่อว่าคุณหา${questions[0].name}เจอ โดยไม่บอกว่าเขาอยู่ตรงไหน</p>`,
     1: `<p><b>เห็นไหมครับ?</b> เขาเห็นเป้าหมายโผล่มาตรงรูพอดี เลยมั่นใจว่าเราหาเจอจริง แต่รอบ ๆ ถูกปิดมืดหมด</p><p>แถมเรายังขยับกระดาษให้รูมาอยู่กลางจอทุกครั้ง เขาจึงจำไม่ได้ด้วยซ้ำว่ารูนี้มาจากมุมไหนของภาพ — นี่แหละคือ Zero-Knowledge</p>`,
     2: `<p><b>ยอดเยี่ยมครับ!</b> คุณได้ลองสร้างหลักฐานจากความลับของตัวเองแล้ว จะเห็นว่าค่า Proof เปลี่ยนทุกครั้ง แต่ยังใช้พิสูจน์ได้เหมือนเดิม และ Victor หรือใครก็ตามจะไม่มีวันเดาความลับของคุณย้อนกลับมาได้</p>`,
     3: `<p><b>ยอดเยี่ยมครับ!</b> คุณเพิ่งเห็นหลักการที่เรียกว่า Selective Disclosure — เปิดเผยเฉพาะสิ่งที่จำเป็นจริง ๆ</p><p>บน Stealth Trade เราใช้หลักการเดียวกันนี้ ระบบรู้แค่ว่า "เงินคุณพอสำหรับออร์เดอร์" โดยไม่เคยเห็นว่าคุณมีเงินเท่าไหร่ครับ</p>`,
@@ -93,7 +93,7 @@ const MENTOR_LINES = {
 };
 
 /* ── Pseudo-hash for ZKP proof ── */
-function pseudoHash(str, salt) {
+function PseudoHash(str, salt) {
     let h1 = 0x811c9dc5, h2 = 0x01000193;
     const s = String(salt) + '|' + str;
     for (let i = 0; i < s.length; i++) {
@@ -110,7 +110,7 @@ function pseudoHash(str, salt) {
 export default function Lab0() {
     // ── Progress ──
     const [doneSet, setDoneSet] = useState(new Set());
-    const [speech, setSpeech] = useState(MENTOR_LINES.intro);
+    const [speech, setSpeech] = useState(mentorLines.intro);
 
     // ── Station 1: Photo & Question State ──
     const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -120,7 +120,7 @@ export default function Lab0() {
     const imgRef = useRef(null);
     const [imgRatio, setImgRatio] = useState(849 / 1128);
 
-    const currentQ = QUESTIONS[currentQIndex];
+    const currentQ = questions[currentQIndex];
 
     // ── Station 2: Proof ──
     const [secret, setSecret] = useState('');
@@ -136,7 +136,7 @@ export default function Lab0() {
     const [isCopied, setIsCopied] = useState(false);
 
     // ── Station 3: ID Card ──
-    const ID_FIELDS = [
+    const idFields = [
         { id: 'age', label: 'อายุ 20 ปีขึ้นไป', val: 'ใช่', need: true },
         { id: 'name', label: 'ชื่อ-นามสกุล', val: 'สมชาย รักษ์ไทย', need: false },
         { id: 'dob', label: 'วันเกิด', val: '14 พ.ค. 2543', need: false },
@@ -146,7 +146,7 @@ export default function Lab0() {
     const [checked, setChecked] = useState({ age: false, name: false, dob: false, idnum: false, addr: false });
     const [v2Verdict, setV2Verdict] = useState({ cls: '', html: '' });
 
-    const NOTES = {
+    const notes = {
         idle: currentQ.noteIdle,
         shown: `เพื่อนเห็นทั้งภาพ พร้อมตำแหน่งของ${currentQ.name}`,
         masked: `เห็นแค่${currentQ.name}ผ่านรูที่ฉีก — ไม่มีอะไรบอกได้เลยว่ารูนี้มาจากส่วนไหนของภาพ`,
@@ -159,22 +159,22 @@ export default function Lab0() {
             const next = new Set(prev);
             next.add(n);
             const isAll = next.size === 3;
-            setSpeech(isAll ? MENTOR_LINES.all : MENTOR_LINES[n]);
+            setSpeech(isAll ? mentorLines.all : mentorLines[n]);
             return next;
         });
     }, []);
 
     // ── Station 1 Question Navigation ──
     const handleSelectQuestion = (idx) => {
-        if (idx < 0 || idx >= QUESTIONS.length) return;
+        if (idx < 0 || idx >= questions.length) return;
         setCurrentQIndex(idx);
         setMode('idle');
         setV1aVerdict({ cls: '', html: '' });
-        setSpeech(`<p><b>${QUESTIONS[idx].title}</b></p><p>${QUESTIONS[idx].mentorIntro}</p>`);
+        setSpeech(`<p><b>${questions[idx].title}</b></p><p>${questions[idx].mentorIntro}</p>`);
     };
 
     const handleNextQuestion = () => {
-        if (currentQIndex < QUESTIONS.length - 1) {
+        if (currentQIndex < questions.length - 1) {
             handleSelectQuestion(currentQIndex + 1);
         } else {
             handleSelectQuestion(0);
@@ -224,7 +224,7 @@ export default function Lab0() {
             // รหัสผ่านเปลี่ยน → สร้าง hash ใหม่
             const salt = Math.floor(Math.random() * 999999);
             setProofSalt(salt);
-            setProofOut('zkp:' + pseudoHash(val, salt));
+            setProofOut('zkp:' + PseudoHash(val, salt));
         }
         // รหัสผ่านเดิม → proofOut/proofSalt คงเดิม hash ไม่เปลี่ยน
 
@@ -237,7 +237,7 @@ export default function Lab0() {
     };
 
     // ── Station 3: Leak meter ──
-    const extraCount = ID_FIELDS.filter(f => !f.need && checked[f.id]).length;
+    const extraCount = idFields.filter(f => !f.need && checked[f.id]).length;
     const ageOn = checked['age'];
     const leakPct = Math.round(extraCount / 4 * 100);
     const leakBarColor = leakPct === 0 ? 'var(--l0-green)' : (leakPct <= 50 ? 'var(--l0-amber)' : 'var(--l0-red)');
@@ -259,7 +259,7 @@ export default function Lab0() {
         const newChecked = { ...checked, [id]: checked_val };
         setChecked(newChecked);
 
-        const newExtra = ID_FIELDS.filter(f => !f.need && newChecked[f.id]).length;
+        const newExtra = idFields.filter(f => !f.need && newChecked[f.id]).length;
         const newAgeOn = newChecked['age'];
 
         if (newAgeOn && newExtra === 0) {
@@ -274,7 +274,7 @@ export default function Lab0() {
 
     const handleUseZKP = () => {
         const zkpChecked = {};
-        ID_FIELDS.forEach(f => { zkpChecked[f.id] = f.need; });
+        idFields.forEach(f => { zkpChecked[f.id] = f.need; });
         setChecked(zkpChecked);
         setV2Verdict({ cls: 'good', html: '<b>นาฬิกาอัจฉริยะขึ้นไฟเขียว — คุณเลือกข้อมูลที่จะแสดงได้ถูกต้อง</b> เครื่องสแกนบอกพนักงานแค่ว่า "ใช่ อายุเกิน 20" เขาได้คำตอบที่ต้องการครบ ส่วนชื่อ เลขบัตร ที่อยู่ และวันเกิดจริง ยังเป็นความลับทั้งหมด หลักการนี้เรียกว่า Zero-Knowledge Proof' });
         complete(3, ['ben3']);
@@ -350,9 +350,9 @@ export default function Lab0() {
                             {/* Question Navigation Bar */}
                             <div className="lab0-q-nav">
                                 <div className="lab0-q-nav-left">
-                                    <span className="lab0-q-badge">ข้อที่ {currentQIndex + 1} / {QUESTIONS.length}</span>
+                                    <span className="lab0-q-badge">ข้อที่ {currentQIndex + 1} / {questions.length}</span>
                                     <div className="lab0-q-tabs">
-                                        {QUESTIONS.map((q, idx) => {
+                                        {questions.map((q, idx) => {
                                             const isActive = idx === currentQIndex;
                                             const isDone = solvedQuestions.has(idx);
                                             return (
@@ -383,7 +383,7 @@ export default function Lab0() {
                                         className="lab0-q-nav-btn"
                                         onClick={handleNextQuestion}
                                     >
-                                        {currentQIndex < QUESTIONS.length - 1 ? 'ถัดไป →' : '↺ วนข้อแรก'}
+                                        {currentQIndex < questions.length - 1 ? 'ถัดไป →' : '↺ วนข้อแรก'}
                                     </button>
                                 </div>
                             </div>
@@ -456,7 +456,7 @@ export default function Lab0() {
                                 )}
                             </div>
 
-                            <p className="lab0-crowd-note">{NOTES[mode]}</p>
+                            <p className="lab0-crowd-note">{notes[mode]}</p>
 
                             <div className="lab0-btn-row">
                                 <button className="lab0-btn outline-primary" onClick={handleShowAll}>👁 เปิดภาพทั้งหมดให้เพื่อนดู</button>
@@ -469,8 +469,8 @@ export default function Lab0() {
                                     <div dangerouslySetInnerHTML={{ __html: v1aVerdict.html }} />
                                     {mode === 'masked' && (
                                         <div className="lab0-verdict-next">
-                                            <span>{currentQIndex < QUESTIONS.length - 1 ? `🎉 ผ่านข้อที่ ${currentQIndex + 1} แล้ว! ลองทดสอบข้อถัดไปต่อเลย` : '🎉 ผ่านครบทั้ง 4 ข้อของสถานีที่ 1 แล้ว!'}</span>
-                                            {currentQIndex < QUESTIONS.length - 1 ? (
+                                            <span>{currentQIndex < questions.length - 1 ? `🎉 ผ่านข้อที่ ${currentQIndex + 1} แล้ว! ลองทดสอบข้อถัดไปต่อเลย` : '🎉 ผ่านครบทั้ง 4 ข้อของสถานีที่ 1 แล้ว!'}</span>
+                                            {currentQIndex < questions.length - 1 ? (
                                                 <button type="button" className="lab0-btn primary" style={{ padding: '6px 14px', fontSize: '12px' }} onClick={handleNextQuestion}>
                                                     เล่นข้อถัดไป →
                                                 </button>
@@ -564,7 +564,7 @@ export default function Lab0() {
                                             onClick={() => {
                                                 const typed = loginInput.trim();
                                                 // Hash รหัสผ่านที่พิมพ์ด้วย salt เดิม แล้วเทียบกับ proofOut
-                                                const hashed = 'zkp:' + pseudoHash(typed, proofSalt);
+                                                const hashed = 'zkp:' + PseudoHash(typed, proofSalt);
                                                 if (hashed === proofOut) {
                                                     setLoginResult('success');
                                                     complete(2);
@@ -659,7 +659,7 @@ export default function Lab0() {
                                     <span>บัตรประชาชน / ข้อมูลส่วนตัว</span>
                                     <span>☑ = แสดงให้พนักงานดู</span>
                                 </div>
-                                {ID_FIELDS.map(f => {
+                                {idFields.map(f => {
                                     const isNeeded = f.need && checked[f.id];
                                     const isExposed = !f.need && checked[f.id];
                                     let fieldCls = 'lab0-id-field';
@@ -785,7 +785,7 @@ export default function Lab0() {
                             <ul className="lab0-toc">
                                 <li className={doneSet.has(1) ? 'done' : ''}>
                                     <span className="lab0-tick">{doneSet.has(1) ? '✓' : ''}</span>
-                                    สถานี 1 —  เกมฝูงชน {solvedQuestions.size > 0 && `(${solvedQuestions.size}/${QUESTIONS.length} ข้อ)`}
+                                    สถานี 1 —  เกมฝูงชน {solvedQuestions.size > 0 && `(${solvedQuestions.size}/${questions.length} ข้อ)`}
                                 </li>
                                 <li className={doneSet.has(2) ? 'done' : ''}>
                                     <span className="lab0-tick">{doneSet.has(2) ? '✓' : ''}</span>
