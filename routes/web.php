@@ -9,17 +9,34 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\WalletController;
+use App\Models\Item;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $featuredItems = Item::query()
+        ->with(['images', 'itemType', 'user.profile'])
+        ->where('status', Item::STATUS_AVAILABLE)
+        ->latest()
+        ->limit(8)
+        ->get()
+        ->map(fn (Item $item) => [
+            'id' => $item->id,
+            'name' => $item->name,
+            'price' => $item->price,
+            'item_type' => $item->itemType?->name,
+            'seller_name' => $item->user?->profile?->display_name ?: $item->user?->name,
+            'cover_image' => $item->images->first()?->path,
+        ]);
+
     return Inertia::render('Homepage', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'featuredItems' => $featuredItems,
     ]);
 });
 
