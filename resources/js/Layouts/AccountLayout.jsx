@@ -3,18 +3,18 @@ import StealthTradeLayout from '@/Layouts/StealthTradeLayout';
 
 const MENU = [
     { key: 'profile', label: 'โปรไฟล์', icon: 'person', href: 'account.profile' },
-    { key: 'orders', label: 'คำสั่งซื้อ', icon: 'receipt_long', href: null, disabled: true },
+    { key: 'orders', label: 'คำสั่งซื้อ', icon: 'receipt_long', href: 'account.orders' },
     { key: 'addresses', label: 'ที่อยู่จัดส่ง', icon: 'location_on', href: 'account.addresses' },
 ];
 
-export default function AccountLayout({ children, active }) {
+export default function AccountLayout({ children, active, title = 'โปรไฟล์ของฉัน', subtitle = 'จัดการข้อมูลส่วนตัวและที่อยู่จัดส่ง' }) {
     return (
         <StealthTradeLayout>
             <div className="mx-auto w-full max-w-6xl px-4 py-6">
                 {/* Banner */}
-                <div className="bg-neutral-100 rounded-2xl px-6 py-6 mb-6">
-                    <h1 className="text-2xl font-bold text-neutral-900">โปรไฟล์ของฉัน</h1>
-                    <p className="text-sm text-neutral-500 mt-1">จัดการข้อมูลส่วนตัวและที่อยู่จัดส่ง</p>
+                <div className="bg-neutral-200 border border-neutral-300 rounded-2xl px-6 py-6 mb-6">
+                    <h1 className="text-2xl font-bold text-neutral-900">{title}</h1>
+                    <p className="text-sm text-neutral-500 mt-1">{subtitle}</p>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-6">

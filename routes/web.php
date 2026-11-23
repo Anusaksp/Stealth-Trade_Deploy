@@ -5,6 +5,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GoogleLoginController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\WalletController;
@@ -88,6 +89,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/wallet/checkout', [WalletController::class, 'checkout'])->name('wallet.checkout');
     Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
     Route::get('/wallet/success', [WalletController::class, 'success'])->name('wallet.success');
+
+    // Orders / การซื้อขาย
+    Route::get('/checkout/{item}', [OrderController::class, 'checkout'])->name('orders.checkout');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/success/{order}', [OrderController::class, 'success'])->name('orders.success');
+    Route::get('/account/orders', [OrderController::class, 'myOrders'])->name('account.orders');
+    Route::patch('/orders/{order}/advance', [OrderController::class, 'advance'])->name('orders.advance');
 
     // แชท
     Route::post('/items/{item}/chat', [ChatController::class, 'start'])->name('chat.start');

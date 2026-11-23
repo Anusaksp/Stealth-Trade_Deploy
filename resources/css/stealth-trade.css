@@ -172,13 +172,13 @@ body {
 }
 
 .stealth-nav__link:hover {
-    color: #10b981;
-    background-color: rgba(16, 185, 129, 0.1);
+    color: #111111;
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .stealth-nav__link--active {
-    background-color: #e6f8f0;
-    color: #10b981 !important;
+    background-color: #111111;
+    color: #ffffff !important;
 }
 
 

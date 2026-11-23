@@ -1,6 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState, useEffect, useRef, createContext, useContext } from 'react';
-import axios from 'axios';
+import { useState, createContext, useContext } from 'react';
 import PageBackground from '@/Components/PageBackground';
 
 const formatBalance = (n) =>
@@ -14,42 +13,9 @@ export default function StealthTradeLayout({ children }) {
     const { auth } = usePage().props;
     const { url } = usePage();
     const [lang, setLang] = useState('TH');
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [toast, setToast] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
-    const prevUnreadRef = useRef(0);
-    const toastTimerRef = useRef(null);
 
-    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers', '/conversations', '/wallet'].some((p) => url.startsWith(p));
-
-    // Global polling: ตรวจข้อความใหม่ (unread) ทุก 15 วิ
-    useEffect(() => {
-        if (!auth?.user) return;
-        let mounted = true;
-        const fetchUnread = async () => {
-            try {
-                const res = await axios.get(route('chat.unread'));
-                if (!mounted) return;
-                const count = res.data.unread_count;
-                if (count > prevUnreadRef.current && res.data.conversations.length > 0) {
-                    const latest = res.data.conversations[0];
-                    setToast(`💬 ข้อความใหม่จาก ${latest.other_user} — ${latest.item_name}`);
-                    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-                    toastTimerRef.current = setTimeout(() => setToast(null), 4000);
-                }
-                prevUnreadRef.current = count;
-                setUnreadCount(count);
-            } catch (e) {
-                // ignore
-            }
-        };
-        fetchUnread();
-        const interval = setInterval(fetchUnread, 15000);
-        return () => {
-            mounted = false;
-            clearInterval(interval);
-        };
-    }, [auth?.user]);
+    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers', '/conversations', '/wallet', '/checkout', '/orders'].some((p) => url.startsWith(p));
 
     return (
         <LangContext.Provider value={{ lang, setLang }}>
@@ -210,12 +176,6 @@ export default function StealthTradeLayout({ children }) {
                     </div>
                 </footer>
 
-                {/* Toast แจ้งข้อความใหม่ */}
-                {toast && (
-                    <div className="fixed bottom-4 right-4 z-50 bg-neutral-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm max-w-xs">
-                        {toast}
-                    </div>
-                )}
             </PageBackground>
         </LangContext.Provider>
     );

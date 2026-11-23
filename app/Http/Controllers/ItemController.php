@@ -6,6 +6,7 @@ use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
 use App\Models\ItemType;
+use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -106,9 +107,20 @@ class ItemController extends Controller
     {
         $item->load(['images', 'itemType', 'user.profile', 'pickupAddress']);
 
+        $related = Item::query()
+            ->with(['images', 'itemType'])
+            ->where('user_id', $item->user_id)
+            ->where('id', '!=', $item->id)
+            ->where('status', Item::STATUS_AVAILABLE)
+            ->latest()
+            ->limit(4)
+            ->get()
+            ->map(fn (Item $i) => $this->serialize($i));
+
         return Inertia::render('Items/Show', [
             'item' => $this->serialize($item, true),
             'canManage' => auth()->check() && auth()->id() === $item->user_id,
+            'related' => $related,
         ]);
     }
 
@@ -186,9 +198,16 @@ class ItemController extends Controller
             ->paginate(12)
             ->through(fn (Item $item) => $this->serialize($item));
 
+        $sellingOrders = Order::where('seller_id', auth()->id())
+            ->with(['buyer.profile', 'item'])
+            ->latest()
+            ->get()
+            ->map(fn (Order $o) => $o->serialize());
+
         return Inertia::render('Account/Items', [
             'items' => $items,
             'myItemCount' => (clone $base)->count(),
+            'sellingOrders' => $sellingOrders,
             'counts' => [
                 'all' => (clone $base)->count(),
                 'available' => (clone $base)->where('status', Item::STATUS_AVAILABLE)->count(),
