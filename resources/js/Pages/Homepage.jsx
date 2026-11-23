@@ -196,22 +196,28 @@ function HomeContent({ featuredItems = [] }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-20 text-neutral-900">
                 
               {/* ── 1. Hero Section ── */}
-            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#f8f9fa] via-[#f1f3f5] to-[#e9ecef] border border-neutral-200/80 px-6 py-12 sm:px-12 lg:px-16 lg:py-20">
+            <section
+                className="relative overflow-hidden rounded-3xl border border-neutral-200/80 px-6 py-12 sm:px-12 lg:px-16 lg:py-20"
+                style={{
+                    background:
+                        'linear-gradient(135deg, #ffffff 0%, #f7f8f9 42%, #e9ecef 78%, #dfe2e6 100%)',
+                }}
+            >
                 
                 {/* เส้นคลื่นเคลื่อนที่ด้านหลัง */}
                 <svg
-                    className="pointer-events-none absolute -inset-x-16 inset-y-0 w-[120%] h-full opacity-55"
+                    className="pointer-events-none absolute -inset-x-16 inset-y-0 w-[120%] h-full opacity-80"
                     viewBox="0 0 1440 600"
                     fill="none"
                     preserveAspectRatio="none"
                 >
                     <g className="wave-line-1">
-                        <path d="M-100 280 C 250 210, 550 350, 900 270 C 1150 210, 1350 290, 1540 250" stroke="#cbd5e1" strokeWidth="1.2" />
-                        <path d="M-100 420 C 300 350, 650 490, 1000 400 C 1250 340, 1400 430, 1540 390" stroke="#cbd5e1" strokeWidth="1" />
+                        <path d="M-100 280 C 250 210, 550 350, 900 270 C 1150 210, 1350 290, 1540 250" stroke="#9ca3af" strokeWidth="1.4" />
+                        <path d="M-100 420 C 300 350, 650 490, 1000 400 C 1250 340, 1400 430, 1540 390" stroke="#9ca3af" strokeWidth="1.2" />
                     </g>
                     <g className="wave-line-2">
-                        <path d="M-100 350 C 280 420, 600 290, 950 360 C 1200 410, 1380 330, 1540 360" stroke="#94a3b8" strokeWidth="0.9" opacity="0.5" />
-                        <path d="M-100 500 C 320 440, 700 560, 1050 480 C 1280 430, 1420 510, 1540 470" stroke="#cbd5e1" strokeWidth="1.1" />
+                        <path d="M-100 350 C 280 420, 600 290, 950 360 C 1200 410, 1380 330, 1540 360" stroke="#6b7280" strokeWidth="1.1" opacity="0.65" />
+                        <path d="M-100 500 C 320 440, 700 560, 1050 480 C 1280 430, 1420 510, 1540 470" stroke="#9ca3af" strokeWidth="1.3" />
                     </g>
                 </svg>
 
