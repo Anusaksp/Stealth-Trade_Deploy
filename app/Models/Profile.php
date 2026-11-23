@@ -10,9 +10,12 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'display_name',
+        'shop_handle',
         'phone',
+        'province',
         'bio',
         'avatar_path',
+        'balance',
     ];
 
     public function user(): BelongsTo

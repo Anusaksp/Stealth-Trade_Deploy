@@ -21,12 +21,14 @@ class AccountController extends Controller
     {
         $request->validate([
             'display_name' => ['nullable', 'string', 'max:255'],
+            'shop_handle' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
+            'province' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string'],
             'avatar' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $attributes = $request->only(['display_name', 'phone', 'bio']);
+        $attributes = $request->only(['display_name', 'shop_handle', 'phone', 'province', 'bio']);
 
         if ($request->hasFile('avatar')) {
             if (auth()->user()->profile?->avatar_path) {

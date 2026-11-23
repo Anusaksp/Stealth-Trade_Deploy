@@ -7,6 +7,7 @@ use App\Http\Controllers\GoogleLoginController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\WalletController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -77,8 +78,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/account/addresses', [AddressController::class, 'index'])->name('account.addresses');
     Route::post('/account/addresses', [AddressController::class, 'store'])->name('account.addresses.store');
     Route::patch('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
+    Route::patch('/account/addresses/{address}/default', [AddressController::class, 'makeDefault'])->name('account.addresses.default');
     Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
     Route::get('/account/items', [ItemController::class, 'myItems'])->name('account.items');
+    Route::patch('/account/items/{item}/status', [ItemController::class, 'updateStatus'])->name('account.items.status');
+
+    // Wallet / Point
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/checkout', [WalletController::class, 'checkout'])->name('wallet.checkout');
+    Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
+    Route::get('/wallet/success', [WalletController::class, 'success'])->name('wallet.success');
 
     // แชท
     Route::post('/items/{item}/chat', [ChatController::class, 'start'])->name('chat.start');

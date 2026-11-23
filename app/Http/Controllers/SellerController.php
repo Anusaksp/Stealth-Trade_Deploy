@@ -13,10 +13,6 @@ class SellerController extends Controller
     {
         $user->load(['profile', 'addresses']);
 
-        // จังหวัดจากที่อยู่ "ค่าเริ่มต้น" (is_default) — ถ้าไม่มีใช้ที่อยู่แรก
-        $defaultAddress = $user->addresses->firstWhere('is_default', true)
-            ?? $user->addresses->first();
-
         $items = Item::query()
             ->with(['images', 'itemType'])
             ->where('user_id', $user->id)
@@ -31,14 +27,23 @@ class SellerController extends Controller
                 'cover_image' => $item->images->first()?->path,
             ]);
 
+        $itemCount = Item::query()
+            ->where('user_id', $user->id)
+            ->where('status', Item::STATUS_AVAILABLE)
+            ->count();
+
         return Inertia::render('Sellers/Show', [
             'seller' => [
                 'id' => $user->id,
-                'name' => $user->profile?->display_name ?: $user->name,
+                'name' => $user->profile?->shop_handle
+                    ?: ($user->profile?->display_name ?: $user->name),
+                'real_name' => $user->profile?->display_name ?: $user->name,
                 'avatar' => $user->profile?->avatar_path,
                 'phone' => $user->profile?->phone,
                 'bio' => $user->profile?->bio,
-                'province' => $defaultAddress?->province,
+                'province' => $user->profile?->province,
+                'member_since' => $user->created_at?->toISOString(),
+                'item_count' => $itemCount,
             ],
             'items' => $items,
         ]);

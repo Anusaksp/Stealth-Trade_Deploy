@@ -17,13 +17,14 @@ class ItemController extends Controller
     public function index(Request $request): Response
     {
         $query = Item::query()
-            ->with(['images', 'itemType', 'user.profile'])
+            ->with(['images', 'itemType', 'user.profile', 'pickupAddress'])
             ->where('status', Item::STATUS_AVAILABLE);
 
         $search = $request->query('search');
         $itemTypeId = $request->query('item_type_id');
         $minPrice = $request->query('min_price');
         $maxPrice = $request->query('max_price');
+        $sort = $request->query('sort', 'recommended');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -44,8 +45,15 @@ class ItemController extends Controller
             $query->where('price', '<=', (float) $maxPrice);
         }
 
+        if ($sort === 'price_asc') {
+            $query->orderBy('price', 'asc');
+        } elseif ($sort === 'price_desc') {
+            $query->orderBy('price', 'desc');
+        } else {
+            $query->latest();
+        }
+
         $items = $query
-            ->latest()
             ->paginate(48)
             ->withQueryString()
             ->through(fn (Item $item) => $this->serialize($item));
@@ -53,11 +61,13 @@ class ItemController extends Controller
         return Inertia::render('Items/Index', [
             'items' => $items,
             'itemTypes' => ItemType::orderBy('name')->get(),
+            'myItemCount' => auth()->check() ? Item::where('user_id', auth()->id())->count() : 0,
             'filters' => [
                 'search' => $search,
                 'item_type_id' => $itemTypeId,
                 'min_price' => $minPrice,
                 'max_price' => $maxPrice,
+                'sort' => $sort,
             ],
         ]);
     }
@@ -153,17 +163,37 @@ class ItemController extends Controller
         return redirect()->route('account.items')->with('success', 'ลบสินค้าแล้ว');
     }
 
+    public function updateStatus(Request $request, Item $item): RedirectResponse
+    {
+        abort_unless($item->user_id === auth()->id(), 403);
+
+        $request->validate([
+            'status' => ['required', 'in:available,reserved,sold'],
+        ]);
+
+        $item->update(['status' => $request->status]);
+
+        return back()->with('success', 'อัปเดตสถานะสินค้าแล้ว');
+    }
+
     public function myItems(): Response
     {
-        $items = Item::query()
-            ->with(['images', 'itemType', 'user.profile'])
-            ->where('user_id', auth()->id())
+        $base = Item::where('user_id', auth()->id());
+
+        $items = (clone $base)
+            ->with(['images', 'itemType', 'user.profile', 'pickupAddress'])
             ->latest()
             ->paginate(12)
             ->through(fn (Item $item) => $this->serialize($item));
 
         return Inertia::render('Account/Items', [
             'items' => $items,
+            'myItemCount' => (clone $base)->count(),
+            'counts' => [
+                'all' => (clone $base)->count(),
+                'available' => (clone $base)->where('status', Item::STATUS_AVAILABLE)->count(),
+                'sold' => (clone $base)->where('status', Item::STATUS_SOLD)->count(),
+            ],
         ]);
     }
 
@@ -177,6 +207,9 @@ class ItemController extends Controller
             'seller_id' => $item->user_id,
             'created_at' => $item->created_at?->toISOString(),
             'item_type' => $item->itemType?->name,
+            'location' => $item->pickupAddress
+                ? trim(implode(' ', array_filter([$item->pickupAddress->province, $item->pickupAddress->postal_code])))
+                : null,
             'images' => $item->images->map(fn ($img) => [
                 'id' => $img->id,
                 'path' => $img->path,

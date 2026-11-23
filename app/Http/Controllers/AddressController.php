@@ -54,4 +54,14 @@ class AddressController extends Controller
 
         return back()->with('success', 'ลบที่อยู่แล้ว');
     }
+
+    public function makeDefault(Address $address): RedirectResponse
+    {
+        abort_unless($address->user_id === auth()->id(), 403);
+
+        auth()->user()->addresses()->update(['is_default' => false]);
+        $address->update(['is_default' => true]);
+
+        return back()->with('success', 'ตั้งเป็นค่าเริ่มต้นแล้ว');
+    }
 }

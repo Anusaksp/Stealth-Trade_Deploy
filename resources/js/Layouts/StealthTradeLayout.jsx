@@ -3,6 +3,9 @@ import { useState, useEffect, useRef, createContext, useContext } from 'react';
 import axios from 'axios';
 import PageBackground from '@/Components/PageBackground';
 
+const formatBalance = (n) =>
+    Number(n ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export const LangContext = createContext();
 
 export const useLang = () => useContext(LangContext);
@@ -13,10 +16,11 @@ export default function StealthTradeLayout({ children }) {
     const [lang, setLang] = useState('TH');
     const [unreadCount, setUnreadCount] = useState(0);
     const [toast, setToast] = useState(null);
+    const [menuOpen, setMenuOpen] = useState(false);
     const prevUnreadRef = useRef(0);
     const toastTimerRef = useRef(null);
 
-    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers', '/conversations'].some((p) => url.startsWith(p));
+    const isMarketplace = ['/market', '/sell', '/items', '/account', '/sellers', '/conversations', '/wallet'].some((p) => url.startsWith(p));
 
     // Global polling: ตรวจข้อความใหม่ (unread) ทุก 15 วิ
     useEffect(() => {
@@ -68,40 +72,68 @@ export default function StealthTradeLayout({ children }) {
                         <div className="stealth-nav__center">
                             <Link href="/" className={`stealth-nav__link ${url === '/' ? 'stealth-nav__link--active' : ''}`}>หน้าแรก</Link>
                             <Link href={route('items.index')} className={`stealth-nav__link ${url.startsWith('/market') ? 'stealth-nav__link--active' : ''}`}>ตลาด</Link>
-                            <Link href={route('items.create')} className={`stealth-nav__link ${url.startsWith('/sell') ? 'stealth-nav__link--active' : ''}`}>ขายสินค้า</Link>
                             <Link href={route('stealth.dashboard')} className={`stealth-nav__link ${url.startsWith('/stealth-dashboard') ? 'stealth-nav__link--active' : ''}`}>ZKP</Link>
                         </div>
 
-                        {/* Right side: lang switcher + login/user */}
+                        {/* Right side: balance + avatar */}
                         <div className="stealth-nav__right">
-                            {auth?.user && (
-                                <Link
-                                    href={route('chat.index')}
-                                    className="relative flex items-center justify-center w-9 h-9 rounded-full hover:bg-neutral-200/50 text-neutral-700 transition-colors"
-                                    title="ข้อความ"
-                                >
-                                    <span className="material-symbols-outlined text-[22px]">chat_bubble</span>
-                                    {unreadCount > 0 && (
-                                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none">
-                                            {unreadCount > 99 ? '99+' : unreadCount}
-                                        </span>
-                                    )}
-                                </Link>
-                            )}
                             {auth?.user ? (
-                                <div className="stealth-user-menu">
-                                    <Link href={route('account.profile')} className="stealth-user-btn">
-                                        {auth.profile?.display_name || auth.user.name}
-                                    </Link>
+                                <>
                                     <Link
-                                        href={route('logout')}
-                                        method="post"
-                                        as="button"
-                                        className="stealth-login-btn"
+                                        href={route('wallet.index')}
+                                        title="เติม Point"
+                                        className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-3.5 py-1.5 text-sm font-semibold text-neutral-900 hover:bg-neutral-200 transition-colors"
                                     >
-                                        LOGOUT
+                                        <span className="material-symbols-outlined text-[18px] text-amber-500">monetization_on</span>
+                                        <span>{formatBalance(auth.profile?.balance)}</span>
                                     </Link>
-                                </div>
+
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setMenuOpen((v) => !v)}
+                                            className="w-9 h-9 rounded-full overflow-hidden border border-neutral-200 bg-neutral-100 flex items-center justify-center text-neutral-500 hover:border-neutral-400 transition-colors"
+                                        >
+                                            {auth.profile?.avatar_path ? (
+                                                <img src={`/images/${auth.profile.avatar_path}`} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="material-symbols-outlined text-[20px]">person</span>
+                                            )}
+                                        </button>
+
+                                        {menuOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                                                <div className="absolute right-0 top-full mt-2 z-20 w-52 rounded-xl border border-neutral-200 bg-white shadow-lg py-1.5">
+                                                    <div className="px-4 py-2 border-b border-neutral-100">
+                                                        <div className="text-sm font-semibold text-neutral-900 truncate">
+                                                            {auth.profile?.display_name || auth.user.name}
+                                                        </div>
+                                                        <div className="text-xs text-neutral-400 truncate">{auth.user.email}</div>
+                                                    </div>
+                                                    <Link href={route('account.profile')} className="flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+                                                        <span className="material-symbols-outlined text-[18px]">person</span> โปรไฟล์
+                                                    </Link>
+                                                    <Link href={route('account.items')} className="flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+                                                        <span className="material-symbols-outlined text-[18px]">inventory_2</span> สินค้าของฉัน
+                                                    </Link>
+                                                    <Link href={route('account.addresses')} className="flex items-center gap-2.5 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+                                                        <span className="material-symbols-outlined text-[18px]">location_on</span> ที่อยู่จัดส่ง
+                                                    </Link>
+                                                    <div className="border-t border-neutral-100 my-1.5" />
+                                                    <Link
+                                                        href={route('logout')}
+                                                        method="post"
+                                                        as="button"
+                                                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-neutral-50 w-full text-left"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[18px]">logout</span> ออกจากระบบ
+                                                    </Link>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </>
                             ) : (
                                 <div className="stealth-auth-buttons">
                                     <Link href={route('login')} className="stealth-btn-outline">
@@ -112,14 +144,6 @@ export default function StealthTradeLayout({ children }) {
                                     </Link>
                                 </div>
                             )}
-
-
-
-                            {/* Language Switcher */}
-                            <div className="stealth-lang-switcher" onClick={() => setLang(lang === 'TH' ? 'EN' : 'TH')}>
-                                <span className="material-symbols-outlined">language</span>
-                                <span className="stealth-lang-text">ไทย | English</span>
-                            </div>
                         </div>
                     </div>
                 </nav>
