@@ -100,7 +100,7 @@ export default function Index({ items, filters, itemTypes, myItemCount }) {
         <StealthTradeLayout>
             <Head title="ตลาดซื้อขาย" />
 
-            <div className="mx-auto w-full max-w-6xl px-4 py-6">
+            <div className="mx-auto w-full max-w-7xl px-4 py-6">
                 <MarketHeader active="market" myItemCount={myItemCount} />
 
                 {/* Search + Filters */}
@@ -191,7 +191,7 @@ export default function Index({ items, filters, itemTypes, myItemCount }) {
                         {hasFilter ? 'ไม่พบสินค้าที่ตรงกับเงื่อนไข' : 'ยังไม่มีสินค้าในขณะนี้'}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         {list.map((item) => (
                             <ItemCard key={item.id} item={item} />
                         ))}

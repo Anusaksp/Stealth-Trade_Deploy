@@ -129,6 +129,24 @@ export default function Show({ item, canManage, related }) {
                                 </Link>
                             </div>
                         )}
+
+                        {/* Trust / delivery info box */}
+                        <div className="bg-neutral-100 rounded-lg p-4 space-y-3">
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-[20px] text-neutral-500 shrink-0">local_shipping</span>
+                                <div>
+                                    <div className="text-sm font-medium text-neutral-900">จัดส่งฟรี</div>
+                                    <div className="text-xs text-neutral-500 mt-0.5">ไม่มีค่าจัดส่งสำหรับสินค้าทุกรายการ</div>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-[20px] text-neutral-500 shrink-0">verified_user</span>
+                                <div>
+                                    <div className="text-sm font-medium text-neutral-900">ร้านค้าที่ตรวจสอบแล้ว</div>
+                                    <div className="text-xs text-neutral-500 mt-0.5">ร้านค้าผ่านการยืนยันตัวตนจากแพลตฟอร์ม</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
