@@ -119,14 +119,7 @@ export default function Show({ item, canManage, related }) {
                                 >
                                     ซื้อเลย
                                 </Link>
-                                <Link
-                                    href={route('chat.start', item.id)}
-                                    method="post"
-                                    as="button"
-                                    className="px-4 py-3 border border-neutral-300 text-neutral-700 text-sm font-semibold rounded-xl hover:border-neutral-500 transition-colors"
-                                >
-                                    แชท
-                                </Link>
+                                
                             </div>
                         )}
 
